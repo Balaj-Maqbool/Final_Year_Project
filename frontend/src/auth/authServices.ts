@@ -1,3 +1,4 @@
+
 // authServices.ts
 import type { loginData } from "./Login";
 import type { registerData } from "./Register";
@@ -27,7 +28,7 @@ export const handleRegister = async (
     alert("Unable to connect to the server.");
   }
 };
-
+/////handler function for login
 export const handleLogin = async (
   data: loginData,
   navigate: NavigateFunction
@@ -48,10 +49,10 @@ export const handleLogin = async (
     }
 
     localStorage.setItem("token", result.token);
-    localStorage.setItem("role", localStorage.user.role);
-    localStorage.setItem("user", JSON.stringify(result.user));
+    localStorage.setItem("role",result.role);
+    localStorage.setItem("user", JSON.stringify(result));
 
-    if (result.user.role == "admin") {
+    if (result.role == "admin") {
       navigate("/admin/dashboard");
     } else {
       navigate("/freelancer/dashboard");
