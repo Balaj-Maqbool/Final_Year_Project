@@ -15,23 +15,7 @@ const cleanQuotedString = (input) => {
     return str;
 };
 
-// const cleanQuotedString = (str) => {
-//     const cleanedString = str
-//         .trim()                        // removes leading/trailing spaces
-//         .replace(/^"(.*)"$/, "$1")    // removes one pair of outer double quotes
-//         .trim();                      // trims again in case quotes were around spaces
-//     return cleanedString;
-// };
+
 
 export { throwIfInvalid, cleanQuotedString };
 
-function deepCleanQuotes(input) {
-    let str = input.trim();
-    while (
-        (str.startsWith('"') && str.endsWith('"')) ||
-        (str.startsWith("'") && str.endsWith("'"))
-    ) {
-        str = str.slice(1, -1).trim();
-    }
-    return str;
-}

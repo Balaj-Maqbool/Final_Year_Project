@@ -1,15 +1,23 @@
 {
-    "name": "backend",
+    "name": "freelance-marketplace-backend",
     "version": "1.0.0",
-    "description": "a professional way to build a project",
+    "description": "Backend for Final Year Project (FYP) - A MERN Stack Freelancing Marketplace",
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "dev": "nodemon src/index.js"
+        "dev": "nodemon src/index.js",
+        "start": "node src/index.js"
     },
     "keywords": [
         "backend",
-        "javascript"
+        "javascript",
+        "mern",
+        "freelancing",
+        "marketplace",
+        "fyp",
+        "nodejs",
+        "express",
+        "mongodb"
     ],
     "author": "Balaj Maqbool",
     "license": "ISC",
@@ -18,8 +26,7 @@
         "prettier": "^3.5.3"
     },
     "dependencies": {
-        "bcrypt": "^6.0.0",
-        "bcryptjs": "^3.0.2",
+        "bcryptjs": "^3.0.3",
         "cloudinary": "^2.7.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",

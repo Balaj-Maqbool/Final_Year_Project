@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 
-const DB_NAME = "MyProject";
+const DB_NAME = "FreelanceMarketplace";
 const DataBase_URI = process.env.DataBase_URI;
 
 const PORT = process.env.PORT || 8000;
