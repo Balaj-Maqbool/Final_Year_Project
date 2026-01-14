@@ -17,6 +17,10 @@ const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || "cloud name N
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || "cloud api key Not Found";
 const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || "cloud api secret Not Found";
 
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "google client id Not Found";
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "google client secret Not Found";
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "google redirect uri Not Found";
+
 export {
     DB_NAME,
     PORT,
@@ -29,4 +33,7 @@ export {
     CLOUDINARY_CLOUD_NAME,
     CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET,
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    GOOGLE_REDIRECT_URI
 };

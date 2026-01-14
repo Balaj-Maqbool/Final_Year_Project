@@ -6,6 +6,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
 import { throwIfInvalid } from "../utils/validators.js";
+import crypto from "crypto";
 
 const cookieOptions = {
     httpOnly: true,
@@ -462,6 +463,78 @@ const deleteUserCoverImage = asyncHandler(async (req, res) => {
 });
 
 
+const handleGoogleCallback = asyncHandler(async (req, res) => {
+    // req.user is the profile returned from Passport Strategy
+    const profile = req.user;
+    const role = req.query.state || "Client"; // Get role from state, default to Client
+
+    if (!profile) {
+        throw new ApiError(400, "Google Authentication Failed");
+    }
+
+    const email = profile.emails?.[0]?.value;
+    const googleId = profile.id;
+    const fullName = profile.displayName;
+    const profileImage = profile.photos?.[0]?.value;
+
+    if (!email) {
+        throw new ApiError(400, "Email not found in Google Profile");
+    }
+
+    // 1. Check if user exists
+    let user = await User.findOne({
+        $or: [{ googleId }, { email }]
+    });
+
+    if (user) {
+        // User exists
+        if (!user.googleId) {
+            // Link account if email matches but no googleId
+            user.googleId = googleId;
+            // Optionally update profile image if empty
+            if (!user.profileImage) user.profileImage = profileImage;
+            await user.save({ validateBeforeSave: false });
+        }
+    } else {
+        // Create new user
+        // Generate random password
+        const randomPassword = crypto.randomBytes(20).toString("hex");
+
+        // Generate unique username
+        const baseUsername = email.split("@")[0];
+        const uniqueUsername = `${baseUsername}_${crypto.randomInt(1000, 9999)}`;
+
+        user = await User.create({
+            fullName,
+            email,
+            username: uniqueUsername,
+            password: randomPassword,
+            googleId,
+            role, // Use the role passed in state
+            profileImage,
+            coverImage: ""
+        });
+    }
+
+    // Generate tokens
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+
+    // Redirect to frontend
+    // Use an env variable for frontend URL in production, for now hardcode or use simple relative
+    // For FYP, typically localhost:5173 or similar
+    // We'll assume localhost:5173 for now or just return JSON if that's what user prefers? 
+    // Usually OAuth requires redirect.
+    // Let's redirect to a success page on frontend with tokens query params
+
+    // Better: Helper function or constant for frontend URL
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+    return res.redirect(
+        `${frontendUrl}/oauth-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
+    );
+});
+
+
 export {
     registerUser,
     loginUser,
@@ -476,5 +549,6 @@ export {
     getUserProfileById,
     changeCurrentPassword,
     deleteUserProfileImage,
-    deleteUserCoverImage
+    deleteUserCoverImage,
+    handleGoogleCallback
 };

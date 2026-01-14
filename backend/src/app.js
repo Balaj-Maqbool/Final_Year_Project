@@ -18,8 +18,13 @@ app.use(express.json({ limit: "24kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+import passport from "passport";
+import "./passport/passport.config.js";
+app.use(passport.initialize());
+
 // router imports
 import userRouter from "./routes/user.routes.js";
 
 app.use("/api/v1/users", userRouter);
+
 export { app };
