@@ -27,4 +27,10 @@ import userRouter from "./routes/user.routes.js";
 
 app.use("/api/v1/users", userRouter);
 
+import jobRouter from "./routes/job.routes.js";
+app.use("/api/v1/jobs", jobRouter);
+
+import bidRouter from "./routes/bid.routes.js";
+app.use("/api/v1/bids", bidRouter);
+
 export { app };

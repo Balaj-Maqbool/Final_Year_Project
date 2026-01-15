@@ -73,6 +73,10 @@ const userSchema = new Schema(
             type: String, // URL to portfolio
             default: ""
         },
+        rating: {
+            type: Number,
+            default: 0
+        },
     },
     {
         timestamps: true
