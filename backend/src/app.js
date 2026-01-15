@@ -33,4 +33,7 @@ app.use("/api/v1/jobs", jobRouter);
 import bidRouter from "./routes/bid.routes.js";
 app.use("/api/v1/bids", bidRouter);
 
+import ratingRouter from "./routes/rating.routes.js";
+app.use("/api/v1/ratings", ratingRouter);
+
 export { app };
