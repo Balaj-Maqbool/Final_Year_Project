@@ -26,8 +26,13 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new ApiError(400, "This job is not open for bidding");
     }
 
-    // Check if user has already bid
-    const existingBid = await Bid.findOne({ job_id: jobId, user_id: req.user?._id });
+    // Check if user has already bid (excluding rejected bids)
+    const existingBid = await Bid.findOne({
+        job_id: jobId,
+        user_id: req.user?._id,
+        status: { $ne: "Rejected" }
+    });
+
     if (existingBid) {
         throw new ApiError(400, "You have already placed a bid on this job");
     }
