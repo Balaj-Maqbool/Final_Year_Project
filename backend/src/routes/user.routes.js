@@ -26,22 +26,20 @@ router.route("/register").post(registerUser);
 
 router.route("/login").post(loginUser);
 
-router.get(
-    "/google",
-    (req, res, next) => {
-        const role = req.query.role || "Client";
-        passport.authenticate("google", {
-            scope: ["profile", "email"],
-            state: role // Pass role as state
-        })(req, res, next);
-    }
-);
+router.route("/google").get((req, res, next) => {
+    const role = req.query.role || "Client";
+    passport.authenticate("google", {
+        scope: ["profile", "email"],
+        state: role // Pass role as state
+    })(req, res, next);
+});
 
-router.get(
-    "/google/callback",
-    passport.authenticate("google", { session: false, failureRedirect: "/login" }),
-    handleGoogleCallback
-);
+router.route("/google/callback").get
+    (
+        passport.authenticate("google", { session: false, failureRedirect: "/login" }),
+        handleGoogleCallback
+    );
+
 
 
 // Secured routes
