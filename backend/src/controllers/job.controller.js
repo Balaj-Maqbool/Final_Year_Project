@@ -2,9 +2,14 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
+import mongoose from "mongoose";
 
 const createJob = asyncHandler(async (req, res) => {
     const { title, description, budget, deadline, category } = req.body;
+
+    if (req.user.role !== "Client") {
+        throw new ApiError(403, "Only Clients can post jobs");
+    }
 
     if (!title || !description || !budget || !deadline || !category) {
         throw new ApiError(400, "All fields (title, description, budget, deadline, category) are required");
@@ -26,9 +31,40 @@ const createJob = asyncHandler(async (req, res) => {
 
 const getAllJobs = asyncHandler(async (req, res) => {
     // Optional: Add filtering by category, budget, etc. later
-    const jobs = await Job.find({ status: "Open" })
-        .populate("poster_id", "fullName email profileImage")
-        .sort({ createdAt: -1 });
+    const jobs = await Job.aggregate([
+        {
+            $match: {
+                status: "Open"
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "poster_id",
+                foreignField: "_id",
+                as: "poster",
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            email: 1,
+                            profileImage: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                poster: { $first: "$poster" }
+            }
+        },
+        {
+            $sort: {
+                createdAt: -1
+            }
+        }
+    ]);
 
     return res.status(200).json(
         new ApiResponse(200, jobs, "Jobs fetched successfully")
@@ -47,14 +83,51 @@ const getMyJobs = asyncHandler(async (req, res) => {
 const getJobById = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
 
-    const job = await Job.findById(jobId).populate("poster_id", "fullName email profileImage");
+    // Validate jobId format if needed or trust mongoose to cast, but aggregate needs ObjectId casting usually if passing string
+    // However, findById casts automatically. Aggregate does not.
+    // We need mongoose.Types.ObjectId
 
-    if (!job) {
+    // Check if valid ObjectId
+    if (!mongoose.isValidObjectId(jobId)) {
+        throw new ApiError(400, "Invalid Job ID");
+    }
+
+    const job = await Job.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(jobId)
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "poster_id",
+                foreignField: "_id",
+                as: "poster",
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            email: 1,
+                            profileImage: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                poster: { $first: "$poster" }
+            }
+        }
+    ]);
+
+    if (!job?.length) {
         throw new ApiError(404, "Job not found");
     }
 
     return res.status(200).json(
-        new ApiResponse(200, job, "Job fetched successfully")
+        new ApiResponse(200, job[0], "Job fetched successfully")
     );
 });
 
