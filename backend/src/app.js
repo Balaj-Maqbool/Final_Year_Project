@@ -39,4 +39,7 @@ app.use("/api/v1/ratings", ratingRouter);
 import taskRouter from "./routes/task.routes.js";
 app.use("/api/v1/tasks", taskRouter);
 
+import dashboardRouter from "./routes/dashboard.routes.js";
+app.use("/api/v1/dashboard", dashboardRouter);
+
 export { app };
