@@ -36,4 +36,7 @@ app.use("/api/v1/bids", bidRouter);
 import ratingRouter from "./routes/rating.routes.js";
 app.use("/api/v1/ratings", ratingRouter);
 
+import taskRouter from "./routes/task.routes.js";
+app.use("/api/v1/tasks", taskRouter);
+
 export { app };
