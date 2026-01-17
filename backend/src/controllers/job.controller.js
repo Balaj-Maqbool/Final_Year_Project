@@ -4,6 +4,8 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
 import mongoose from "mongoose";
 
+import { Task } from "../models/task.model.js";
+
 const createJob = asyncHandler(async (req, res) => {
     const { title, description, budget, deadline, category } = req.body;
 
@@ -173,6 +175,18 @@ const updateJob = asyncHandler(async (req, res) => {
     // 2. If currently Assigned, allow move to Completed, but BLOCK revert to Open.
     if (job.status === "Assigned" && status === "Open") {
         throw new ApiError(400, "Cannot revert an Assigned job to Open status.");
+    }
+
+    // 3. New Rule: ALL tasks must be DONE before marking job as Completed
+    if (status === "Completed") {
+        const pendingTasks = await Task.countDocuments({
+            job_id: jobId,
+            status: { $ne: "Done" }
+        });
+
+        if (pendingTasks > 0) {
+            throw new ApiError(400, `Cannot complete job. There are ${pendingTasks} pending tasks that must be finished first.`);
+        }
     }
 
     job.title = title || job.title;
