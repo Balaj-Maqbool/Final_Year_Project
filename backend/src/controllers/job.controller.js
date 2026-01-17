@@ -163,6 +163,18 @@ const updateJob = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not authorized to update this job");
     }
 
+    // Critical Business Rule: Limits on updating Assigned/Completed jobs
+
+    // 1. If currently Completed, it's final. Partition logic: Status cannot change from Completed.
+    if (job.status === "Completed") {
+        throw new ApiError(400, "Job is already Completed. No further updates allowed.");
+    }
+
+    // 2. If currently Assigned, allow move to Completed, but BLOCK revert to Open.
+    if (job.status === "Assigned" && status === "Open") {
+        throw new ApiError(400, "Cannot revert an Assigned job to Open status.");
+    }
+
     job.title = title || job.title;
     job.description = description || job.description;
     job.budget = budget || job.budget;

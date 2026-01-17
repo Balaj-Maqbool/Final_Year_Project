@@ -151,6 +151,11 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
     ]);
 
     // 2. Acive/Completed Jobs (Where assigned) & Earnings
+    // Logic Issue Fix: Earnings should come from the Accepted BID AMOUNT, not the JOB BUDGET.
+
+    // We need to find jobs where this freelancer is assigned
+    // AND look up their specific accepted bid for that job to get the price.
+
     const jobStats = await Job.aggregate([
         {
             $match: {
@@ -158,12 +163,46 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
             }
         },
         {
+            $lookup: {
+                from: "bids",
+                let: { jobId: "$_id", freelancerId: userId },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$job_id", "$$jobId"] },
+                                    { $eq: ["$user_id", "$$freelancerId"] },
+                                    { $eq: ["$status", "Accepted"] }
+                                ]
+                            }
+                        }
+                    },
+                    { $project: { bid_amount: 1 } }
+                ],
+                as: "acceptedBid"
+            }
+        },
+        {
+            // Unwind safely (though assigned jobs SHOULD have an accepted bid, hypothetically)
+            $unwind: { path: "$acceptedBid", preserveNullAndEmptyArrays: true }
+        },
+        {
             $facet: {
                 "earnings": [
                     {
                         $group: {
                             _id: null,
-                            totalEarnings: { $sum: "$budget" }, // Assumes full budget is earned
+                            // Use the bid amount if available, otherwise fallback to budget (safety net), or 0
+                            totalEarnings: {
+                                $sum: {
+                                    $cond: [
+                                        { $eq: ["$status", "Completed"] },
+                                        { $ifNull: ["$acceptedBid.bid_amount", "$budget"] },
+                                        0
+                                    ]
+                                }
+                            },
                             completedJobsCount: {
                                 $sum: { $cond: [{ $eq: ["$status", "Completed"] }, 1, 0] }
                             },
@@ -190,9 +229,10 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                     {
                         $project: {
                             title: 1,
-                            budget: 1,
+                            budget: 1, // Still show est budget or maybe show accepted bid? lets keep budget for listing
                             deadline: 1,
-                            "client.fullName": 1
+                            "client.fullName": 1,
+                            "finalPrice": { $ifNull: ["$acceptedBid.bid_amount", "$budget"] } // Helpful to see
                         }
                     }
                 ]
