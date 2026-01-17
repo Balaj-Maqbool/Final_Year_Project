@@ -30,12 +30,29 @@ const createJob = asyncHandler(async (req, res) => {
 });
 
 const getAllJobs = asyncHandler(async (req, res) => {
-    // Optional: Add filtering by category, budget, etc. later
+    const { search, category, minBudget, maxBudget } = req.query;
+
+    const matchStage = {
+        status: "Open"
+    };
+
+    if (search) {
+        matchStage.title = { $regex: search, $options: "i" };
+    }
+
+    if (category) {
+        matchStage.category = category;
+    }
+
+    if (minBudget || maxBudget) {
+        matchStage.budget = {};
+        if (minBudget) matchStage.budget.$gte = parseInt(minBudget);
+        if (maxBudget) matchStage.budget.$lte = parseInt(maxBudget);
+    }
+
     const jobs = await Job.aggregate([
         {
-            $match: {
-                status: "Open"
-            }
+            $match: matchStage
         },
         {
             $lookup: {

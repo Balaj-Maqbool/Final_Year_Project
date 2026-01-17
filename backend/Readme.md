@@ -1,61 +1,73 @@
-# Things that i learned
+# Freelance Marketplace Backend
 
-- import DB_NAME from"./constants.js"// when export default
-- import {DB_NAME} from "./constants.js" //when direct export
+A robust backend REST API for a private SaaS freelancing platform. Built with **Node.js**, **Express**, and **MongoDB**, featuring role-based authentication, complex aggregation pipelines, and a complete job/bidding lifecycle.
 
-- always export (direct or default ) If you want to use some variable or anything from other files
+## 🚀 Tech Stack
 
-## In JavaScript ES modules:
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB (Mongoose)
+- **Auth**: JWT & Passport.js (Google OAuth)
+- **File Storage**: Cloudinary (Multer)
 
-- To share a variable, function, or object from one file to another, you must export it.
-- Then in the other file, you import it.
+## ✨ Key Features
 
-## new and this
+- **🔐 Authentication & User Management**
+  - Role-based access (Client vs. Freelancer).
+  - Google OAuth integration.
+  - Profile & Cover image management.
 
-- new only works for classical function(){}
-- this works for arrow ()=>{} , but only for one instance, so not recommended to use in arrow functions
-- this refers to the thing it was called by
+- **💼 Job Management**
+  - Create, Update, Delete jobs.
+  - **Advanced Search**: Filter by regex title, category, and budget range.
 
-## call & bind
+- **🙋‍♂️ Bidding System**
+  - Freelancers can bid on open jobs.
+  - Clients can **Accept/Reject** bids.
+  - Automatic job status updates upon assignment.
 
-- you can pass this (context) of parent function to its child function bu using .call(context, arg1,agr2 ...) method
-- the child or inner function will change the context (this) of parent or outer function
+- **✅ Task Tracking**
+  - Kanban-style status (To Do, In Progress, Done).
+  - Client approval workflow for completed tasks.
 
-## jwt (json web token)
+- **⭐ Ratings & Reviews**
+  - Clients rate Freelancers upon job completion.
+  - Automatic average rating calculation.
 
-- is a bearer token
-- the one who bears it is always legit and correct requester
-- acts like a key to get the data from the DB
+- **📊 Dashboards**
+  - Aggregated analytics for Clients (Spending, Hires) and Freelancers (Earnings, Success Rate).
 
-## HTTP process
+## 🛠️ Installation & Setup
 
-Basic Flow:
+1.  **Clone the repository**
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+3.  **Environment Variables**:
+    Create a `.env` file in the root directory:
+    ```env
+    PORT=3000
+    MONGODB_URI=your_mongodb_connection_string
+    ACCESS_TOKEN_SECRET=your_jwt_secret
+    ACCESS_TOKEN_EXPIRY=1d
+    REFRESH_TOKEN_SECRET=your_refresh_secret
+    REFRESH_TOKEN_EXPIRY=10d
+    CLOUDINARY_CLOUD_NAME=...
+    CLOUDINARY_API_KEY=...
+    CLOUDINARY_API_SECRET=...
+    GOOGLE_CLIENT_ID=...
+    GOOGLE_CLIENT_SECRET=...
+    GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/users/google/callback
+    ```
+4.  **Run the server**:
+    ```bash
+    npm run dev
+    ```
 
-Client Sends HTTP Request
-Server Processes Request
-Server Sends HTTP Response
-Client Handles the Response
+## 📖 API Documentation
 
-## HTTP status codes
+Detailed endpoint specifications are available in [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
 
-HTTP response status codes indicate whether a specific HTTP request has been successfully completed. Responses are grouped in five classes:
+---
 
-Informational responses (100 – 199)
-Successful responses (200 – 299)
-Redirection messages (300 – 399)
-Client error responses (400 – 499)
-Server error responses (500 – 599)
-
-## Steps to Register a User
-
-| Step | Description                                 |
-| ---- | ------------------------------------------- |
-| 1    | Client sends POST `/register`               |
-| 2    | Parse JSON body                             |
-| 3    | Validate required fields                    |
-| 4    | Check if user already exists                |
-| 5    | Hash password using bcrypt                  |
-| 6    | Save user to MongoDB                        |
-| 7    | Create JWT token                            |
-| 8    | Send back JSON response (optionally cookie) |
-| 9    | Redirect or navigate user (frontend)        |
