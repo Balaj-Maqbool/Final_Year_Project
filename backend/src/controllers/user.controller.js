@@ -2,10 +2,10 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
-import {ApiResponse} from "../utils/ApiResponse.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
-import { throwIfInvalid } from "../utils/validators.js";
+
 import crypto from "crypto";
 
 const cookieOptions = {
@@ -32,10 +32,10 @@ const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
 
     // Use validator utility as requested
-    throwIfInvalid(!fullName?.trim(), 400, "Full Name is required");
-    throwIfInvalid(!email?.trim(), 400, "Email is required");
-    throwIfInvalid(!username?.trim(), 400, "Username is required");
-    throwIfInvalid(!password?.trim(), 400, "Password is required");
+    if (!fullName?.trim()) throw new ApiError(400, "Full Name is required");
+    if (!email?.trim()) throw new ApiError(400, "Email is required");
+    if (!username?.trim()) throw new ApiError(400, "Username is required");
+    if (!password?.trim()) throw new ApiError(400, "Password is required");
 
     // Role is now MANDATORY
     if (!role) {
@@ -43,7 +43,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const allowedRoles = ["Freelancer", "Client"];
-    throwIfInvalid(!allowedRoles.includes(role), 400, "Invalid Role. Allowed: Freelancer, Client");
+    if (!allowedRoles.includes(role)) throw new ApiError(400, "Invalid Role. Allowed: Freelancer, Client");
 
     const existedUser = await User.findOne({
         $or: [{ username }, { email }]
@@ -81,8 +81,8 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     const { email, username, password, role } = req.body;
 
-    throwIfInvalid(!username && !email, 400, "username or email is required");
-    throwIfInvalid(!role, 400, "Role is required to login");
+    if (!username && !email) throw new ApiError(400, "username or email is required");
+    if (!role) throw new ApiError(400, "Role is required to login");
 
     const user = await User.findOne({
         $or: [{ username }, { email }]
@@ -199,9 +199,9 @@ const deleteUser = asyncHandler(async (req, res) => {
     const { email, password, role } = req.body;
 
     // 1. Validation
-    throwIfInvalid(!email?.trim(), 400, "Email is required to confirm deletion");
-    throwIfInvalid(!password?.trim(), 400, "Password is required to confirm deletion");
-    throwIfInvalid(!role, 400, "Role is required to confirm deletion");
+    if (!email?.trim()) throw new ApiError(400, "Email is required to confirm deletion");
+    if (!password?.trim()) throw new ApiError(400, "Password is required to confirm deletion");
+    if (!role) throw new ApiError(400, "Role is required to confirm deletion");
 
     const user = await User.findById(req.user._id);
 
@@ -244,8 +244,8 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email, bio, skills, portfolio } = req.body;
 
     // Validation
-    throwIfInvalid(!fullName?.trim(), 400, "Full Name is required");
-    throwIfInvalid(!email?.trim(), 400, "Email is required");
+    if (!fullName?.trim()) throw new ApiError(400, "Full Name is required");
+    if (!email?.trim()) throw new ApiError(400, "Email is required");
 
     // Prepare update object
     const updateData = {
@@ -391,8 +391,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
-    throwIfInvalid(!oldPassword || !newPassword, 400, "Old and New password are required");
-    throwIfInvalid(oldPassword === newPassword, 400, "Old and New password cannot be same");
+    if (!oldPassword || !newPassword) throw new ApiError(400, "Old and New password are required");
+    if (oldPassword === newPassword) throw new ApiError(400, "Old and New password cannot be same");
 
     const user = await User.findById(req.user._id);
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
