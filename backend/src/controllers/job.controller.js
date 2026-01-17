@@ -177,15 +177,16 @@ const updateJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot revert an Assigned job to Open status.");
     }
 
-    // 3. New Rule: ALL tasks must be DONE before marking job as Completed
+    // 3. New Rule: ALL tasks must be APPROVED by Client before marking job as Completed
     if (status === "Completed") {
-        const pendingTasks = await Task.countDocuments({
+        // We check if there are any tasks where is_approved is NOT true
+        const unapprovedTasks = await Task.countDocuments({
             job_id: jobId,
-            status: { $ne: "Done" }
+            is_approved: { $ne: true }
         });
 
-        if (pendingTasks > 0) {
-            throw new ApiError(400, `Cannot complete job. There are ${pendingTasks} pending tasks that must be finished first.`);
+        if (unapprovedTasks > 0) {
+            throw new ApiError(400, `Cannot complete job. There are ${unapprovedTasks} tasks that are not yet approved by you.`);
         }
     }
 
