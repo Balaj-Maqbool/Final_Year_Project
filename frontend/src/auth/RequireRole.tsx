@@ -7,7 +7,7 @@ interface Props{
     allowedRole:"admin"|"freelancer"
 }
 
-const RequireRole=({children,allowedRole}:Props){
+const RequireRole=({children,allowedRole}:Props)=>{
 
 const role=localStorage.getItem('role')
 if(role!==allowedRole){
@@ -17,3 +17,5 @@ else
     return children
 
 }
+
+export default RequireRole

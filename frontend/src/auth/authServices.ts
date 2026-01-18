@@ -11,7 +11,7 @@ export const handleRegister = async (
   try {
     const response = await fetch("http://localhost:3000/api/register", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
 
@@ -36,29 +36,31 @@ export const handleLogin = async (
   try {
     const response = await fetch("http://localhost:3000/api/login", {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+
     const result = await response.json();
 
     if (!response.ok) {
-      alert("Login UnSuccessful");
+      // alert(result);
       return;
     }
 
+    
     localStorage.setItem("token", result.token);
-    localStorage.setItem("role",result.role);
-    localStorage.setItem("user", JSON.stringify(result));
+    localStorage.setItem("role", result.user.role);
+    localStorage.setItem("user", JSON.stringify(result.user));
 
-    if (result.role == "admin") {
-      navigate("/admin/dashboard");
+    console.log("TOKEN SAVED:", result.token);
+
+    // role-based redirect
+    if (result.user.role === "freelancer") {
+      navigate("/freelancer/freelancerDashboard");
     } else {
-      navigate("/freelancer/dashboard");
+      navigate("/admin/dashboard");
     }
   } catch (error) {
     console.error(error);
-    alert("Unable to connect to the server.");
   }
 };

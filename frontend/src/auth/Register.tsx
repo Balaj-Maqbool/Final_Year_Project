@@ -1,5 +1,6 @@
 import { useRef, type FormEvent } from "react";
 import { Button, Form, FormGroup, Row, Stack } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 export interface registerData {
   name: string;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const Register = ({ onSubmit }: Props) => {
+  const navigate= useNavigate()
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passRef = useRef<HTMLInputElement>(null);
@@ -69,7 +71,7 @@ const Register = ({ onSubmit }: Props) => {
           Save
         </Button>
 
-        <Button variant="outline-secondary" type="button">
+        <Button onClick={()=>navigate('/login')} variant="outline-secondary" type="button">
           Login
         </Button>
       </Stack>
