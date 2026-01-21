@@ -9,9 +9,10 @@ export const handleRegister = async (
   navigate: NavigateFunction
 ) => {
   try {
-    const response = await fetch("http://localhost:3000/api/register", {
+    const response = await fetch("http://localhost:8000/api/v1/users/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(data),
     });
 
@@ -34,31 +35,32 @@ export const handleLogin = async (
   navigate: NavigateFunction
 ) => {
   try {
-    const response = await fetch("http://localhost:3000/api/login", {
+    const response = await fetch("http://localhost:8000/api/v1/users/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(data),
     });
 
     const result = await response.json();
 
     if (!response.ok) {
-      // alert(result);
+      alert(`Login failed: ${result.message || response.statusText}`);
       return;
     }
 
     
-    localStorage.setItem("token", result.token);
-    localStorage.setItem("role", result.user.role);
-    localStorage.setItem("user", JSON.stringify(result.user));
+    localStorage.setItem("token", result.data.accessToken);
+    localStorage.setItem("role", result.data.user.role);
+    localStorage.setItem("user", JSON.stringify(result.data.user));
 
-    console.log("TOKEN SAVED:", result.token);
+    console.log("TOKEN SAVED:", result.data.accessToken);
 
     // role-based redirect
-    if (result.user.role === "freelancer") {
+    if (result.data.user.role === "Freelancer") {
       navigate("/freelancer/freelancerDashboard");
     } else {
-      navigate("/admin/dashboard");
+      navigate("/client/dashboard"); // Assuming client dashboard path
     }
   } catch (error) {
     console.error(error);

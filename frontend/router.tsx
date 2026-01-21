@@ -26,7 +26,7 @@ const router = createBrowserRouter([
 
     element: (
       <RequireToken>
-        <RequireRole allowedRole="freelancer">
+        <RequireRole allowedRole="Freelancer">
           <FreelancerLayout  />
         </RequireRole>
       </RequireToken>
@@ -40,7 +40,20 @@ const router = createBrowserRouter([
   },
 
 //Admin Pages
+{
+  path:'/client',
 
+   element: (
+      <RequireToken>
+        <RequireRole allowedRole="Client">
+          <FreelancerLayout  />
+        </RequireRole>
+      </RequireToken>
+    ),
+    children:[
+      { path: "freelancerDashboard", element: <FreelancerDashboard /> },
+    ]
+}
 
 ]);
 

@@ -32,16 +32,19 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-        // const token =localStorage.getItem('token')
+        // const token =localStorage.getItem('token')//no need for localstorage now that cookies are being used
       try {
-        console.log("TOKEN:", localStorage.getItem("token"));
+        // console.log("TOKEN:", localStorage.getItem("token"));
 
-        const response = await fetch(
-          "http://localhost:3000/api/freelancer-stats",
+      const response = await fetch(
+          "http://localhost:8000/api/v1/dashboard/freelancer",
           {
-             headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
+            method: "GET",
+            // This is the key for Cookies:
+            credentials: "include", 
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
         );
 

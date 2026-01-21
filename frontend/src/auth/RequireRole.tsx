@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom"
 
 interface Props{
     children:JSX.Element,
-    allowedRole:"admin"|"freelancer"
+    allowedRole:"Client"|"Freelancer"
 }
 
 const RequireRole=({children,allowedRole}:Props)=>{

@@ -113,6 +113,7 @@ const getClientDashboard = asyncHandler(async (req, res) => {
     );
 });
 
+//////freelancer dashBoard
 const getFreelancerDashboard = asyncHandler(async (req, res) => {
     if (req.user.role !== "Freelancer") {
         throw new ApiError(403, "Only Freelancers can access this dashboard");

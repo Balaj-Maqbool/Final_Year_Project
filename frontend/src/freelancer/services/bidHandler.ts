@@ -1,4 +1,4 @@
-const API = "http://localhost:3000/api/bids";
+const API = "http://localhost:8000/api/v1/bids";
 
 const authHeader = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -14,7 +14,8 @@ export const bidHandler = {
     });
 
     if (!res.ok) throw new Error("Failed to create bid");
-    return res.json();
+    const result = await res.json();
+    return result.data;
   },
 
   updateBid: async (bidId: string, data: any) => {
@@ -25,7 +26,8 @@ export const bidHandler = {
     });
 
     if (!res.ok) throw new Error("Failed to update bid");
-    return res.json();
+    const result = await res.json();
+    return result.data;
   },
 
   getMyBidForJob: async (jobId: string) => {
@@ -36,6 +38,7 @@ export const bidHandler = {
     if (res.status === 404) return null;
     if (!res.ok) throw new Error("Failed to fetch bid");
 
-    return res.json();
+    const result = await res.json();
+    return result.data;
   },
 };

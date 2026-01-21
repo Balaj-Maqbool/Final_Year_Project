@@ -31,11 +31,10 @@ const BrowseJobs = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/jobs", {
+        const response = await fetch("http://localhost:8000/api/v1/jobs", {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { "Content-Type": "application/json" },
+      credentials: "include",
         });
 
         if (!response.ok) {
@@ -44,7 +43,7 @@ const BrowseJobs = () => {
         }
 
         const result = await response.json();
-        setJobs(result);
+        setJobs(result.data);
       } catch (error) {
         console.error("Error fetching jobs", error);
       } finally {

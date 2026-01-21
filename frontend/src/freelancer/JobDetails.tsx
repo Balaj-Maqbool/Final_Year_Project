@@ -31,15 +31,15 @@ const JobDetails = () => {
   const [myBid, setMyBid] = useState<Bid | undefined>(undefined);
 
   // Fetch job
-  useEffect(() => {
+  useEffect(() => {              
     const fetchJob = async () => {
-      const res = await fetch(`http://localhost:3000/api/jobs/${jobId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      const res = await fetch(`http://localhost:8000/api/v1/jobs/${jobId}`, {
+        method: "GET",  
+        headers: { "Content-Type": "application/json" },
+      credentials: "include",
       });
       const data = await res.json();
-      setJob(data);
+      setJob(data.data);
     };
 
     fetchJob();
@@ -68,7 +68,7 @@ const JobDetails = () => {
       {/* HEADER */}
       <div className="job-header">
         <h1>{job.title}</h1>
-
+                            
         <div className="job-meta">
           <span>Posted recently</span>
           <Badge bg="secondary">{job.category}</Badge>

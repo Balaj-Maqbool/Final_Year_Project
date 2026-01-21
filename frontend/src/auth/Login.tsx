@@ -66,8 +66,8 @@ const Login = ({ onSubmit }: Props) => {
                                     <Form.Label className="fw-semibold">Role</Form.Label>
                                     <Form.Select ref={roleRef} required>
                                         <option value="">Select a role</option>
-                                        <option value="freelancer">Freelancer</option>
-                                        <option value="admin">Admin</option>
+                                        <option value="Freelancer">Freelancer</option>
+                                        <option value="Client">Client</option>
                                     </Form.Select>
                                 </FormGroup>
                             </Row>

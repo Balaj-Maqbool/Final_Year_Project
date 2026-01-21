@@ -3,7 +3,8 @@ import { Button, Form, FormGroup, Row, Stack, Card, Container } from "react-boot
 import { useNavigate } from "react-router-dom";
 
 export interface registerData {
-  name: string;
+  fullName: string;
+  username: string;
   email: string;
   password: string;
   role: string;
@@ -15,7 +16,8 @@ interface Props {
 
 const Register = ({ onSubmit }: Props) => {
   const navigate = useNavigate();
-  const nameRef = useRef<HTMLInputElement>(null);
+  const fullNameRef = useRef<HTMLInputElement>(null);
+  const usernameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passRef = useRef<HTMLInputElement>(null);
   const roleRef = useRef<HTMLSelectElement>(null);
@@ -23,7 +25,8 @@ const Register = ({ onSubmit }: Props) => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSubmit({
-      name: nameRef.current!.value,
+      fullName: fullNameRef.current!.value,
+      username: usernameRef.current!.value,
       email: emailRef.current!.value,
       password: passRef.current!.value,
       role: roleRef.current!.value,
@@ -42,11 +45,22 @@ const Register = ({ onSubmit }: Props) => {
           <Form onSubmit={handleSubmit}>
             <Stack direction="vertical" gap={3}>
               <Row>
-                <FormGroup controlId="name">
+                <FormGroup controlId="fullName">
                   <Form.Label className="fw-semibold">Full Name</Form.Label>
                   <Form.Control 
-                    ref={nameRef} 
-                    placeholder="Enter your name" 
+                    ref={fullNameRef} 
+                    placeholder="Enter your full name" 
+                    required 
+                  />
+                </FormGroup>
+              </Row>
+
+              <Row>
+                <FormGroup controlId="username">
+                  <Form.Label className="fw-semibold">Username</Form.Label>
+                  <Form.Control 
+                    ref={usernameRef} 
+                    placeholder="Choose a username" 
                     required 
                   />
                 </FormGroup>
@@ -81,8 +95,8 @@ const Register = ({ onSubmit }: Props) => {
                   <Form.Label className="fw-semibold">Role</Form.Label>
                   <Form.Select ref={roleRef} required>
                     <option value="">Select a role</option>
-                    <option value="freelancer">Freelancer</option>
-                    <option value="admin">Admin</option>
+                    <option value="Freelancer">Freelancer</option>
+                    <option value="Client">Client</option>
                   </Form.Select>
                 </FormGroup>
               </Row>

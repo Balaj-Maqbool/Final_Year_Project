@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { CORS_ORIGIN } from "./constants.js";
-
+import 'dotenv/config'
 const app = express();
 
 app.use(
@@ -24,7 +24,6 @@ app.use(passport.initialize());
 
 // router imports
 import userRouter from "./routes/user.routes.js";
-
 app.use("/api/v1/users", userRouter);
 
 import jobRouter from "./routes/job.routes.js";
@@ -35,6 +34,7 @@ app.use("/api/v1/bids", bidRouter);
 
 import ratingRouter from "./routes/rating.routes.js";
 app.use("/api/v1/ratings", ratingRouter);
+
 
 import taskRouter from "./routes/task.routes.js";
 app.use("/api/v1/tasks", taskRouter);
