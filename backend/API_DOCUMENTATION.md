@@ -18,7 +18,7 @@
 | **POST** | `/logout` | Logout (clears cookies) | *No Body* |
 | **POST** | `/refresh-token` | Get new access token | *Cookies (auto-sent)* |
 | **GET** | `/google` | Initiate Google OAuth | **Query**: `?role=Client` (Default) or `?role=Freelancer` |
-| **GET** | `/google/callback` | Google Redirect (Internal) | **Query**: `?code=...` (Handled by browser) |
+| **GET** | `/google/callback` | Google Redirect (Sets Secure Cookies) | **Query**: `?code=...` (Handled by browser) |
 | **DELETE** | `/delete-account` | Delete my account | *No Body* |
 
 ### Profile Endpoints
