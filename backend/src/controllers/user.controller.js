@@ -471,6 +471,7 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
     if (!profile) {
         throw new ApiError(400, "Google Authentication Failed");
     }
+    console.log(profile);
 
     const email = profile.emails?.[0]?.value;
     const googleId = profile.id;
@@ -520,18 +521,20 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
     // Redirect to frontend
-    // Use an env variable for frontend URL in production, for now hardcode or use simple relative
-    // For FYP, typically localhost:5173 or similar
-    // We'll assume localhost:5173 for now or just return JSON if that's what user prefers? 
-    // Usually OAuth requires redirect.
-    // Let's redirect to a success page on frontend with tokens query params
-
-    // Better: Helper function or constant for frontend URL
+    // Use an env variable for frontend URL in production
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
-    return res.redirect(
-        `${frontendUrl}/oauth-success?accessToken=${accessToken}&refreshToken=${refreshToken}`
-    );
+    // SECURITY UPDATE: Set tokens in HttpOnly cookies instead of URL
+    const options = {
+        httpOnly: true,
+        secure: true, // Always true since we are using cookieOptions constant elsewhere which is secure: true
+    };
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .redirect(`${frontendUrl}/oauth-success`); // No tokens in URL
 });
 
 
