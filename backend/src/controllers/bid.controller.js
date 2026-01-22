@@ -3,11 +3,12 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Bid } from "../models/bid.model.js";
 import { Job } from "../models/job.model.js";
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const placeBid = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
     const { bid_amount, message, timeline } = req.body;
+    console.log("placeBid payload:", req.body);
 
     if (req.user.role !== "Freelancer") {
         throw new ApiError(403, "Only Freelancers can place bids");
@@ -265,6 +266,29 @@ const updateBid = asyncHandler(async (req, res) => {
         new ApiResponse(200, bid, "Bid updated successfully")
     );
 });
+const getMyBidForJob = asyncHandler(async (req, res) => {
+    const { jobId } = req.params;
+
+    if (!req.user) {
+        throw new ApiError(401, "Unauthorized");
+    }
+
+    const bid = await Bid.findOne({
+        job_id: jobId,
+        user_id: req.user._id
+    });
+
+    if (!bid) {
+        // Return 200 with null data to signify "no bid exists" without causing a 404 error log
+        return res.status(200).json(
+            new ApiResponse(200, null, "No bid found for this job")
+        );
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, bid, "Bid fetched successfully")
+    );
+});
 
 export {
     placeBid,
@@ -272,5 +296,6 @@ export {
     updateBidStatus,
     withdrawBid,
     getMyBids,
-    updateBid
+    updateBid,
+    getMyBidForJob
 };

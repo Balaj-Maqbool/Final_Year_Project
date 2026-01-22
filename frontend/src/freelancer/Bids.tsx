@@ -38,11 +38,22 @@ const BidForm = ({ jobId, onSubmit, existingBid }: Props) => {
     const startDate = new Date().toISOString();
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + 1);
+    const amount = Number(amountRef.current!.value);
+    if (!amount || amount <= 0) {
+        alert("Please enter a valid bid amount");
+        return;
+    }
+
+    const message = proposalRef.current!.value;
+    if (!message.trim()) {
+        alert("Please enter a proposal message");
+        return;
+    }
 
     onSubmit({
       job_id: jobId,
-      bid_amount: Number(amountRef.current!.value),
-      message: proposalRef.current!.value,
+      bid_amount: amount,
+      message: message,
       timeline: {
         start_date: startDate,
         end_date: endDate.toISOString(),

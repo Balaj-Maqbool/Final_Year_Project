@@ -27,7 +27,11 @@ export const bidHandler = {
 
   createBid: async (data: BidData, jobId: JobId) => {
     const res = await fetch(`http://localhost:8000/api/v1/bids/${jobId}`, fetchConfig("POST", data));
-    if (!res.ok) throw new Error("Failed to create bid");
+    if (!res.ok) {
+        const err = await res.json();
+        console.error("Create Bid Error:", err);
+        throw new Error(err.message || "Failed to create bid");
+    }
     const result = await res.json();
     return result.data;
   },

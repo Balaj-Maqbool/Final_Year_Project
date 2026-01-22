@@ -27,7 +27,7 @@ interface Bid {
 }
 
 const JobDetails = () => {
-  const { jobId } = useParams<{ jobId: string }>(); // Explicitly type the param
+  const { jobId } = useParams<{ jobId: string }>(); 
   const [job, setJob] = useState<Job | null>(null);
   const [myBid, setMyBid] = useState<Bid | undefined>(undefined);
 
