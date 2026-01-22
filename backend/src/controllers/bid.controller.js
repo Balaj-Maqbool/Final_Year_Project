@@ -3,7 +3,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Bid } from "../models/bid.model.js";
 import { Job } from "../models/job.model.js";
-import mongoose from "mongoose"
+import mongoose from "mongoose";
+import { sseManager } from "../utils/SSEManager.js";
 
 const placeBid = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -51,6 +52,13 @@ const placeBid = asyncHandler(async (req, res) => {
         bid_amount,
         message,
         timeline
+    });
+
+    // SSE: Notify Client (Job Poster)
+    sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
+        type: "NEW_BID",
+        message: "New bid received on your job",
+        jobId: jobId
     });
 
     return res.status(201).json(
@@ -158,6 +166,13 @@ const updateBidStatus = asyncHandler(async (req, res) => {
         // Optional: Reject all other pending bids? For now, we leave them or logic can be added here.
     }
 
+    // SSE: Notify Freelancer of decision
+    sseManager.sendToUser(bid.user_id, "DASHBOARD_UPDATE", {
+        type: "BID_STATUS_UPDATE",
+        message: `Your bid was ${status}`,
+        jobId: job._id
+    });
+
     return res.status(200).json(
         new ApiResponse(200, bid, `Bid ${status.toLowerCase()} successfully`)
     );
@@ -181,6 +196,23 @@ const withdrawBid = asyncHandler(async (req, res) => {
     }
 
     await Bid.findByIdAndDelete(bidId);
+
+    // SSE: Notify Client that bid was withdrawn
+    if (bid.job_id) {
+        // Need to fetch job poster
+        try {
+            const job = await Job.findById(bid.job_id);
+            if (job) {
+                sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
+                    type: "BID_WITHDRAWN",
+                    message: "A freelancer withdrew their bid",
+                    jobId: job._id
+                });
+            }
+        } catch (error) {
+            console.error("Error sending withdrawal notification:", error);
+        }
+    }
 
     return res.status(200).json(
         new ApiResponse(200, {}, "Bid withdrawn successfully")
