@@ -42,6 +42,8 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You cannot bid on your own job");
     }
 
+    console.log("placeBid - Saving Bid for User:", req.user?._id);
+
     const bid = await Bid.create({
         job_id: jobId,
         user_id: req.user?._id,
@@ -185,6 +187,8 @@ const withdrawBid = asyncHandler(async (req, res) => {
 });
 
 const getMyBids = asyncHandler(async (req, res) => {
+    console.log("getMyBids - User:", req.user?._id, "Type:", typeof req.user?._id);
+
     if (!req.user) {
         throw new ApiError(401, "Unauthorized");
     }
@@ -195,7 +199,7 @@ const getMyBids = asyncHandler(async (req, res) => {
     const bids = await Bid.aggregate([
         {
             $match: {
-                user_id: req.user._id
+                user_id: new mongoose.Types.ObjectId(req.user._id)
             }
         },
         {
@@ -234,10 +238,39 @@ const getMyBids = asyncHandler(async (req, res) => {
     );
 });
 
+const updateBid = asyncHandler(async (req, res) => {
+    const { bidId } = req.params;
+    const { bid_amount, message, timeline } = req.body;
+
+    const bid = await Bid.findById(bidId);
+    if (!bid) {
+        throw new ApiError(404, "Bid not found");
+    }
+
+    if (bid.user_id.toString() !== req.user?._id.toString()) {
+        throw new ApiError(403, "You are not authorized to update this bid");
+    }
+
+    if (bid.status !== "Pending") {
+        throw new ApiError(400, "Cannot update a bid that has been accepted or rejected");
+    }
+
+    if (bid_amount) bid.bid_amount = bid_amount;
+    if (message) bid.message = message;
+    if (timeline) bid.timeline = timeline;
+
+    await bid.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, bid, "Bid updated successfully")
+    );
+});
+
 export {
     placeBid,
     getJobBids,
     updateBidStatus,
     withdrawBid,
-    getMyBids
+    getMyBids,
+    updateBid
 };

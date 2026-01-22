@@ -1,5 +1,5 @@
 import { useRef, type FormEvent } from "react";
-import { Button, Form, FormGroup, Row, Stack, Card, Container } from "react-bootstrap";
+import "./auth.css";
 import { useNavigate } from "react-router-dom";
 
 export interface registerData {
@@ -33,95 +33,97 @@ const Register = ({ onSubmit }: Props) => {
     });
   };
 
-  return (
-    <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "90vh" }}>
-      <Card style={{ maxWidth: "500px", width: "100%" }} className="shadow-sm border-0">
-        <Card.Body className="p-4">
-          <div className="text-center mb-4">
-            <h2 className="fw-bold">Create Account</h2>
-            <p className="text-muted">Join us by filling out the information below</p>
-          </div>
+  
+    return (
+        <div className="auth-container">
+            <div className="auth-card">
+                <div className="auth-header">
+                    <h2>Create Account</h2>
+                    <p>Join us by filling out the information below</p>
+                </div>
 
-          <Form onSubmit={handleSubmit}>
-            <Stack direction="vertical" gap={3}>
-              <Row>
-                <FormGroup controlId="fullName">
-                  <Form.Label className="fw-semibold">Full Name</Form.Label>
-                  <Form.Control 
-                    ref={fullNameRef} 
-                    placeholder="Enter your full name" 
-                    required 
-                  />
-                </FormGroup>
-              </Row>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="fullName">Full Name</label>
+                        <input
+                            id="fullName"
+                            className="form-control"
+                            ref={fullNameRef}
+                            placeholder="Enter your full name"
+                            required
+                        />
+                    </div>
 
-              <Row>
-                <FormGroup controlId="username">
-                  <Form.Label className="fw-semibold">Username</Form.Label>
-                  <Form.Control 
-                    ref={usernameRef} 
-                    placeholder="Choose a username" 
-                    required 
-                  />
-                </FormGroup>
-              </Row>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="username">Username</label>
+                        <input
+                            id="username"
+                            className="form-control"
+                            ref={usernameRef}
+                            placeholder="Choose a username"
+                            required
+                        />
+                    </div>
 
-              <Row>
-                <FormGroup controlId="email">
-                  <Form.Label className="fw-semibold">Email address</Form.Label>
-                  <Form.Control 
-                    type="email" 
-                    ref={emailRef} 
-                    placeholder="name@example.com" 
-                    required 
-                  />
-                </FormGroup>
-              </Row>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="email">Email address</label>
+                        <input
+                            id="email"
+                            className="form-control"
+                            type="email"
+                            ref={emailRef}
+                            placeholder="name@example.com"
+                            required
+                        />
+                    </div>
 
-              <Row>
-                <FormGroup controlId="password">
-                  <Form.Label className="fw-semibold">Password</Form.Label>
-                  <Form.Control 
-                    type="password" 
-                    ref={passRef} 
-                    placeholder="Create a password" 
-                    required 
-                  />
-                </FormGroup>
-              </Row>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="password">Password</label>
+                        <input
+                            id="password"
+                            className="form-control"
+                            type="password"
+                            ref={passRef}
+                            placeholder="Create a password"
+                            required
+                        />
+                    </div>
 
-              <Row>
-                <FormGroup controlId="role">
-                  <Form.Label className="fw-semibold">Role</Form.Label>
-                  <Form.Select ref={roleRef} required>
-                    <option value="">Select a role</option>
-                    <option value="Freelancer">Freelancer</option>
-                    <option value="Client">Client</option>
-                  </Form.Select>
-                </FormGroup>
-              </Row>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="role">Role</label>
+                        <select id="role" className="form-select" ref={roleRef} required>
+                            <option value="">Select a role</option>
+                            <option value="Freelancer">Freelancer</option>
+                            <option value="Client">Client</option>
+                        </select>
+                    </div>
 
-              <Button variant="primary" type="submit" className="w-100 mt-2 py-2 fw-bold">
-                Register
-              </Button>
+                    <button type="submit" className="btn-auth">
+                        Register
+                    </button>
 
-              <Stack direction="horizontal" className="justify-content-center mt-3" gap={2}>
-                <span className="text-muted">Already have an account?</span>
-                <Button 
-                  onClick={() => navigate('/login')} 
-                  variant="link" 
-                  type="button" 
-                  className="p-0 text-decoration-none fw-bold"
-                >
-                  Login
-                </Button>
-              </Stack>
-            </Stack>
-          </Form>
-        </Card.Body>
-      </Card>
-    </Container>
-  );
+                     <button 
+                        type="button" 
+                        className="btn-auth btn-google mt-3" 
+                        style={{ backgroundColor: "#db4437" }}
+                        onClick={() => {
+                            const role = roleRef.current?.value || "Client";
+                            window.location.href = `http://localhost:8000/api/v1/users/google?role=${role}`;
+                        }}
+                    >
+                       Sign up with Google
+                    </button>
+
+                    <div className="auth-footer">
+                        <span>Already have an account?</span>
+                        <button type="button" onClick={() => navigate('/login')} className="auth-link">
+                            Login
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
 };
 
 export default Register;

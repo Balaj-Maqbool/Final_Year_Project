@@ -1,4 +1,5 @@
 import { Outlet } from "react-router-dom"
+import Navbar from "../components/Navbar"
 
 
 const FreelancerLayout = () => {
@@ -6,8 +7,12 @@ const FreelancerLayout = () => {
 
     return(
         <>
-        <Outlet/>
-        </>
+       
+        <Navbar/>
+<div id="main">
+    <Outlet/>
+</div>
+    </>
     )
 }
 

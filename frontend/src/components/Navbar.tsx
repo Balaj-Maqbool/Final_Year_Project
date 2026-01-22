@@ -1,34 +1,27 @@
+import { Link } from "react-router-dom";
+import "./Navbar.css";
 
-const Navbar=()=>{
+const Navbar = () => {
+  return (
+    <nav className="custom-navbar">
+      <div className="navbar-container">
+        <Link to="/" className="nav-brand">
+          PakFreelance
+        </Link>
+        
+        <ul className="nav-menu">
+           <li><Link to="/freelancer/jobs" className="nav-link">Find Work</Link></li>
+           <li><Link to="/freelancer/my-bids" className="nav-link">My Bids</Link></li>
+           <li><Link to="/freelancer/freelancerDashboard" className="nav-link">Dashboard</Link></li>
+        </ul>
 
-    return(
-        <nav className="navbar navbar-expand-lg bg-body-tertiary">
-  <div className="container-fluid">
-    <a className="navbar-brand" href="#">FreelacePK</a>
-    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span className="navbar-toggler-icon"></span>
-    </button>
-    <div className="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-        <li className="nav-item">
-          <a className="nav-link active" aria-current="page" href="#">Home</a>
-        </li>
-        <li className="nav-item">
-          <a className="nav-link" href="#">Link</a>
-        </li>
-       
-        <li className="nav-item">
-          <a className="nav-link disabled" aria-disabled="true">Disabled</a>
-        </li>
-      </ul>
-      <form className="d-flex" role="search">
-        <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-        <button className="btn btn-outline-success" type="submit">Search</button>
-      </form>
-    </div>
-  </div>
-</nav>
-    )
-}
+        <div className="nav-menu">
+           <Link to="/login" className="nav-btn nav-btn-secondary">Login</Link>
+           <Link to="/register" className="nav-btn nav-btn-primary">Sign Up</Link>
+        </div>
+      </div>
+    </nav>
+  );
+};
 
 export default Navbar

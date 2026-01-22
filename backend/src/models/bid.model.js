@@ -21,8 +21,14 @@ const bidSchema = new Schema(
             required: true
         },
         timeline: {
-            type: String, // e.g., "7 days", "1 month"
-            required: true
+            start_date: {
+                type: Date,
+                required: true
+            },
+            end_date: {
+                type: Date,
+                required: true
+            }
         },
         status: {
             type: String,

@@ -5,7 +5,8 @@ import {
     getJobBids,
     updateBidStatus,
     withdrawBid,
-    getMyBids
+    getMyBids,
+    updateBid
 } from "../controllers/bid.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -26,11 +27,17 @@ router.use(verifyJWT);
 // GET /:jobId -> get all bids for job
 // PATCH /:jobId/:bidId/status -> update status
 
+
+
+// Routes for specific static paths MUST keep before dynamic /:jobId
 router.route("/my-bids").get(getMyBids);
 
 router.route("/:jobId")
     .post(placeBid)
     .get(getJobBids);
+
+router.route("/bid/:bidId")
+    .put(updateBid);
 
 router.route("/:jobId/:bidId")
     .delete(withdrawBid);

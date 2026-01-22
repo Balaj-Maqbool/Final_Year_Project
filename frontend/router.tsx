@@ -1,23 +1,34 @@
-import Layout from "../frontend/src/outlet/Layout";
+// import Layout from "../frontend/src/outlet/Layout";
 import RequireRole from "./src/auth/RequireRole";
 import { createBrowserRouter } from "react-router-dom";
 import RegisterPage from "./src/auth/Registerpage";
 import Loginpage from "./src/auth/Loginpage";
-import FreelancerLayout from "./src/freelancer/FreelancerLayout";
+import OAuthSuccess from "./src/auth/OAuthSuccess";
+import FreelancerLayout from "./src/outlet/FreelancerLayout";
 import RequireToken from "./src/auth/RequireToken";
 import FreelancerDashboard from "./src/freelancer/FreelancerDashboard";
 import BrowseJobs from "./src/freelancer/BrowseJobs";
 import Bids from "./src/freelancer/JobDetails"
+import MyBids from "./src/freelancer/MyBids";
+import LandingPage from "./src/landing/LandingPage";
 
 const router = createBrowserRouter([
   //// Authentication pages
   {
     path: "/",
-    element: <Layout />,
-    children: [
-      { index:true, element: <RegisterPage /> },
-      { path: "login", element: <Loginpage /> },
-    ],
+    element: <LandingPage />,
+  },
+  {
+      path: "/register",
+      element: <RegisterPage />,
+  },
+  {
+      path: "/login",
+      element: <Loginpage />,
+  },
+  {
+      path: "/oauth-success",
+      element: <OAuthSuccess />,
   },
   ////////Freelancer pages
 
@@ -34,7 +45,8 @@ const router = createBrowserRouter([
     children: [
       { path: "freelancerDashboard", element: <FreelancerDashboard /> },
       {path:'jobs',element:<BrowseJobs/>},
-        {path:'jobs/:jobId',element:<Bids/>}
+        {path:'jobs/:jobId',element:<Bids/>},
+        {path:'my-bids',element:<MyBids/>}
     
     ],
   },

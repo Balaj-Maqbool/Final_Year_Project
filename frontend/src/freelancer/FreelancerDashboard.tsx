@@ -165,7 +165,7 @@ const Dashboard = () => {
               <Card.Body>
                 <Card.Title>My Bids</Card.Title>
                 <Card.Text>Track your submitted proposals</Card.Text>
-                <Button variant="secondary">View Bids</Button>
+                <Button as={Link as any} to="/freelancer/my-bids" variant="secondary">View Bids</Button>
               </Card.Body>
             </Card>
           </Col>

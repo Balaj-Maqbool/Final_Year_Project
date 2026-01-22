@@ -2,6 +2,8 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { CORS_ORIGIN } from "./constants.js";
+import { ApiError } from "./utils/ApiError.js";
+import { ApiResponse } from "./utils/ApiResponse.js";
 import 'dotenv/config'
 const app = express();
 
@@ -41,5 +43,33 @@ app.use("/api/v1/tasks", taskRouter);
 
 import dashboardRouter from "./routes/dashboard.routes.js";
 app.use("/api/v1/dashboard", dashboardRouter);
+
+app.get("/", (req, res) => {
+    res.send("API is running...");
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error("Global Error Handler Catch:", err);
+    if (err instanceof ApiError) {
+        return res.status(err.statusCode).json(
+            new ApiResponse(err.statusCode, null, err.message) // Fixed: Use ApiResponse structure for consistency? 
+            // Actually, usually ApiError has everything. Let's just send JSON.
+            // But the frontend expects `data` field sometimes? 
+            // Let's stick to a standard error format.
+        );
+    }
+    // Mongoose Validation Error
+    if (err.name === 'ValidationError') {
+         return res.status(400).json(
+            new ApiResponse(400, null, err.message)
+        );
+    }
+
+    // Default 500
+    return res.status(500).json(
+        new ApiResponse(500, null, "Internal Server Error: " + err.message)
+    );
+});
 
 export { app };
