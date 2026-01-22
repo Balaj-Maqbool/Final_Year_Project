@@ -17,7 +17,6 @@ const getUserNotifications = asyncHandler(async (req, res) => {
         sort: { createdAt: -1 }
     };
 
-    // Since we didn't use mongoose-paginate-v2 plugin, we do manual pagination or use simple find
     const skip = (options.page - 1) * options.limit;
 
     const notifications = await Notification.find(filter)

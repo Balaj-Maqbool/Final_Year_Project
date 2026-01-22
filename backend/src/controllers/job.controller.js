@@ -29,22 +29,18 @@ const createJob = asyncHandler(async (req, res) => {
         poster_id: req.user?._id
     });
 
-    // 1. SSE: Broadcast (Toast) to ALL Freelancers (Ephemeral)
     sseManager.broadcast("NEW_JOB_AVAILABLE", {
         message: "New Job Posted",
-        job // Send full job or lightweight version
+        job
     }, "Freelancer");
 
-    // 2. Skill Matching: Find Freelancers with matching skills & Notify (Persistent)
     if (required_skills && required_skills.length > 0) {
         try {
-            // Find freelancers who have AT LEAST ONE of the required skills
             const matchedFreelancers = await User.find({
                 role: "Freelancer",
                 skills: { $in: required_skills }
             }).select("_id");
 
-            // Send persistent notification to each matched freelancer
             matchedFreelancers.forEach(user => {
                 sseManager.sendToUser(user._id, "DASHBOARD_UPDATE", {
                     type: "JOB_MATCH",
@@ -195,7 +191,7 @@ const updateJob = asyncHandler(async (req, res) => {
     if (job.poster_id.toString() !== req.user?._id.toString()) {
         throw new ApiError(403, "You are not authorized to update this job");
     }
-    
+
     // Critical Business Rule: Limits on updating Assigned/Completed jobs
 
     // 1. If currently Completed, it's final. Partition logic: Status cannot change from Completed.

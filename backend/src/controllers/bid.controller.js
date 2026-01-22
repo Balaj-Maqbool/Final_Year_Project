@@ -227,7 +227,7 @@ const getMyBids = asyncHandler(async (req, res) => {
     const bids = await Bid.aggregate([
         {
             $match: {
-                user_id: req.user._id
+                user_id: new mongoose.Types.ObjectId(req.user._id)
             }
         },
         {
@@ -266,10 +266,63 @@ const getMyBids = asyncHandler(async (req, res) => {
     );
 });
 
+const updateBid = asyncHandler(async (req, res) => {
+    const { bidId } = req.params;
+    const { bid_amount, message, timeline } = req.body;
+
+    const bid = await Bid.findById(bidId);
+    if (!bid) {
+        throw new ApiError(404, "Bid not found");
+    }
+
+    if (bid.user_id.toString() !== req.user?._id.toString()) {
+        throw new ApiError(403, "You are not authorized to update this bid");
+    }
+
+    if (bid.status !== "Pending") {
+        throw new ApiError(400, "Cannot update a bid that has been accepted or rejected");
+    }
+
+    if (bid_amount) bid.bid_amount = bid_amount;
+    if (message) bid.message = message;
+    if (timeline) bid.timeline = timeline;
+
+    await bid.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, bid, "Bid updated successfully")
+    );
+});
+const getMyBidForJob = asyncHandler(async (req, res) => {
+    const { jobId } = req.params;
+
+    if (!req.user) {
+        throw new ApiError(401, "Unauthorized");
+    }
+
+    const bid = await Bid.findOne({
+        job_id: jobId,
+        user_id: req.user._id
+    });
+
+    if (!bid) {
+        // Return 200 with null data to signify "no bid exists" without causing a 404 error log
+        return res.status(200).json(
+            new ApiResponse(200, null, "No bid found for this job")
+        );
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, bid, "Bid fetched successfully")
+    );
+});
+
 export {
     placeBid,
     getJobBids,
     updateBidStatus,
     withdrawBid,
-    getMyBids
+    getMyBids,
+    updateBid,
+    getMyBidForJob
 };

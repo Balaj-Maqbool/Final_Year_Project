@@ -38,7 +38,6 @@ const getClientDashboard = asyncHandler(async (req, res) => {
                                 $sum: { $cond: [{ $eq: ["$status", "Completed"] }, 1, 0] }
                             },
                             totalBudgetSpent: {
-                                // Only count budget for assigned/completed jobs as "committed/spent"
                                 $sum: {
                                     $cond: [
                                         { $in: ["$status", ["Assigned", "Completed"]] },
@@ -150,12 +149,6 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
             }
         }
     ]);
-
-    // 2. Acive/Completed Jobs (Where assigned) & Earnings
-    // Logic Issue Fix: Earnings should come from the Accepted BID AMOUNT, not the JOB BUDGET.
-
-    // We need to find jobs where this freelancer is assigned
-    // AND look up their specific accepted bid for that job to get the price.
 
     const jobStats = await Job.aggregate([
         {
