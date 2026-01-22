@@ -14,10 +14,7 @@ const getUserNotifications = asyncHandler(async (req, res) => {
     const options = {
         page: parseInt(page),
         limit: parseInt(limit),
-        sort: { createdAt: -1 },
-        populate: {
-            path: 'relatedId', // Optional: Use careful population if relatedId refs dynamic models
-        }
+        sort: { createdAt: -1 }
     };
 
     // Since we didn't use mongoose-paginate-v2 plugin, we do manual pagination or use simple find
