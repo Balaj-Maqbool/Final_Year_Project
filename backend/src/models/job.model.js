@@ -24,6 +24,10 @@ const jobSchema = new Schema(
             required: true,
             index: true
         },
+        required_skills: {
+            type: [String],
+            default: []
+        },
         status: {
             type: String,
             enum: ["Open", "Assigned", "Completed"],

@@ -87,5 +87,24 @@
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
 | **GET** | `/client` | Get Client Stats | *No Body* <br>Returns: `{ stats: { totalJobs, spent... }, recentJobs: [...] }` |
-| **GET** | `/freelancer` | Get Freelancer Stats | *No Body* <br>Returns: `{ stats: { earnings, bids... }, activeJobs: [...], pendingTasks: [...] }` |
+
+---
+
+## 7. Notifications (`/notifications`)
+
+| Method | Endpoint | Description | Request Body / Params |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/` | Get my notifications | **Query**: `?page=1` `?limit=10` `?type=NEW_BID` |
+| **PATCH** | `/:notificationId/read` | Mark as read | **Param**: `notificationId` |
+| **PATCH** | `/read-all` | Mark all as read | *No Body* |
+| **DELETE** | `/:notificationId` | Delete a notification | **Param**: `notificationId` |
+
+---
+
+## 8. Real-time Events (SSE) (`/dashboard`)
+
+| Method | Endpoint | Description | Request Body / Params |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/events` | Subscribe to Event Stream | **Header**: `Accept: text/event-stream` <br>**Note**: Connection stays open. |
+
 

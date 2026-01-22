@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Task } from "../models/task.model.js";
 import { Job } from "../models/job.model.js";
 import mongoose from "mongoose";
+import { sseManager } from "../utils/SSEManager.js";
 
 const createTask = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -33,6 +34,13 @@ const createTask = asyncHandler(async (req, res) => {
         title,
         description,
         assigned_user_id: job.assigned_to
+    });
+
+    // SSE: Notify Freelancer
+    sseManager.sendToUser(job.assigned_to, "DASHBOARD_UPDATE", {
+        type: "NEW_TASK",
+        message: "New task assigned to you",
+        taskId: task._id
     });
 
     return res.status(201).json(
@@ -90,6 +98,17 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     task.status = status;
     await task.save();
 
+    // SSE: Notify Client (Job Poster)
+    // Need to fetch job to find poster
+    const job = await Job.findById(task.job_id);
+    if (job) {
+        sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
+            type: "TASK_STATUS_UPDATE",
+            message: `Task '${task.title}' moved to ${status}`,
+            taskId: task._id
+        });
+    }
+
     return res.status(200).json(
         new ApiResponse(200, task, "Task status updated successfully")
     );
@@ -120,6 +139,13 @@ const approveTask = asyncHandler(async (req, res) => {
 
     task.is_approved = true;
     await task.save();
+
+    // SSE: Notify Freelancer of approval
+    sseManager.sendToUser(task.assigned_user_id, "DASHBOARD_UPDATE", {
+        type: "TASK_APPROVED",
+        message: `Your task '${task.title}' was approved`,
+        taskId: task._id
+    });
 
     return res.status(200).json(
         new ApiResponse(200, task, "Task approved successfully")
