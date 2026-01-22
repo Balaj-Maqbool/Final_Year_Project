@@ -72,4 +72,30 @@ app.use((err, req, res, next) => {
     );
 });
 
+
+app.get("/", (req, res) => {
+    res.send("API is running...");
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error("Global Error Handler Catch:", err);
+    if (err instanceof ApiError) {
+        return res.status(err.statusCode).json(
+            new ApiResponse(err.statusCode, null, err.message)
+        );
+    }
+    // Mongoose Validation Error
+    if (err.name === 'ValidationError') {
+        return res.status(400).json(
+            new ApiResponse(400, null, err.message)
+        );
+    }
+
+    // Default 500
+    return res.status(500).json(
+        new ApiResponse(500, null, "Internal Server Error: " + err.message)
+    );
+});
+
 export { app };
