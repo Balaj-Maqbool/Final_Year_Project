@@ -11,6 +11,7 @@ import BrowseJobs from "./src/freelancer/BrowseJobs";
 import Bids from "./src/freelancer/JobDetails"
 import MyBids from "./src/freelancer/MyBids";
 import LandingPage from "./src/landing/LandingPage";
+import ProfilePage from "./src/profile/ProfilePage";
 
 const router = createBrowserRouter([
   //// Authentication pages
@@ -46,7 +47,12 @@ const router = createBrowserRouter([
       { path: "freelancerDashboard", element: <FreelancerDashboard /> },
       {path:'jobs',element:<BrowseJobs/>},
         {path:'jobs/:jobId',element:<Bids/>},
-        {path:'my-bids',element:<MyBids/>}
+        {path:'my-bids',element:<MyBids/>},
+      { path: "freelancerDashboard", element: <FreelancerDashboard /> },
+      {path:'jobs',element:<BrowseJobs/>},
+      {path:'jobs/:jobId',element:<Bids/>},
+      {path:'my-bids',element:<MyBids/>},
+      {path:'profile',element:<ProfilePage/>}
     
     ],
   },
@@ -65,7 +71,13 @@ const router = createBrowserRouter([
     children:[
       { path: "freelancerDashboard", element: <FreelancerDashboard /> },
     ]
-}
+},
+
+//profile pages
+{
+  path:'/profile',
+  element:<ProfilePage/>
+},
 
 ]);
 

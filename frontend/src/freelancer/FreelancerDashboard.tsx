@@ -175,7 +175,7 @@ const Dashboard = () => {
               <Card.Body>
                 <Card.Title>Profile</Card.Title>
                 <Card.Text>Update your skills and bio</Card.Text>
-                <Button variant="outline-primary">Edit Profile</Button>
+                <Button as={Link as any} to="/profile" variant="outline-primary">Edit Profile</Button>
               </Card.Body>
             </Card>
           </Col>
