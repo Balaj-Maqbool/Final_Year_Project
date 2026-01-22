@@ -2,12 +2,14 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
+import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
+import { sseManager } from "../utils/SSEManager.js";
 
 import { Task } from "../models/task.model.js";
 
 const createJob = asyncHandler(async (req, res) => {
-    const { title, description, budget, deadline, category } = req.body;
+    const { title, description, budget, deadline, category, required_skills } = req.body;
 
     if (req.user.role !== "Client") {
         throw new ApiError(403, "Only Clients can post jobs");
@@ -23,8 +25,37 @@ const createJob = asyncHandler(async (req, res) => {
         budget,
         deadline,
         category,
+        required_skills: required_skills || [],
         poster_id: req.user?._id
     });
+
+    // 1. SSE: Broadcast (Toast) to ALL Freelancers (Ephemeral)
+    sseManager.broadcast("NEW_JOB_AVAILABLE", {
+        message: "New Job Posted",
+        job // Send full job or lightweight version
+    }, "Freelancer");
+
+    // 2. Skill Matching: Find Freelancers with matching skills & Notify (Persistent)
+    if (required_skills && required_skills.length > 0) {
+        try {
+            // Find freelancers who have AT LEAST ONE of the required skills
+            const matchedFreelancers = await User.find({
+                role: "Freelancer",
+                skills: { $in: required_skills }
+            }).select("_id");
+
+            // Send persistent notification to each matched freelancer
+            matchedFreelancers.forEach(user => {
+                sseManager.sendToUser(user._id, "DASHBOARD_UPDATE", {
+                    type: "JOB_MATCH",
+                    message: `New job matches your skills: ${title}`,
+                    jobId: job._id
+                });
+            });
+        } catch (error) {
+            console.error("Error sending skill match notifications:", error);
+        }
+    }
 
     return res.status(201).json(
         new ApiResponse(201, job, "Job posted successfully")
@@ -164,7 +195,7 @@ const updateJob = asyncHandler(async (req, res) => {
     if (job.poster_id.toString() !== req.user?._id.toString()) {
         throw new ApiError(403, "You are not authorized to update this job");
     }
-
+    
     // Critical Business Rule: Limits on updating Assigned/Completed jobs
 
     // 1. If currently Completed, it's final. Partition logic: Status cannot change from Completed.
@@ -198,6 +229,15 @@ const updateJob = asyncHandler(async (req, res) => {
     if (status) job.status = status;
 
     await job.save();
+
+    // SSE: Notify Freelancer if job is completed
+    if (job.status === "Completed" && job.assigned_to) {
+        sseManager.sendToUser(job.assigned_to, "DASHBOARD_UPDATE", {
+            type: "JOB_COMPLETED",
+            message: `Job '${job.title}' has been marked as Completed`,
+            jobId: job._id
+        });
+    }
 
     return res.status(200).json(
         new ApiResponse(200, job, "Job updated successfully")
