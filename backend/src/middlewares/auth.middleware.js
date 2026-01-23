@@ -23,22 +23,4 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     next();
 });
 
-const verifyRole = (roles = []) => {
-    return asyncHandler(async (req, res, next) => {
-        if (!req.user?.role) {
-            throw new ApiError(401, "Unauthorized Access, Role not found");
-        }
-
-        // Convert string to array if single role passed
-        if (typeof roles === "string") {
-            roles = [roles];
-        }
-
-        if (!roles.includes(req.user.role)) {
-            throw new ApiError(403, "Access Denied: You do not have permission");
-        }
-        next();
-    });
-};
-
-export { verifyJWT, verifyRole };
+export { verifyJWT };
