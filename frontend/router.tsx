@@ -12,6 +12,7 @@ import Bids from "./src/freelancer/JobDetails"
 import MyBids from "./src/freelancer/MyBids";
 import LandingPage from "./src/landing/LandingPage";
 import ProfilePage from "./src/profile/ProfilePage";
+import ClientDashboard from "./src/client/ClientDashboard";
 
 const router = createBrowserRouter([
   //// Authentication pages
@@ -69,7 +70,7 @@ const router = createBrowserRouter([
       </RequireToken>
     ),
     children:[
-      { path: "freelancerDashboard", element: <FreelancerDashboard /> },
+      { path: "clientDashboard", element: <ClientDashboard /> },
     ]
 },
 

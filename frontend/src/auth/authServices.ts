@@ -60,7 +60,7 @@ export const handleLogin = async (
     if (result.data.user.role === "Freelancer") {
       navigate("/freelancer/freelancerDashboard");
     } else {
-      navigate("/client/dashboard"); // Assuming client dashboard path
+      navigate("/client/clientDashboard"); // Assuming client dashboard path
     }
   } catch (error) {
     console.error(error);
