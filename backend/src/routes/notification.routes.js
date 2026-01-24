@@ -17,10 +17,10 @@ router.route("/")
 router.route("/read-all")
     .patch(markAllAsRead);
 
-router.route("/:notificationId/read")
+router.route("/read/:notificationId")
     .patch(markNotificationAsRead);
 
-router.route("/:notificationId")
+router.route("/delete/:notificationId")
     .delete(deleteNotification);
 
 export default router;
