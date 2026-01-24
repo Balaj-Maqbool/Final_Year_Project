@@ -39,8 +39,14 @@ class SSEManager {
 
         console.log(`SSE Client Connected: ${id} (${role})`);
 
-        // 4. Handle Disconnect
+        // 4. Setup Keep-Alive (Heartbeat)
+        const keepAliveInterval = setInterval(() => {
+            res.write(': keepalive\n\n');
+        }, 30000);
+
+        // 5. Handle Disconnect
         req.on("close", () => {
+            clearInterval(keepAliveInterval);
             console.log(`SSE Client Disconnected: ${id}`);
             const userConnections = this.clients.get(id);
             if (userConnections) {

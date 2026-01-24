@@ -47,6 +47,12 @@ app.use("/api/v1/tasks", taskRouter);
 import dashboardRouter from "./routes/dashboard.routes.js";
 app.use("/api/v1/dashboard", dashboardRouter);
 
+import notificationRouter from "./routes/notification.routes.js";
+app.use("/api/v1/notifications", notificationRouter);
+
+import streamRouter from "./routes/stream.routes.js";
+app.use("/api/v1/stream", streamRouter);
+
 
 app.get("/", (req, res) => {
     res.send("API is running...");

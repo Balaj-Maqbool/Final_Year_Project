@@ -5,7 +5,6 @@ import { Job } from "../models/job.model.js";
 import { Bid } from "../models/bid.model.js";
 import { Task } from "../models/task.model.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
 
 const getClientDashboard = asyncHandler(async (req, res) => {
     if (req.user.role !== "Client") {
@@ -279,17 +278,8 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
     );
 });
 
-const subscribeToDashboardEvents = asyncHandler(async (req, res) => {
-    // Ensure user is authenticated (middleware does this, but good to be sure)
-    if (!req.user) {
-        throw new ApiError(401, "Unauthorized");
-    }
-    // Pass user role to SSE Manager for filtering
-    sseManager.addClient(req.user._id, req.user.role, res, req);
-});
 
 export {
     getClientDashboard,
-    getFreelancerDashboard,
-    subscribeToDashboardEvents
+    getFreelancerDashboard
 };
