@@ -11,6 +11,12 @@
     - [x] Fix JWT expiration handling (Returns 401 instead of 500) <!-- id: 9 -->
     - [x] Fix Refresh Token logic bugs <!-- id: 10 -->
 
+- [x] **Real-Time Architecture (SSE)** <!-- id: 13 -->
+    - [x] Create `stream.controller.js` (Connection Logic) <!-- id: 14 -->
+    - [x] Create `stream.routes.js` <!-- id: 15 -->
+    - [x] Mount routes in `app.js` <!-- id: 16 -->
+    - [x] Cleanup (Remove legacy SSE code) <!-- id: 17 -->
+
 ## Future Features (Pending)
 
 - [ ] **Forgot Password Flow** <!-- id: 11 -->
@@ -31,3 +37,6 @@
     - [ ] **3. Platform Assistant (Chatbot)**
         - Input: User asks about platform rules/features.
         - AI Output: RAG (Retrieval Augmented Generation) or Context-aware answers about Admins, Fees, and Policies.
+
+- [ ] **API Security** <!-- id: 18 -->
+    - [ ] **Rate Limiting** (prevent abuse)

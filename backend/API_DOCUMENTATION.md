@@ -107,10 +107,10 @@
 
 ---
 
-## 8. Real-time Events (SSE) (`/dashboard`)
+## 8. Real-time Stream (`/stream`)
 
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
-| **GET** | `/events` | Subscribe to Event Stream | **Header**: `Accept: text/event-stream` <br>**Note**: Connection stays open. |
+| **GET** | `/connect` | Subscribe to Event Stream | **Header**: `Accept: text/event-stream` <br>**Note**: Connection stays open. <br>**Heartbeat**: Server sends `: keepalive` every 30s. |
 
 
