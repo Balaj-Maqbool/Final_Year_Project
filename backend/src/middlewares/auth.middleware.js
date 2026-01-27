@@ -10,35 +10,16 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     if (!accessToken) {
         throw new ApiError(401, "Unauthorized Access, Token expired");
     }
-    const decodedToken = jwt.verify(accessToken, ACCESS_TOKEN_SECRET);
-    if (!decodedToken) {
-        throw new ApiError(500, "Internal Server Error");
-    }
-
-    const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
-    if (!user) {
-        throw new ApiError(401, "Invalid Access Token");
-    }
-    req.user = user;
-    next();
-});
-
-const verifyRole = (roles = []) => {
-    return asyncHandler(async (req, res, next) => {
-        if (!req.user?.role) {
-            throw new ApiError(401, "Unauthorized Access, Role not found");
-        }
-
-        // Convert string to array if single role passed
-        if (typeof roles === "string") {
-            roles = [roles];
-        }
-
-        if (!roles.includes(req.user.role)) {
-            throw new ApiError(403, "Access Denied: You do not have permission");
+    try {
+        const decodedToken = jwt.verify(accessToken, ACCESS_TOKEN_SECRET);
+        req.user = await User.findById(decodedToken?._id).select("-password -refreshToken");
+        if (!req.user) {
+            throw new ApiError(401, "Invalid Access Token");
         }
         next();
-    });
-};
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid access token");
+    }
+});
 
-export { verifyJWT, verifyRole };
+export { verifyJWT };

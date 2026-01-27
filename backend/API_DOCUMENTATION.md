@@ -8,9 +8,9 @@
 
 ---
 
-## 1. User & Authentication (`/users`)
+## 1. Authentication (`/users`)
+*Note: All Auth routes are mounted under `/users` for backward compatibility.*
 
-### Auth Endpoints
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
 | **POST** | `/register` | Register a new user | **JSON**: <br>`{ "email": "user@example.com", "username": "user123", "password": "securePass123", "fullName": "John Doe", "role": "Client" or "Freelancer" }` |
@@ -19,20 +19,23 @@
 | **POST** | `/refresh-token` | Get new access token | *Cookies (auto-sent)* |
 | **GET** | `/google` | Initiate Google OAuth | **Query**: `?role=Client` (Default) or `?role=Freelancer` |
 | **GET** | `/google/callback` | Google Redirect (Sets Secure Cookies) | **Query**: `?code=...` (Handled by browser) |
+| **PATCH** | `/password/change` | Change password | **JSON**: <br>`{ "oldPassword": "old", "newPassword": "new" }` |
 | **DELETE** | `/delete-account` | Delete my account | *No Body* |
 
-### Profile Endpoints
+---
+
+## 2. Profile Management (`/users`)
+
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
 | **GET** | `/me` | Get current user details | *No Body* |
 | **GET** | `/` | Get list of all users | *No Body* |
+| **GET** | `/profile/:id` | Get public profile | **Param**: `id` (User ID) |
 | **PATCH** | `/profile` | Update account details | **JSON** (All optional): <br>`{ "fullName": "New Name", "bio": "My Bio", "skills": ["React", "Node"], "portfolio": "http://..." }` |
-| **PATCH** | `/password/change` | Change password | **JSON**: <br>`{ "oldPassword": "old", "newPassword": "new" }` |
 | **PATCH** | `/profile/image` | Update Profile Pic | **Multipart/Form-Data**: <br>Key: `profileImage` (File) |
 | **DELETE** | `/profile/image` | Remove Profile Pic | *No Body* |
 | **PATCH** | `/profile/cover` | Update Cover Pic | **Multipart/Form-Data**: <br>Key: `coverImage` (File) |
 | **DELETE** | `/profile/cover` | Remove Cover Pic | *No Body* |
-| **GET** | `/profile/:id` | Get public profile | **Param**: `id` (User ID) |
 
 ---
 
@@ -56,6 +59,8 @@
 | **POST** | `/:jobId` | Place a bid (Freelancer) | **JSON**: <br>`{ "bid_amount": 400, "message": "I can do this", "timeline": "3 Days" }` |
 | **GET** | `/:jobId` | Get bids for my job (Client)| **Param**: `jobId` |
 | **GET** | `/my-bids` | Get my active bids (Freelancer) | *No Body* |
+| **GET** | `/job/:jobId/my-bid` | Check if I already bid on this job | **Param**: `jobId` |
+| **PATCH** | `/:bidId` | Update my pending bid | **JSON**: <br>`{ "bid_amount": 550, "message": "Typo fix..." }` |
 | **PATCH** | `/:jobId/:bidId/status` | Accept/Reject a bid | **JSON**: <br>`{ "status": "Accepted" }` or `{ "status": "Rejected" }` |
 | **DELETE** | `/:jobId/:bidId` | Withdraw bid (If Pending) | **Params**: `jobId`, `bidId` |
 
@@ -87,6 +92,7 @@
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
 | **GET** | `/client` | Get Client Stats | *No Body* <br>Returns: `{ stats: { totalJobs, spent... }, recentJobs: [...] }` |
+| **GET** | `/freelancer` | Get Freelancer Stats | *No Body* <br>Returns: `{ stats: { totalBids... }, earnings: {...}, activeJobs: [...] }` |
 
 ---
 
@@ -101,10 +107,10 @@
 
 ---
 
-## 8. Real-time Events (SSE) (`/dashboard`)
+## 8. Real-time Stream (`/stream`)
 
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
-| **GET** | `/events` | Subscribe to Event Stream | **Header**: `Accept: text/event-stream` <br>**Note**: Connection stays open. |
+| **GET** | `/connect` | Subscribe to Event Stream | **Header**: `Accept: text/event-stream` <br>**Note**: Connection stays open. <br>**Heartbeat**: Server sends `: keepalive` every 30s. |
 
 

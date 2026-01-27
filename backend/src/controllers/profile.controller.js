@@ -5,8 +5,6 @@ import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-    // User requested only basic data: email, username, full name
-    // returning _id and role is also usually essential for frontend logic
     const user = await User.findById(req.user._id).select("email username fullName role _id");
 
     return res
@@ -44,7 +42,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
             $set: updateData
         },
         { new: true }
-    ).select("-password -refreshToken");
+    ).select("-password");
 
     return res
         .status(200)
@@ -167,13 +165,10 @@ const deleteUserProfileImage = asyncHandler(async (req, res) => {
 
     if (user.profileImage) {
         try {
-            // Extract publicId: URL is .../folder/filename.ext
-            // We need folder/filename
             const urlParts = user.profileImage.split("/");
-            const filenameWithExt = urlParts[urlParts.length - 1]; // filename.jpg
-            const folder = urlParts[urlParts.length - 2]; // Project-00
+            const filenameWithExt = urlParts[urlParts.length - 1];
+            const folder = urlParts[urlParts.length - 2];
 
-            // Basic extraction (might need refinement if URL structure varies)
             const publicId = `${folder}/${filenameWithExt.split(".")[0]}`;
 
             await deleteFromCloudinary(publicId);

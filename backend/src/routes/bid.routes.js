@@ -15,24 +15,15 @@ const router = Router({ mergeParams: true }); // Enable access to params from pa
 
 router.use(verifyJWT);
 
-// Routes for /api/v1/bids/:jobId/... or /api/v1/jobs/:jobId/bids ??
-// Let's decide on the path strategy.
-// Strategy A: /api/v1/bids (requires passing jobId in body or params explicitly generally)
-// Strategy B: /api/v1/jobs/:jobId/bids (Nesting)
-// The user request pattern often implies relationships.
-// Let's stick to a clean separate router for bids, but maybe referenced by ID.
-
-// Actually, "placeBid" needs jobId. "getJobBids" needs jobId.
-// I'll define routes like:
-// POST /:jobId -> place bid
-// GET /:jobId -> get all bids for job
-// PATCH /:jobId/:bidId/status -> update status
+// Routes for bid management
 
 
 
 // Routes for specific static paths MUST keep before dynamic /:jobId
 router.route("/my-bids").get(getMyBids);
 router.route("/my/:jobId").get(getMyBidForJob);
+
+router.route("/job/:jobId/my-bid").get(getMyBidForJob); // Check if I already bid
 
 router.route("/:jobId")
     .post(placeBid)
@@ -43,6 +34,9 @@ router.route("/bid/:bidId")
 
 router.route("/:jobId/:bidId")
     .delete(withdrawBid);
+
+router.route("/:bidId")
+    .patch(updateBid); // Update Bid (General)
 
 router.route("/:jobId/:bidId/status")
     .patch(updateBidStatus);

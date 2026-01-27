@@ -36,7 +36,6 @@ const createTask = asyncHandler(async (req, res) => {
         assigned_user_id: job.assigned_to
     });
 
-    // SSE: Notify Freelancer
     sseManager.sendToUser(job.assigned_to, "DASHBOARD_UPDATE", {
         type: "NEW_TASK",
         message: "New task assigned to you",

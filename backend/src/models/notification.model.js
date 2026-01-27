@@ -9,7 +9,17 @@ const notificationSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ["NEW_JOB", "NEW_JOB_AVAILABLE", "JOB_MATCH", "NEW_BID", "BID_WITHDRAWN", "BID_STATUS_UPDATE", "NEW_TASK", "TASK_STATUS_UPDATE", "TASK_APPROVED", "JOB_COMPLETED", "NEW_RATING", "SYSTEM"],
+            enum: ["NEW_JOB",
+                "NEW_JOB_AVAILABLE",
+                "JOB_MATCH", "NEW_BID",
+                "BID_WITHDRAWN",
+                "BID_STATUS_UPDATE",
+                "NEW_TASK",
+                "TASK_STATUS_UPDATE",
+                "TASK_APPROVED",
+                "JOB_COMPLETED",
+                "NEW_RATING",
+                "SYSTEM"],
             required: true
         },
         message: {

@@ -8,7 +8,7 @@ import crypto from "crypto";
 
 const cookieOptions = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
 };
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -28,14 +28,11 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
-
-    // Use validator utility as requested
     if (!fullName?.trim()) throw new ApiError(400, "Full Name is required");
     if (!email?.trim()) throw new ApiError(400, "Email is required");
     if (!username?.trim()) throw new ApiError(400, "Username is required");
     if (!password?.trim()) throw new ApiError(400, "Password is required");
 
-    // Role is now MANDATORY
     if (!role) {
         throw new ApiError(400, "Role is required (Client or Freelancer)");
     }
@@ -51,7 +48,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(409, "User with email or username already exists");
     }
 
-    // No avatar/image upload during registration as requested
+
 
     const user = await User.create({
         fullName,
@@ -103,6 +100,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
+
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
     return res
@@ -113,9 +111,7 @@ const loginUser = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 {
-                    user: loggedInUser,
-                    accessToken,
-                    refreshToken
+                    user: loggedInUser
                 },
                 "User logged In Successfully"
             )
@@ -165,19 +161,17 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             throw new ApiError(401, "Refresh token is expired or used");
         }
 
-        const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(user._id);
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshTokens(user._id);
 
         return res
             .status(200)
             .cookie("accessToken", accessToken, cookieOptions)
             .cookie("refreshToken", newRefreshToken, cookieOptions)
-            .json(
-                new ApiResponse(
-                    200,
-                    { accessToken, refreshToken: newRefreshToken },
-                    "Access token refreshed"
-                )
-            );
+            .json(new ApiResponse(
+                200,
+                {},
+                "Access token refreshed"
+            ));
     } catch (error) {
         throw new ApiError(401, error?.message || "Invalid refresh token");
     }

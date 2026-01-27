@@ -25,8 +25,11 @@ import "./passport/passport.config.js";
 app.use(passport.initialize());
 
 // router imports
-import userRouter from "./routes/user.routes.js";
-app.use("/api/v1/users", userRouter);
+import authRouter from "./routes/auth.routes.js";
+import profileRouter from "./routes/profile.routes.js";
+
+app.use("/api/v1/users", authRouter);
+app.use("/api/v1/users", profileRouter);
 
 import jobRouter from "./routes/job.routes.js";
 app.use("/api/v1/jobs", jobRouter);
@@ -44,6 +47,13 @@ app.use("/api/v1/tasks", taskRouter);
 import dashboardRouter from "./routes/dashboard.routes.js";
 app.use("/api/v1/dashboard", dashboardRouter);
 
+import notificationRouter from "./routes/notification.routes.js";
+app.use("/api/v1/notifications", notificationRouter);
+
+import streamRouter from "./routes/stream.routes.js";
+app.use("/api/v1/stream", streamRouter);
+
+
 app.get("/", (req, res) => {
     res.send("API is running...");
 });
@@ -53,15 +63,12 @@ app.use((err, req, res, next) => {
     console.error("Global Error Handler Catch:", err);
     if (err instanceof ApiError) {
         return res.status(err.statusCode).json(
-            new ApiResponse(err.statusCode, null, err.message) // Fixed: Use ApiResponse structure for consistency? 
-            // Actually, usually ApiError has everything. Let's just send JSON.
-            // But the frontend expects `data` field sometimes? 
-            // Let's stick to a standard error format.
+            new ApiResponse(err.statusCode, null, err.message)
         );
     }
     // Mongoose Validation Error
     if (err.name === 'ValidationError') {
-         return res.status(400).json(
+        return res.status(400).json(
             new ApiResponse(400, null, err.message)
         );
     }

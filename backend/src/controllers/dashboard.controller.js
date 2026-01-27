@@ -5,7 +5,6 @@ import { Job } from "../models/job.model.js";
 import { Bid } from "../models/bid.model.js";
 import { Task } from "../models/task.model.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
 
 const getClientDashboard = asyncHandler(async (req, res) => {
     if (req.user.role !== "Client") {
@@ -38,7 +37,6 @@ const getClientDashboard = asyncHandler(async (req, res) => {
                                 $sum: { $cond: [{ $eq: ["$status", "Completed"] }, 1, 0] }
                             },
                             totalBudgetSpent: {
-                                // Only count budget for assigned/completed jobs as "committed/spent"
                                 $sum: {
                                     $cond: [
                                         { $in: ["$status", ["Assigned", "Completed"]] },
@@ -151,12 +149,6 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
             }
         }
     ]);
-
-    // 2. Acive/Completed Jobs (Where assigned) & Earnings
-    // Logic Issue Fix: Earnings should come from the Accepted BID AMOUNT, not the JOB BUDGET.
-
-    // We need to find jobs where this freelancer is assigned
-    // AND look up their specific accepted bid for that job to get the price.
 
     const jobStats = await Job.aggregate([
         {
@@ -286,17 +278,8 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
     );
 });
 
-const subscribeToDashboardEvents = asyncHandler(async (req, res) => {
-    // Ensure user is authenticated (middleware does this, but good to be sure)
-    if (!req.user) {
-        throw new ApiError(401, "Unauthorized");
-    }
-    // Pass user role to SSE Manager for filtering
-    sseManager.addClient(req.user._id, req.user.role, res, req);
-});
 
 export {
     getClientDashboard,
-    getFreelancerDashboard,
-    subscribeToDashboardEvents
+    getFreelancerDashboard
 };
