@@ -36,6 +36,13 @@ export const bidHandler = {
     return result.data;
   },
 
+  getJobBids: async (jobId: string) => {
+    const res = await fetch(`${API}/${jobId}`, { credentials: "include" });
+    if (!res.ok) throw new Error("Failed to fetch bids");
+    const result = await res.json();
+    return result.data;
+  },
+
   updateBid: async (bidId: string, data: BidData) => {
     const res = await fetch(`${API}/bid/${bidId}`, fetchConfig("PUT", data));
     if (!res.ok) throw new Error("Failed to update bid");

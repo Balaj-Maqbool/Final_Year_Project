@@ -13,6 +13,9 @@ import MyBids from "./src/freelancer/MyBids";
 import LandingPage from "./src/landing/LandingPage";
 import ProfilePage from "./src/profile/ProfilePage";
 import ClientDashboard from "./src/client/ClientDashboard";
+import PostJob from "./src/client/PostJob";
+import AllJobs from "./src/client/AllJobs";
+import ViewBids from "./src/client/ViewBids";
 
 const router = createBrowserRouter([
   //// Authentication pages
@@ -71,6 +74,9 @@ const router = createBrowserRouter([
     ),
     children:[
       { path: "clientDashboard", element: <ClientDashboard /> },
+      {path:"postjob" , element:<PostJob/>},
+      {path:"alljobs" , element:<AllJobs/>},
+      {path:"view-bids/:jobId",element:<ViewBids/>}
     ]
 },
 

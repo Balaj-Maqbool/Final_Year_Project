@@ -19,47 +19,52 @@ const createJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields (title, description, budget, deadline, category) are required");
     }
 
-    const job = await Job.create({
-        title,
-        description,
-        budget,
-        deadline,
-        category,
-        required_skills: required_skills || [],
-        poster_id: req.user?._id
-    });
+    try {
+        const job = await Job.create({
+            title,
+            description,
+            budget,
+            deadline,
+            category,
+            required_skills: required_skills || [],
+            poster_id: req.user?._id
+        });
 
-    // 1. SSE: Broadcast (Toast) to ALL Freelancers (Ephemeral)
-    sseManager.broadcast("NEW_JOB_AVAILABLE", {
-        message: "New Job Posted",
-        job // Send full job or lightweight version
-    }, "Freelancer");
+        // 1. SSE: Broadcast (Toast) to ALL Freelancers (Ephemeral)
+        sseManager.broadcast("NEW_JOB_AVAILABLE", {
+            message: "New Job Posted",
+            job // Send full job or lightweight version
+        }, "Freelancer");
 
-    // 2. Skill Matching: Find Freelancers with matching skills & Notify (Persistent)
-    if (required_skills && required_skills.length > 0) {
-        try {
-            // Find freelancers who have AT LEAST ONE of the required skills
-            const matchedFreelancers = await User.find({
-                role: "Freelancer",
-                skills: { $in: required_skills }
-            }).select("_id");
+        // 2. Skill Matching: Find Freelancers with matching skills & Notify (Persistent)
+        if (required_skills && required_skills.length > 0) {
+            try {
+                // Find freelancers who have AT LEAST ONE of the required skills
+                const matchedFreelancers = await User.find({
+                    role: "Freelancer",
+                    skills: { $in: required_skills }
+                }).select("_id");
 
-            // Send persistent notification to each matched freelancer
-            matchedFreelancers.forEach(user => {
-                sseManager.sendToUser(user._id, "DASHBOARD_UPDATE", {
-                    type: "JOB_MATCH",
-                    message: `New job matches your skills: ${title}`,
-                    jobId: job._id
+                // Send persistent notification to each matched freelancer
+                matchedFreelancers.forEach(user => {
+                    sseManager.sendToUser(user._id, "DASHBOARD_UPDATE", {
+                        type: "JOB_MATCH",
+                        message: `New job matches your skills: ${title}`,
+                        jobId: job._id
+                    });
                 });
-            });
-        } catch (error) {
-            console.error("Error sending skill match notifications:", error);
+            } catch (error) {
+                console.error("Error sending skill match notifications:", error);
+            }
         }
-    }
 
-    return res.status(201).json(
-        new ApiResponse(201, job, "Job posted successfully")
-    );
+        return res.status(201).json(
+            new ApiResponse(201, job, "Job posted successfully")
+        );
+    } catch (error) {
+        console.error("Error creating job:", error);
+        throw new ApiError(500, "Internal Server Error while creating job: " + error.message);
+    }
 });
 
 const getAllJobs = asyncHandler(async (req, res) => {

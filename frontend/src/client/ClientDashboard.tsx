@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Table, Badge, Button, Spinner } from "react-bootstrap";
-import  { data, Link } from "react-router-dom";
+import  {  Link } from "react-router-dom";
 import "../dashboard.css";
-
-
 
 interface Job {
   id: string;
@@ -59,7 +57,7 @@ useEffect(() => {
         <Container className="dashboard-container">
         <div className="dashboard-header">
             <h3>Client Dashboard</h3>
-            <p>Here is what happens with your projects today.</p>
+            <p>Here is what is happening with your projects today.</p>
         </div>
 
         {/* SUMMARY CARDS */}
@@ -85,7 +83,7 @@ useEffect(() => {
           <Col md={3}>
             <Card className="dashboard-card">
               <Card.Body>
-                <Card.Title className="card-title">Completed Jobs</Card.Title>
+                <Card.Title className="card-title">Completed Projects</Card.Title>
                 <h2 className="summary-value">{data?.completedJobsCount || 0}</h2>
               </Card.Body>
             </Card>
@@ -153,8 +151,8 @@ useEffect(() => {
               <Card.Body>
                 <Card.Title>Post a Job</Card.Title>
                 <Card.Text>Find new freelancers to hire</Card.Text>
-                {/* Adjust route if needed */}
-                <Button as={Link as any} to="/freelancer/jobs" className="btn-primary-custom w-100">Browse Projects</Button>
+                
+                <Button as={Link as any} to="/client/postjob" className="btn-primary-custom w-100">Browse Projects</Button>
               </Card.Body>
             </Card>
           </Col>
@@ -164,7 +162,7 @@ useEffect(() => {
               <Card.Body>
                 <Card.Title>View Proposals</Card.Title>
                 <Card.Text>Track proposals for your projects</Card.Text>
-                <Button as={Link as any} to="/freelancer/my-bids" className="btn-secondary-custom w-100">Review Proposals</Button>
+                <Button as={Link as any} to="/client/viewbids" className="btn-secondary-custom w-100">Review Proposals</Button>
               </Card.Body>
             </Card>
           </Col>
@@ -172,9 +170,9 @@ useEffect(() => {
           <Col md={4}>
             <Card className="dashboard-card action-card">
               <Card.Body>
-                <Card.Title>Company Profile</Card.Title>
-                <Card.Text>Update your company details</Card.Text>
-                <Button as={Link as any} to="/profile" className="btn-outline-custom w-100">Edit Profile</Button>
+                <Card.Title>View Projects</Card.Title>
+                <Card.Text>View all your projects</Card.Text>
+                <Button as={Link as any} to="/client/alljobs" className="btn-outline-custom w-100">View Projects</Button>
               </Card.Body>
             </Card>
           </Col>
