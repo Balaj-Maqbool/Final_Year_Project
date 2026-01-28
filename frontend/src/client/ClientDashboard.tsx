@@ -1,63 +1,64 @@
 import { useEffect, useState } from "react";
+import { apiRequest } from "../services/apiClient";
 import { Container, Row, Col, Card, Table, Badge, Button, Spinner } from "react-bootstrap";
-import  {  Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../dashboard.css";
 
 interface Job {
-  id: string;
+  _id: string;
   title: string;
   status: string;
   deadline: string;
 }
 
-interface dashboarsData {
-  totalApplications: number;
-  activeJobsCount: number;
-  completedJobsCount: number;
-  totalEarnings: number;
-  activeJobsList: Job[];
+interface DashboardStats {
+  totalJobs: number;
+  openJobs: number;
+  assignedJobs: number;
+  completedJobs: number;
+  totalBudgetSpent: number;
+  totalBidsReceived: number;
+  pendingBids: number;
+}
+
+interface DashboardData {
+  stats: DashboardStats;
+  recentJobs: Job[];
 }
 
 const ClientDashboard = () => {
 
-const [data ,setData] = useState<dashboarsData | null>(null);
-const [loading ,setLoading] = useState(true);
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchDashboardData = async () => {
-        try {
-            const response = await fetch("http://localhost:8000/api/v1/dashboard/client", {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const result = await response.json();
-            setData(result);
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-            setLoading(false);
-        }
+      try {
+        const data = await apiRequest<DashboardData>("/dashboard/client");
+        setData(data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
     };
     fetchDashboardData();
-}, []);
+  }, []);
 
 
- if (loading)
+  if (loading)
     return (
       <div className="mt-5 text-center">
         <Spinner animation="border" />
       </div>
     );
 
-    return (
-       <>
-        <Container className="dashboard-container">
+  return (
+    <>
+      <Container className="dashboard-container">
         <div className="dashboard-header">
-            <h3>Client Dashboard</h3>
-            <p>Here is what is happening with your projects today.</p>
+          <h3>Client Dashboard</h3>
+          <p>Here is what is happening with your projects today.</p>
         </div>
 
         {/* SUMMARY CARDS */}
@@ -66,7 +67,7 @@ useEffect(() => {
             <Card className="dashboard-card">
               <Card.Body>
                 <Card.Title className="card-title">Total Applications</Card.Title>
-                <h2 className="summary-value">{data?.totalApplications || 0}</h2>
+                <h2 className="summary-value">{data?.stats?.totalBidsReceived || 0}</h2>
               </Card.Body>
             </Card>
           </Col>
@@ -75,7 +76,7 @@ useEffect(() => {
             <Card className="dashboard-card">
               <Card.Body>
                 <Card.Title className="card-title">Active Jobs</Card.Title>
-                <h2 className="summary-value">{data?.activeJobsCount || 0}</h2>
+                <h2 className="summary-value">{data?.stats?.assignedJobs || 0}</h2>
               </Card.Body>
             </Card>
           </Col>
@@ -84,7 +85,7 @@ useEffect(() => {
             <Card className="dashboard-card">
               <Card.Body>
                 <Card.Title className="card-title">Completed Projects</Card.Title>
-                <h2 className="summary-value">{data?.completedJobsCount || 0}</h2>
+                <h2 className="summary-value">{data?.stats?.completedJobs || 0}</h2>
               </Card.Body>
             </Card>
           </Col>
@@ -93,54 +94,54 @@ useEffect(() => {
             <Card className="dashboard-card">
               <Card.Body>
                 <Card.Title className="card-title">Total Spent</Card.Title>
-                <h2 className="summary-value">Rs {data?.totalEarnings || 0}</h2>
+                <h2 className="summary-value">Rs {data?.stats?.totalBudgetSpent?.toLocaleString() || 0}</h2>
               </Card.Body>
             </Card>
           </Col>
         </Row>
 
-        {/* ACTIVE JOBS */}
+        {/* ACTIVE / RECENT JOBS */}
         <div className="mb-4">
-           <h4 className="section-title">Your Active Projects</h4>
-            <Card className="table-card">
+          <h4 className="section-title">Recent Projects</h4>
+          <Card className="table-card">
             <Card.Body className="p-0">
-                <Table responsive className="custom-table">
+              <Table responsive className="custom-table">
                 <thead>
-                    <tr>
+                  <tr>
                     <th>Job Title</th>
                     <th>Status</th>
                     <th>Deadline</th>
                     <th>Action</th>
-                    </tr>
+                  </tr>
                 </thead>
 
                 <tbody>
-                    {data?.activeJobsList?.map((job) => (
-                    <tr key={job.id}>
-                        <td><strong>{job.title}</strong></td>
-                        <td>
+                  {data?.recentJobs?.map((job) => (
+                    <tr key={job._id}>
+                      <td><strong>{job.title}</strong></td>
+                      <td>
                         <Badge
-                            className={`status-badge ${job.status === "In Progress" ? "warning" : "info"}`}
-                            bg=""
+                          className={`status-badge ${job.status === "Assigned" ? "success" : job.status === "Open" ? "info" : "secondary"}`}
+                          bg=""
                         >
-                            {job.status}
+                          {job.status}
                         </Badge>
-                        </td>
-                        <td>{new Date(job.deadline).toLocaleDateString()}</td>
-                        <td>
-                        <Button size="sm" variant="light">View</Button>
-                        </td>
+                      </td>
+                      <td>{new Date(job.deadline).toLocaleDateString()}</td>
+                      <td>
+                        <Button size="sm" variant="light" as={Link as any} to={`/client/viewbids/${job._id}`}>View</Button>
+                      </td>
                     </tr>
-                    ))}
-                    {(!data?.activeJobsList || data.activeJobsList.length === 0) && (
-                        <tr>
-                            <td colSpan={4} className="text-center py-4 text-muted">No active projects</td>
-                        </tr>
-                    )}
+                  ))}
+                  {(!data?.recentJobs || data.recentJobs.length === 0) && (
+                    <tr>
+                      <td colSpan={4} className="text-center py-4 text-muted">No recent projects</td>
+                    </tr>
+                  )}
                 </tbody>
-                </Table>
+              </Table>
             </Card.Body>
-            </Card>
+          </Card>
         </div>
 
         {/* QUICK ACTIONS */}
@@ -151,8 +152,8 @@ useEffect(() => {
               <Card.Body>
                 <Card.Title>Post a Job</Card.Title>
                 <Card.Text>Find new freelancers to hire</Card.Text>
-                
-                <Button as={Link as any} to="/client/postjob" className="btn-primary-custom w-100">Browse Projects</Button>
+
+                <Button as={Link as any} to="/client/postjob" className="btn-primary-custom w-100">Post New Project</Button>
               </Card.Body>
             </Card>
           </Col>
@@ -162,7 +163,7 @@ useEffect(() => {
               <Card.Body>
                 <Card.Title>View Proposals</Card.Title>
                 <Card.Text>Track proposals for your projects</Card.Text>
-                <Button as={Link as any} to="/client/viewbids" className="btn-secondary-custom w-100">Review Proposals</Button>
+                <Button as={Link as any} to="/client/alljobs" className="btn-secondary-custom w-100">Review Proposals</Button>
               </Card.Body>
             </Card>
           </Col>
@@ -178,8 +179,8 @@ useEffect(() => {
           </Col>
         </Row>
       </Container>
-       </>
-    );
+    </>
+  );
 };
 
 export default ClientDashboard;

@@ -11,7 +11,7 @@ const getClientDashboard = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Clients can access this dashboard");
     }
 
-    const userId = req.user._id;
+    const userId = new mongoose.Types.ObjectId(req.user._id);
 
     const dashboardData = await Job.aggregate([
         {
@@ -118,7 +118,7 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Freelancers can access this dashboard");
     }
 
-    const userId = req.user._id;
+    const userId = new mongoose.Types.ObjectId(req.user._id);
 
     // 1. Bid Statistics
     const bidStats = await Bid.aggregate([

@@ -9,6 +9,7 @@ import crypto from "crypto";
 const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
 };
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -307,7 +308,8 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
     // SECURITY UPDATE: Set tokens in HttpOnly cookies instead of URL
     const options = {
         httpOnly: true,
-        secure: true, // Always true since we are using cookieOptions constant elsewhere which is secure: true
+        secure: true,
+        maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
     };
 
     return res
