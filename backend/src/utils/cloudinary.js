@@ -17,13 +17,18 @@ const uploadOnCloudinary = async (localFilePath) => {
             folder: "Project-00",
         });
 
-        // console.log("File uploaded successfully on Cloudinary", response);
-        fs.unlinkSync(localFilePath);
+        // Async delete: doesn't block the event loop
+        fs.unlink(localFilePath, (err) => {
+            if (err) console.error("Error deleting temp file:", err);
+        });
+
         return response;
     } catch (error) {
-        // console.log(error);
 
-        fs.unlinkSync(localFilePath); // remove the  locally saved temporary file if there has been a issue uploading the file , as it can cause issues in the server
+        // Async delete on error too
+        fs.unlink(localFilePath, (err) => {
+            if (err) console.error("Error deleting temp file:", err);
+        });
 
         return null;
     }
