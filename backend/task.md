@@ -17,6 +17,22 @@
     - [x] Mount routes in `app.js` <!-- id: 16 -->
     - [x] Cleanup (Remove legacy SSE code) <!-- id: 17 -->
 
+- [ ] **Chat System (WebSockets)** <!-- id: 19 -->
+    - [ ] **Architecture Setup** <!-- id: 20 -->
+        - [ ] Create `CHAT_ARCHITECTURE.md`
+        - [ ] Create Models (`ChatThread`, `Message`)
+        - [ ] Upgrade `index.js` for WS support
+    - [ ] **Connection Logic** <!-- id: 21 -->
+        - [ ] Implement Shake/Upgrade with Cookie Auth
+        - [ ] Create `ChatManager` (In-Memory Map)
+    - [ ] **Messaging Core** <!-- id: 22 -->
+        - [ ] Implement Text Message Handler
+        - [ ] Implement Status Updates (Sent/Delivered/Read)
+        - [ ] Enforce Access Control (Pending vs Accepted Bids) (Future)
+    - [ ] **REST API** <!-- id: 23 -->
+        - [ ] `GET /history/:threadId`
+        - [ ] `GET /conversations`
+
 ## Future Features (Pending)
 
 - [ ] **Forgot Password Flow** <!-- id: 11 -->

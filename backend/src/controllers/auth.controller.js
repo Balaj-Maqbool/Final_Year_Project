@@ -3,13 +3,21 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import { REFRESH_TOKEN_SECRET } from "../constants.js";
+import {
+    REFRESH_TOKEN_SECRET,
+    ACCESS_TOKEN_EXPIRY,
+    REFRESH_TOKEN_EXPIRY
+} from "../constants.js";
 import crypto from "crypto";
+import { parseDuration } from "../utils/helpers.js";
 
-const cookieOptions = {
+const getCookieOptions = () => ({
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-};
+});
+
+const accessTokenCookieMaxAge = parseDuration(ACCESS_TOKEN_EXPIRY);
+const refreshTokenCookieMaxAge = parseDuration(REFRESH_TOKEN_EXPIRY);
 
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -103,10 +111,12 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
+    const options = getCookieOptions();
+
     return res
         .status(200)
-        .cookie("accessToken", accessToken, cookieOptions)
-        .cookie("refreshToken", refreshToken, cookieOptions)
+        .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenCookieMaxAge })
+        .cookie("refreshToken", refreshToken, { ...options, maxAge: refreshTokenCookieMaxAge })
         .json(
             new ApiResponse(
                 200,
@@ -131,10 +141,12 @@ const logoutUser = asyncHandler(async (req, res) => {
         }
     );
 
+    const options = getCookieOptions();
+
     return res
         .status(200)
-        .clearCookie("accessToken", cookieOptions)
-        .clearCookie("refreshToken", cookieOptions)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
         .json(new ApiResponse(200, {}, "User logged Out"));
 });
 
@@ -163,10 +175,12 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
         const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshTokens(user._id);
 
+        const options = getCookieOptions();
+
         return res
             .status(200)
-            .cookie("accessToken", accessToken, cookieOptions)
-            .cookie("refreshToken", newRefreshToken, cookieOptions)
+            .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenCookieMaxAge })
+            .cookie("refreshToken", newRefreshToken, { ...options, maxAge: refreshTokenCookieMaxAge })
             .json(new ApiResponse(
                 200,
                 {},
@@ -231,11 +245,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 
     await User.findByIdAndDelete(req.user._id);
 
-    const options = {
-        httpOnly: true,
-        secure: true,
-    };
-
+    const options = getCookieOptions();
     return res
         .status(200)
         .clearCookie("accessToken", options)
@@ -251,7 +261,7 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
     if (!profile) {
         throw new ApiError(400, "Google Authentication Failed");
     }
-    console.log(profile);
+    // console.log(profile);
 
     const email = profile.emails?.[0]?.value;
     const googleId = profile.id;
@@ -305,15 +315,12 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
     // SECURITY UPDATE: Set tokens in HttpOnly cookies instead of URL
-    const options = {
-        httpOnly: true,
-        secure: true, // Always true since we are using cookieOptions constant elsewhere which is secure: true
-    };
+    const options = getCookieOptions();
 
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenCookieMaxAge })
+        .cookie("refreshToken", refreshToken, { ...options, maxAge: refreshTokenCookieMaxAge })
         .redirect(`${frontendUrl}/oauth-success`); // No tokens in URL
 });
 
