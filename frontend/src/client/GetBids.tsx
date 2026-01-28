@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { bidHandler } from "../freelancer/services/bidHandler"
-import { Card, Badge, Alert, Spinner } from "react-bootstrap";
+import { Card, Alert, Spinner, Button, Badge } from "react-bootstrap";
 
 interface Bid {
     _id: string;
@@ -17,6 +17,7 @@ interface Bid {
         profileImage?: string;
         rating?: number;
     };
+    status: string;
     createdAt: string;
 }
 
@@ -30,23 +31,43 @@ const GetBids = ({ jobId }: GetBidsProps) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!jobId) return
-        const fetchBids = async () => {
-            try {
-                setLoading(true);
-                const result = await bidHandler.getJobBids(jobId)
-                setBids(result);
-            } catch (err: any) {
-                console.error(err);
-                setError(err.message || "Failed to fetch bids");
-            } finally {
-                setLoading(false);
-            }
+    const fetchBids = async () => {
+        if (!jobId) return;
+        try {
+            setLoading(true);
+            const result = await bidHandler.getJobBids(jobId)
+            setBids(result);
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || "Failed to fetch bids");
+        } finally {
+            setLoading(false);
         }
-        fetchBids()
+    }
 
+    useEffect(() => {
+        fetchBids()
     }, [jobId])
+
+    const handleAcceptBid = async (bidId: string) => {
+        if (!jobId) return;
+        if (!window.confirm("Are you sure you want to accept this bid?")) return;
+
+        try {
+            await bidHandler.updateBidStatus(jobId, bidId, "Accepted");
+            alert("Bid accepted successfully!");
+            fetchBids(); 
+        } catch (err: any) {
+            console.error(err);
+            alert(err.message || "Failed to accept bid");
+        }
+    };
+
+    const handleMessage = (freelancerId: string) => {
+        // Placeholder for messaging logic
+        alert(`Starting conversation with freelancer: ${freelancerId}`);
+        console.log("Start conversation with:", freelancerId);
+    };
 
     if (loading) return <div className="text-center py-4"><Spinner animation="border" /></div>;
     if (error) return <Alert variant="danger">{error}</Alert>;
@@ -55,7 +76,7 @@ const GetBids = ({ jobId }: GetBidsProps) => {
     return (
         <div className="bids-list">
             {bids.map((bid) => (
-                <Card key={bid._id} className="mb-3 shadow-sm">
+                <Card key={bid._id} className={`mb-3 shadow-sm ${bid.status === 'Accepted' ? 'border-success' : ''}`}>
                     <Card.Body>
                         <div className="d-flex justify-content-between align-items-start mb-3">
                             <div className="d-flex align-items-center gap-3">
@@ -74,7 +95,10 @@ const GetBids = ({ jobId }: GetBidsProps) => {
                                     )}
                                 </div>
                                 <div>
-                                    <h5 className="mb-0">{bid.freelancer.fullName}</h5>
+                                    <h5 className="mb-0">
+                                        {bid.freelancer.fullName}
+                                        {bid.status === 'Accepted' && <Badge bg="success" className="ms-2">Accepted</Badge>}
+                                    </h5>
                                     <small className="text-muted">
                                         {bid.freelancer.rating ? `⭐ ${bid.freelancer.rating.toFixed(1)}` : "New Freelancer"}
                                     </small>
@@ -97,6 +121,27 @@ const GetBids = ({ jobId }: GetBidsProps) => {
                                     {new Date(bid.timeline.start_date).toLocaleDateString()} - {new Date(bid.timeline.end_date).toLocaleDateString()}
                                 </span>
                             </div>
+
+                            <div className="d-flex gap-2">
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => handleMessage(bid.freelancer._id)}
+                                >
+                                    Message
+                                </Button>
+                                {bid.status !== 'Accepted' && (
+                                    <Button
+                                        variant="success"
+                                        size="sm"
+                                        onClick={() => handleAcceptBid(bid._id)}
+                                    >
+                                        Accept Bid
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                        <div className="text-end mt-2">
                             <small className="text-muted">
                                 Placed on {new Date(bid.createdAt).toLocaleDateString()}
                             </small>
