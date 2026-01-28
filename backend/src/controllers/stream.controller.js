@@ -13,13 +13,8 @@ const streamEvents = asyncHandler(async (req, res) => {
     }
 
     // Pass the response object to SSEManager to handle headers and connection
-    sseManager.addClient(req.user._id, req.user.role, res, req);
+    sseManager.registerConnection(req.user._id, req.user.role, res, req);
 
-    // Handle client disconnect on the request (extra safety, though SSEManager handles res.on('close'))
-    req.on("close", () => {
-        // The SSEManager removes the client automatically on res close,
-        // but we can log here if needed for debug.
-    });
 });
 
 export { streamEvents };
