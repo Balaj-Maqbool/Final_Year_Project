@@ -1,21 +1,25 @@
 import { Notification } from "../models/notification.model.js";
 
 class SSEManager {
+    // private variables
+    #activeConnections;
+    #HEARTBEAT_INTERVAL_MS;
+
     constructor() {
         // Map<UserId, Set<ConnectionObject>>
-        this.activeConnections = new Map();
-        this.HEARTBEAT_INTERVAL_MS = 30000;
+        this.#activeConnections = new Map();
+        this.#HEARTBEAT_INTERVAL_MS = 30000;
 
         // Start the global heartbeat. 
         // We do NOT need to clear this interval because this Manager 
         // lives as long as the application runs.
-        this.startHeartbeat();
+        this.#startHeartbeat();
     }
 
-    startHeartbeat() {
+    #startHeartbeat() {
         setInterval(() => {
             // Efficiently ping only active connections
-            this.activeConnections.forEach((userConnections) => {
+            this.#activeConnections.forEach((userConnections) => {
                 for (const connection of userConnections) {
                     // If a response is closed, it might throw, so we can wrap in try-catch or rely on the 'close' event handler cleanup
                     try {
@@ -25,7 +29,7 @@ class SSEManager {
                     }
                 }
             });
-        }, this.HEARTBEAT_INTERVAL_MS);
+        }, this.#HEARTBEAT_INTERVAL_MS);
     }
 
     /**
@@ -47,12 +51,12 @@ class SSEManager {
         const id = userId.toString();
 
         // 2. Add to active connections map
-        if (!this.activeConnections.has(id)) {
-            this.activeConnections.set(id, new Set());
+        if (!this.#activeConnections.has(id)) {
+            this.#activeConnections.set(id, new Set());
         }
 
         const connection = { res, role };
-        this.activeConnections.get(id).add(connection);
+        this.#activeConnections.get(id).add(connection);
 
         // 3. Send initial connection confirmation
         const initData = { message: "Connected to Real-time Events" };
@@ -63,11 +67,11 @@ class SSEManager {
         // 4. Handle Disconnect & Errors
         const cleanup = () => {
             console.log(`SSE Client Disconnected/Error: ${id}`);
-            const userConnections = this.activeConnections.get(id);
+            const userConnections = this.#activeConnections.get(id);
             if (userConnections) {
                 userConnections.delete(connection);
                 if (userConnections.size === 0) {
-                    this.activeConnections.delete(id);
+                    this.#activeConnections.delete(id);
                 }
             }
         };
@@ -98,7 +102,7 @@ class SSEManager {
         }
 
         // 2. Send Real-time Event
-        const userConnections = this.activeConnections.get(id);
+        const userConnections = this.#activeConnections.get(id);
         if (userConnections && userConnections.size > 0) {
             const payload = JSON.stringify(data);
             for (const connection of userConnections) {
@@ -115,7 +119,7 @@ class SSEManager {
      */
     broadcast(type, data, targetRole = null) {
         const payload = JSON.stringify(data);
-        this.activeConnections.forEach((userConnections) => {
+        this.#activeConnections.forEach((userConnections) => {
             for (const connection of userConnections) {
                 if (targetRole && connection.role !== targetRole) {
                     continue;
