@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Bid } from "../models/bid.model.js";
 import { Job } from "../models/job.model.js";
+import { ChatThread } from "../models/chat.model.js";
 import mongoose from "mongoose";
 import { sseManager } from "../utils/SSEManager.js";
 
@@ -49,6 +50,13 @@ const placeBid = asyncHandler(async (req, res) => {
         bid_amount,
         message,
         timeline
+    });
+
+    // Create ChatThread between Job Poster and Freelancer
+    await ChatThread.create({
+        participants: [job.poster_id, req.user._id],
+        jobId: jobId,
+        bidId: bid._id
     });
 
     // SSE: Notify Client (Job Poster)
