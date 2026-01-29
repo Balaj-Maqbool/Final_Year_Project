@@ -13,7 +13,8 @@ const jobSchema = new Schema(
         },
         budget: {
             type: Number,
-            required: true
+            required: true,
+            min: [1, "Budget must be at least 1"]
         },
         deadline: {
             type: Date,

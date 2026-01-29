@@ -5,11 +5,11 @@
 **Authentication**:
 - Most endpoints require a JWT token in the header.
 - **Header Format**: `Authorization: Bearer <your-access-token>`
+- **Cookies**: The API also supports HTTP-only `accessToken` and `refreshToken` cookies for browser clients.
 
 ---
 
 ## 1. Authentication (`/users`)
-*Note: All Auth routes are mounted under `/users` for backward compatibility.*
 
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
@@ -18,7 +18,7 @@
 | **POST** | `/logout` | Logout (clears cookies) | *No Body* |
 | **POST** | `/refresh-token` | Get new access token | *Cookies (auto-sent)* |
 | **GET** | `/google` | Initiate Google OAuth | **Query**: `?role=Client` (Default) or `?role=Freelancer` |
-| **GET** | `/google/callback` | Google Redirect (Sets Secure Cookies) | **Query**: `?code=...` (Handled by browser) |
+| **GET** | `/google/callback` | Google Redirect | **Query**: `?code=...` (Handled by browser) |
 | **PATCH** | `/password/change` | Change password | **JSON**: <br>`{ "oldPassword": "old", "newPassword": "new" }` |
 | **DELETE** | `/delete-account` | Delete my account | *No Body* |
 
@@ -39,7 +39,7 @@
 
 ---
 
-## 2. Jobs (`/jobs`)
+## 3. Jobs (`/jobs`)
 
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
@@ -52,7 +52,7 @@
 
 ---
 
-## 3. Bidding System (`/bids`)
+## 4. Bidding System (`/bids`)
 
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
@@ -66,17 +66,7 @@
 
 ---
 
-## 4. Ratings & Reviews (`/ratings`)
-
-| Method | Endpoint | Description | Request Body / Params |
-| :--- | :--- | :--- | :--- |
-| **POST** | `/:jobId` | Rate a freelancer (Client) | **JSON**: <br>`{ "rating": 5, "comment": "Excellent work!" }` (Rating: 1-5 integer) |
-| **PATCH** | `/:ratingId` | Update rating | **JSON**: <br>`{ "rating": 4, "comment": "Changed my mind" }` |
-| **GET** | `/freelancer/:freelancerId` | Get reviews for freelancer | **Param**: `freelancerId` |
-
----
-
-## 5. Task Management (`/tasks`)
+## 5. Tasks (`/tasks`)
 
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
@@ -87,30 +77,52 @@
 
 ---
 
-## 6. Dashboards (`/dashboard`)
+## 6. Ratings & Reviews (`/ratings`)
 
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
-| **GET** | `/client` | Get Client Stats | *No Body* <br>Returns: `{ stats: { totalJobs, spent... }, recentJobs: [...] }` |
+| **POST** | `/:jobId` | Rate a freelancer (Client) | **JSON**: <br>`{ "rating": 5, "comment": "Excellent work!" }` (Rating: 1-5 integer) |
+| **PATCH** | `/:ratingId` | Update rating | **JSON**: <br>`{ "rating": 4, "comment": "Changed my mind" }` |
+| **GET** | `/freelancer/:freelancerId` | Get reviews for freelancer | **Param**: `freelancerId` |
+
+---
+
+## 7. Chat (`/chats`)
+
+| Method | Endpoint | Description | Request Body / Params |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/start` | Start/Get Chat Thread | **JSON**: <br>`{ "recipientId": "user_id_here" }` <br>*(Used for Lazy Initialization)* |
+| **GET** | `/` | Get my threads | **Query**: `?page=1` `?limit=10` |
+| **DELETE** | `/:threadId` | Hide/Delete thread | **Param**: `threadId` |
+| **GET** | `/:threadId/messages` | Get/Load messages | **Param**: `threadId` <br>**Query**: `?page=1` `?limit=20` |
+| **DELETE** | `/messages/:messageId` | Delete a specific message | **Param**: `messageId` |
+| **POST** | `/:threadId/block` | Block a thread/user | **Param**: `threadId` |
+| **POST** | `/:threadId/unblock` | Unblock a thread/user | **Param**: `threadId` |
+
+---
+
+## 8. Notifications (`/notifications`)
+
+| Method | Endpoint | Description | Request Body / Params |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/` | Get my notifications | **Query**: `?page=1` `?limit=10` |
+| **PATCH** | `/read-all` | Mark all as read | *No Body* |
+| **PATCH** | `/read/:notificationId` | Mark one as read | **Param**: `notificationId` |
+| **DELETE** | `/delete/:notificationId` | Delete a notification | **Param**: `notificationId` |
+
+---
+
+## 9. Dashboards (`/dashboard`)
+
+| Method | Endpoint | Description | Request Body / Params |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/client` | Get Client Stats | *No Body* <br>Returns: `{ stats: { totalJobs... }, recentJobs: [...] }` |
 | **GET** | `/freelancer` | Get Freelancer Stats | *No Body* <br>Returns: `{ stats: { totalBids... }, earnings: {...}, activeJobs: [...] }` |
 
 ---
 
-## 7. Notifications (`/notifications`)
+## 10. Real-time Stream (`/stream`)
 
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
-| **GET** | `/` | Get my notifications | **Query**: `?page=1` `?limit=10` `?type=NEW_BID` |
-| **PATCH** | `/:notificationId/read` | Mark as read | **Param**: `notificationId` |
-| **PATCH** | `/read-all` | Mark all as read | *No Body* |
-| **DELETE** | `/:notificationId` | Delete a notification | **Param**: `notificationId` |
-
----
-
-## 8. Real-time Stream (`/stream`)
-
-| Method | Endpoint | Description | Request Body / Params |
-| :--- | :--- | :--- | :--- |
-| **GET** | `/connect` | Subscribe to Event Stream | **Header**: `Accept: text/event-stream` <br>**Note**: Connection stays open. <br>**Heartbeat**: Server sends `: keepalive` every 30s. |
-
-
+| **GET** | `/connect` | Subscribe to Event Stream | **Header**: `Accept: text/event-stream` <br>**Note**: Keep-alive connection. |
