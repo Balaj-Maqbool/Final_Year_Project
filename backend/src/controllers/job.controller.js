@@ -2,10 +2,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
-import { User } from "../models/user.model.js";
-import mongoose from "mongoose";
-import { sseManager } from "../streams/SSEManager.js";
-
+import { NotificationService } from "../services/notification.service.js";
 import { Task } from "../models/task.model.js";
 
 const createJob = asyncHandler(async (req, res) => {
@@ -29,29 +26,8 @@ const createJob = asyncHandler(async (req, res) => {
         poster_id: req.user?._id
     });
 
-    sseManager.broadcast("NEW_JOB_AVAILABLE", {
-        message: "New Job Posted",
-        job
-    }, "Freelancer");
-
-    if (required_skills && required_skills.length > 0) {
-        try {
-            const matchedFreelancers = await User.find({
-                role: "Freelancer",
-                skills: { $in: required_skills }
-            }).select("_id");
-
-            matchedFreelancers.forEach(user => {
-                sseManager.sendToUser(user._id, "DASHBOARD_UPDATE", {
-                    type: "JOB_MATCH",
-                    message: `New job matches your skills: ${title}`,
-                    jobId: job._id
-                });
-            });
-        } catch (error) {
-            console.error("Error sending skill match notifications:", error);
-        }
-    }
+    // Use NotificationService to handle broadcast and skill matching
+    NotificationService.notifyNewJob(job);
 
     return res.status(201).json(
         new ApiResponse(201, job, "Job posted successfully")
@@ -226,13 +202,9 @@ const updateJob = asyncHandler(async (req, res) => {
 
     await job.save();
 
-    // SSE: Notify Freelancer if job is completed
+    // Use NotificationService
     if (job.status === "Completed" && job.assigned_to) {
-        sseManager.sendToUser(job.assigned_to, "DASHBOARD_UPDATE", {
-            type: "JOB_COMPLETED",
-            message: `Job '${job.title}' has been marked as Completed`,
-            jobId: job._id
-        });
+        NotificationService.notifyJobCompleted(job.assigned_to, job);
     }
 
     return res.status(200).json(

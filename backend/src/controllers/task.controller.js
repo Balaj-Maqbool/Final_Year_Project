@@ -3,8 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Task } from "../models/task.model.js";
 import { Job } from "../models/job.model.js";
-import mongoose from "mongoose";
-import { sseManager } from "../streams/SSEManager.js";
+import { NotificationService } from "../services/notification.service.js";
 
 const createTask = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -36,11 +35,8 @@ const createTask = asyncHandler(async (req, res) => {
         assigned_user_id: job.assigned_to
     });
 
-    sseManager.sendToUser(job.assigned_to, "DASHBOARD_UPDATE", {
-        type: "NEW_TASK",
-        message: "New task assigned to you",
-        taskId: task._id
-    });
+    // Use NotificationService
+    NotificationService.notifyNewTask(job.assigned_to, task);
 
     return res.status(201).json(
         new ApiResponse(201, task, "Task created successfully")
@@ -101,11 +97,8 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     // Need to fetch job to find poster
     const job = await Job.findById(task.job_id);
     if (job) {
-        sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
-            type: "TASK_STATUS_UPDATE",
-            message: `Task '${task.title}' moved to ${status}`,
-            taskId: task._id
-        });
+        // Use NotificationService
+        NotificationService.notifyTaskStatusUpdate(job.poster_id, task, status);
     }
 
     return res.status(200).json(
@@ -140,11 +133,8 @@ const approveTask = asyncHandler(async (req, res) => {
     await task.save();
 
     // SSE: Notify Freelancer of approval
-    sseManager.sendToUser(task.assigned_user_id, "DASHBOARD_UPDATE", {
-        type: "TASK_APPROVED",
-        message: `Your task '${task.title}' was approved`,
-        taskId: task._id
-    });
+    // Use NotificationService
+    NotificationService.notifyTaskApproved(task.assigned_user_id, task);
 
     return res.status(200).json(
         new ApiResponse(200, task, "Task approved successfully")

@@ -5,7 +5,7 @@ import { Bid } from "../models/bid.model.js";
 import { Job } from "../models/job.model.js";
 import { ChatThread } from "../models/chat.model.js";
 import mongoose from "mongoose";
-import { sseManager } from "../streams/SSEManager.js";
+import { NotificationService } from "../services/notification.service.js";
 
 const placeBid = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -59,12 +59,8 @@ const placeBid = asyncHandler(async (req, res) => {
         bidId: bid._id
     });
 
-    // SSE: Notify Client (Job Poster)
-    sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
-        type: "NEW_BID",
-        message: "New bid received on your job",
-        jobId: jobId
-    });
+    // Use NotificationService to handle alerts
+    NotificationService.notifyNewBid(job, bid);
 
     return res.status(201).json(
         new ApiResponse(201, bid, "Bid placed successfully")
@@ -171,12 +167,8 @@ const updateBidStatus = asyncHandler(async (req, res) => {
         // Optional: Reject all other pending bids? For now, we leave them or logic can be added here.
     }
 
-    // SSE: Notify Freelancer of decision
-    sseManager.sendToUser(bid.user_id, "DASHBOARD_UPDATE", {
-        type: "BID_STATUS_UPDATE",
-        message: `Your bid was ${status}`,
-        jobId: job._id
-    });
+    // Use NotificationService
+    NotificationService.notifyBidStatusUpdate(bid.user_id, job, status);
 
     return res.status(200).json(
         new ApiResponse(200, bid, `Bid ${status.toLowerCase()} successfully`)
@@ -202,17 +194,12 @@ const withdrawBid = asyncHandler(async (req, res) => {
 
     await Bid.findByIdAndDelete(bidId);
 
-    // SSE: Notify Client that bid was withdrawn
+    // Use NotificationService
     if (bid.job_id) {
-        // Need to fetch job poster
         try {
             const job = await Job.findById(bid.job_id);
             if (job) {
-                sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
-                    type: "BID_WITHDRAWN",
-                    message: "A freelancer withdrew their bid",
-                    jobId: job._id
-                });
+                NotificationService.notifyBidWithdrawn(job.poster_id, job._id);
             }
         } catch (error) {
             console.error("Error sending withdrawal notification:", error);
