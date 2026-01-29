@@ -1,7 +1,6 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../config/cloudinary.js";
 import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -58,7 +57,7 @@ const updateUserProfileImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Profile Image file is missing");
     }
 
-    const profileImage = await uploadOnCloudinary(profileImageLocalPath);
+    const profileImage = await CloudinaryHelper.upload(profileImageLocalPath);
 
     if (!profileImage.url) {
         throw new ApiError(400, "Error while uploading profile image");
@@ -86,7 +85,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cover Image file is missing");
     }
 
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    const coverImage = await CloudinaryHelper.upload(coverImageLocalPath);
 
     if (!coverImage.url) {
         throw new ApiError(400, "Error while uploading cover image");

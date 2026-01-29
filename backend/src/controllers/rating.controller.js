@@ -6,17 +6,20 @@ import { Job } from "../models/job.model.js";
 import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
 import { NotificationService } from "../services/notification.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const addRating = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
     const { rating, comment } = req.body;
+
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     // 1. Role Check: Only Clients can rate
     if (req.user.role !== "Client") {
         throw new ApiError(403, "Only Clients can submit ratings");
     }
 
-    if (!rating || !comment) {
+    if (ValidationHelper.isEmpty(rating) || ValidationHelper.isEmpty(comment)) {
         throw new ApiError(400, "Rating (1-5) and comment are required");
     }
 
@@ -93,7 +96,7 @@ const addRating = asyncHandler(async (req, res) => {
     }
 
     // Use NotificationService
-    NotificationService.notifyNewRating(freelancerId, job, rating);
+    await NotificationService.notifyNewRating(freelancerId, job, rating);
 
     return res.status(201).json(
         new ApiResponse(201, newRating, "Rating submitted successfully")
@@ -102,6 +105,8 @@ const addRating = asyncHandler(async (req, res) => {
 
 const getFreelancerRatings = asyncHandler(async (req, res) => {
     const { freelancerId } = req.params;
+
+    ValidationHelper.validateId(freelancerId, "Invalid Freelancer ID");
 
     const ratings = await Rating.aggregate([
         {
@@ -142,7 +147,9 @@ const updateRating = asyncHandler(async (req, res) => {
     const { ratingId } = req.params;
     const { rating, comment } = req.body;
 
-    if (!rating && !comment) {
+    ValidationHelper.validateId(ratingId, "Invalid Rating ID");
+
+    if (ValidationHelper.isEmpty(rating) && ValidationHelper.isEmpty(comment)) {
         throw new ApiError(400, "Provide rating or comment to update");
     }
 

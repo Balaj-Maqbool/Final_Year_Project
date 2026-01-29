@@ -2,6 +2,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Notification } from "../models/notification.model.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const getUserNotifications = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, type } = req.query;
@@ -40,6 +41,8 @@ const getUserNotifications = asyncHandler(async (req, res) => {
 const markNotificationAsRead = asyncHandler(async (req, res) => {
     const { notificationId } = req.params;
 
+    ValidationHelper.validateId(notificationId, "Invalid Notification ID");
+
     const notification = await Notification.findById(notificationId);
 
     if (!notification) {
@@ -71,6 +74,8 @@ const markAllAsRead = asyncHandler(async (req, res) => {
 
 const deleteNotification = asyncHandler(async (req, res) => {
     const { notificationId } = req.params;
+
+    ValidationHelper.validateId(notificationId, "Invalid Notification ID");
 
     const notification = await Notification.findById(notificationId);
 

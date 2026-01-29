@@ -4,12 +4,15 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Task } from "../models/task.model.js";
 import { Job } from "../models/job.model.js";
 import { NotificationService } from "../services/notification.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const createTask = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
     const { title, description } = req.body;
 
-    if (!title) {
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
+
+    if (ValidationHelper.isEmpty(title)) {
         throw new ApiError(400, "Task title is required");
     }
 
@@ -36,7 +39,7 @@ const createTask = asyncHandler(async (req, res) => {
     });
 
     // Use NotificationService
-    NotificationService.notifyNewTask(job.assigned_to, task);
+    await NotificationService.notifyNewTask(job.assigned_to, task);
 
     return res.status(201).json(
         new ApiResponse(201, task, "Task created successfully")
@@ -45,6 +48,8 @@ const createTask = asyncHandler(async (req, res) => {
 
 const getJobTasks = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
+
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     // Validate Job exists
     const job = await Job.findById(jobId);
@@ -70,6 +75,8 @@ const getJobTasks = asyncHandler(async (req, res) => {
 const updateTaskStatus = asyncHandler(async (req, res) => {
     const { taskId } = req.params;
     const { status } = req.body;
+
+    ValidationHelper.validateId(taskId, "Invalid Task ID");
 
     if (!["To Do", "In Progress", "Done"].includes(status)) {
         throw new ApiError(400, "Invalid status");
@@ -98,7 +105,7 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     const job = await Job.findById(task.job_id);
     if (job) {
         // Use NotificationService
-        NotificationService.notifyTaskStatusUpdate(job.poster_id, task, status);
+        await NotificationService.notifyTaskStatusUpdate(job.poster_id, task, status);
     }
 
     return res.status(200).json(
@@ -108,6 +115,8 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
 
 const approveTask = asyncHandler(async (req, res) => {
     const { taskId } = req.params;
+
+    ValidationHelper.validateId(taskId, "Invalid Task ID");
 
     const task = await Task.findById(taskId);
     if (!task) {
@@ -134,7 +143,7 @@ const approveTask = asyncHandler(async (req, res) => {
 
     // SSE: Notify Freelancer of approval
     // Use NotificationService
-    NotificationService.notifyTaskApproved(task.assigned_user_id, task);
+    await NotificationService.notifyTaskApproved(task.assigned_user_id, task);
 
     return res.status(200).json(
         new ApiResponse(200, task, "Task approved successfully")

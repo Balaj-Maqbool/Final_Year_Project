@@ -53,6 +53,9 @@ app.use("/api/v1/notifications", notificationRouter);
 import streamRouter from "./routes/stream.routes.js";
 app.use("/api/v1/stream", streamRouter);
 
+import chatRouter from "./routes/chat.routes.js";
+app.use("/api/v1/chats", chatRouter);
+
 
 app.get("/", (req, res) => {
     res.send("API is running...");

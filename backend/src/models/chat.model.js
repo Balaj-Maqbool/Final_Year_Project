@@ -23,6 +23,15 @@ const chatThreadSchema = new Schema(
             enum: ["active", "archived", "blocked"],
             default: "active"
         },
+        blockedBy: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            default: null
+        },
+        hiddenFor: [{
+            type: Schema.Types.ObjectId,
+            ref: "User"
+        }],
         lastMessage: {
             content: String,
             senderId: {
@@ -62,6 +71,10 @@ const messageSchema = new Schema(
             type: String,
             enum: ["sent", "delivered", "read"],
             default: "sent"
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false
         },
         attachments: [
             {

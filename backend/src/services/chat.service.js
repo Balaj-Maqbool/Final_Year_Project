@@ -1,16 +1,9 @@
-import { ChatThread, Message } from "../models/chat.model.js";
+import { Message } from "../models/chat.model.js";
 import { Bid } from "../models/bid.model.js";
 import { sseManager } from "../streams/SSEManager.js";
 import { ApiError } from "../utils/ApiError.js";
 
 class ChatService {
-    /**
-     * Validates if a user has permission to send a message in a thread.
-     * Rules:
-     * - Rejected Bids: No one can talk.
-     * - Pending Bids: Freelancer limited to 10 messages.
-     * - Accepted Bids: Unlimited.
-     */
     static async validateMessagePermission(thread, user) {
         const bid = await Bid.findById(thread.bidId);
 
@@ -24,7 +17,18 @@ class ChatService {
                 canSend: false,
                 reason: "Chat disabled: Bid was rejected"
             };
-        } else if (bid.status === "Pending" && user.role === "Freelancer") {
+        }
+
+        // 2. Check if Thread itself is blocked
+        if (thread.status === "blocked") {
+            return {
+                canSend: false,
+                reason: "Chat disabled: This conversation has been blocked"
+            };
+        }
+
+        // 3. Rate Limit for Pending Bids (Freelancer only)
+        if (bid.status === "Pending" && user.role === "Freelancer") {
             const messageCount = await Message.countDocuments({
                 threadId: thread._id,
                 senderId: user._id
@@ -53,12 +57,14 @@ class ChatService {
             attachments
         });
 
-        // 2. Update Thread Metadata
+        // 2. Update Thread Metadata & Unhide
         thread.lastMessage = {
             content,
             senderId: sender._id,
             timestamp: message.createdAt
         };
+        // Unhide for all participants (they should see the new message)
+        thread.hiddenFor = [];
         await thread.save();
 
         // 3. Trigger Notifications for participants

@@ -29,7 +29,7 @@ const createJob = asyncHandler(async (req, res) => {
     });
 
     // Use NotificationService to handle broadcast and skill matching
-    NotificationService.notifyNewJob(job);
+    await NotificationService.notifyNewJob(job);
 
     return res.status(201).json(
         new ApiResponse(201, job, "Job posted successfully")
@@ -204,7 +204,7 @@ const updateJob = asyncHandler(async (req, res) => {
 
     // Use NotificationService
     if (job.status === "Completed" && job.assigned_to) {
-        NotificationService.notifyJobCompleted(job.assigned_to, job);
+        await NotificationService.notifyJobCompleted(job.assigned_to, job);
     }
 
     return res.status(200).json(
