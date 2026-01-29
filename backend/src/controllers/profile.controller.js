@@ -1,7 +1,8 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
+import { uploadOnCloudinary } from "../config/cloudinary.js";
+import { CloudinaryHelper } from "../utils/cloudinary.helper.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const getCurrentUser = asyncHandler(async (req, res) => {
@@ -164,19 +165,7 @@ const deleteUserProfileImage = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (user.profileImage) {
-        try {
-            const urlParts = user.profileImage.split("/");
-            const filenameWithExt = urlParts[urlParts.length - 1];
-            const folder = urlParts[urlParts.length - 2];
-
-            const publicId = `${folder}/${filenameWithExt.split(".")[0]}`;
-
-            await deleteFromCloudinary(publicId);
-        } catch (error) {
-            console.log("Error deleting profile image from Cloudinary:", error);
-            // Optionally throw error, but usually better to proceed with DB clear
-        }
-
+        await CloudinaryHelper.safeDelete(user.profileImage);
         user.profileImage = "";
         await user.save({ validateBeforeSave: false });
     }
@@ -190,17 +179,7 @@ const deleteUserCoverImage = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (user.coverImage) {
-        try {
-            const urlParts = user.coverImage.split("/");
-            const filenameWithExt = urlParts[urlParts.length - 1];
-            const folder = urlParts[urlParts.length - 2];
-            const publicId = `${folder}/${filenameWithExt.split(".")[0]}`;
-
-            await deleteFromCloudinary(publicId);
-        } catch (error) {
-            console.log("Error deleting cover image from Cloudinary:", error);
-        }
-
+        await CloudinaryHelper.safeDelete(user.coverImage);
         user.coverImage = "";
         await user.save({ validateBeforeSave: false });
     }
