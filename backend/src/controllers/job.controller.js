@@ -3,6 +3,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
 import { NotificationService } from "../services/notification.service.js";
+import { ValidationHelper } from "../utils/validation.helper.js";
+import mongoose from "mongoose";
 import { Task } from "../models/task.model.js";
 
 const createJob = asyncHandler(async (req, res) => {
@@ -109,10 +111,8 @@ const getJobById = asyncHandler(async (req, res) => {
     // However, findById casts automatically. Aggregate does not.
     // We need mongoose.Types.ObjectId
 
-    // Check if valid ObjectId
-    if (!mongoose.isValidObjectId(jobId)) {
-        throw new ApiError(400, "Invalid Job ID");
-    }
+    // Validate jobId format
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     const job = await Job.aggregate([
         {

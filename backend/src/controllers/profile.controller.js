@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../config/cloudinary.js";
 import { CloudinaryHelper } from "../utils/cloudinary.helper.js";
+import { ValidationHelper } from "../utils/validation.helper.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const getCurrentUser = asyncHandler(async (req, res) => {
@@ -109,8 +110,9 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 const getUserProfileById = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    // Validate ID format (optional but good practice, though Mongoose usually handles casting)
-    // Here retrieving FULL details (excluding sensitive auth data)
+    // Validate jobId format
+    ValidationHelper.validateId(id, "Invalid User ID");
+
     const user = await User.findById(id);
 
     if (!user) {
