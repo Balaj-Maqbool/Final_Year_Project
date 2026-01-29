@@ -5,7 +5,7 @@ import { uploadOnCloudinary, deleteFromCloudinary } from "../config/cloudinary.j
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id).select("email username fullName role _id");
+    const user = await User.findById(req.user._id);
 
     return res
         .status(200)
@@ -42,7 +42,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
             $set: updateData
         },
         { new: true }
-    ).select("-password");
+    );
 
     return res
         .status(200)
@@ -70,7 +70,7 @@ const updateUserProfileImage = asyncHandler(async (req, res) => {
             }
         },
         { new: true }
-    ).select("-password -refreshToken");
+    );
 
     return res
         .status(200)
@@ -98,7 +98,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
             }
         },
         { new: true }
-    ).select("-password -refreshToken");
+    );
 
     return res
         .status(200)
@@ -110,7 +110,7 @@ const getUserProfileById = asyncHandler(async (req, res) => {
 
     // Validate ID format (optional but good practice, though Mongoose usually handles casting)
     // Here retrieving FULL details (excluding sensitive auth data)
-    const user = await User.findById(id).select("-password -refreshToken");
+    const user = await User.findById(id);
 
     if (!user) {
         throw new ApiError(404, "User not found");
@@ -153,7 +153,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
     // Or just simple find if scale corresponds to FYP
     // User requested "get all users", normally implies pagination but for now plain find is enough for MVP
 
-    const users = await User.find(query).select("-password -refreshToken");
+    const users = await User.find(query);
 
     return res
         .status(200)
@@ -161,7 +161,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 const deleteUserProfileImage = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id).select("-password -refreshToken");
+    const user = await User.findById(req.user._id);
 
     if (user.profileImage) {
         try {
@@ -187,7 +187,7 @@ const deleteUserProfileImage = asyncHandler(async (req, res) => {
 });
 
 const deleteUserCoverImage = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id).select("-password -refreshToken");
+    const user = await User.findById(req.user._id);
 
     if (user.coverImage) {
         try {

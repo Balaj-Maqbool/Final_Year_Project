@@ -38,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
         coverImage: ""
     });
 
-    const createdUser = await User.findById(user._id).select("-password -refreshToken");
+    const createdUser = await User.findById(user._id);
 
     if (!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user");
@@ -81,7 +81,7 @@ const loginUser = asyncHandler(async (req, res) => {
         .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenMaxAge })
         .cookie("refreshToken", refreshToken, { ...options, maxAge: refreshTokenMaxAge })
         .json(
-            new ApiResponse(200, { user: user.toObject({ transform: (doc, ret) => { delete ret.password; delete ret.refreshToken; return ret; } }) }, "User logged In Successfully")
+            new ApiResponse(200, { user }, "User logged In Successfully")
         );
 });
 
