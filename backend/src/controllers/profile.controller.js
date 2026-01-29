@@ -2,8 +2,8 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../config/cloudinary.js";
-import { CloudinaryHelper } from "../utils/cloudinary.helper.js";
-import { ValidationHelper } from "../utils/validation.helper.js";
+import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const getCurrentUser = asyncHandler(async (req, res) => {

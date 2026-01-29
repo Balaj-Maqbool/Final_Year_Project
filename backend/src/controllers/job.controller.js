@@ -3,7 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
 import { NotificationService } from "../services/notification.service.js";
-import { ValidationHelper } from "../utils/validation.helper.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 import mongoose from "mongoose";
 import { Task } from "../models/task.model.js";
 

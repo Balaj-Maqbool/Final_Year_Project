@@ -1,6 +1,6 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import { parseDuration } from "../utils/helpers.js";
+import { parseDuration } from "../utils/time.utils.js";
 import crypto from "crypto";
 import {
     ACCESS_TOKEN_EXPIRY,
