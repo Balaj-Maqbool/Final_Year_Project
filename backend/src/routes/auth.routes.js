@@ -9,7 +9,8 @@ import {
     refreshAccessToken,
     changeCurrentPassword,
     deleteUser,
-    handleGoogleCallback
+    handleGoogleCallback,
+    getCurrentUser
 } from "../controllers/auth.controller.js";
 
 const router = Router();
@@ -39,5 +40,6 @@ router.route("/google/callback").get(
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/password/change").patch(verifyJWT, changeCurrentPassword);
 router.route("/delete-account").delete(verifyJWT, deleteUser);
+router.route("/current-user").get(verifyJWT, getCurrentUser);
 
 export default router;

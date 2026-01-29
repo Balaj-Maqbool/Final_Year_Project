@@ -4,13 +4,7 @@ interface RequestOptions extends RequestInit {
   headers?: Record<string, string>;
 }
 
-/**
- * A wrapper around fetch that handles:
- * 1. Base URL
- * 2. Default headers
- * 3. Credentials (Cookies)
- * 4. Automatic Token Refresh on 401
- */
+
 export const apiRequest = async <T>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" = "GET",

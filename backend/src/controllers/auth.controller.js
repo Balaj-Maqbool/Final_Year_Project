@@ -264,13 +264,16 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
     }
 
     // 1. Check if user exists
+    console.log("Checking if user exists for:", email);
     let user = await User.findOne({
         $or: [{ googleId }, { email }]
     });
 
     if (user) {
+        console.log("User found:", user._id);
         // User exists
         if (!user.googleId) {
+            console.log("Linking Google ID to existing user");
             // Link account if email matches but no googleId
             user.googleId = googleId;
             // Optionally update profile image if empty
@@ -278,6 +281,7 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
             await user.save({ validateBeforeSave: false });
         }
     } else {
+        console.log("Creating new user");
         // Create new user
         // Generate random password
         const randomPassword = crypto.randomBytes(20).toString("hex");
@@ -285,6 +289,7 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
         // Generate unique username
         const baseUsername = email.split("@")[0];
         const uniqueUsername = `${baseUsername}_${crypto.randomInt(1000, 9999)}`;
+        console.log("Generated username:", uniqueUsername, "Role:", role);
 
         user = await User.create({
             fullName,
@@ -296,14 +301,20 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
             profileImage,
             coverImage: ""
         });
+        console.log("User created:", user._id);
     }
 
     // Generate tokens
+    console.log("Generating tokens...");
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+    console.log("Tokens generated");
 
     // Redirect to frontend
     // Use an env variable for frontend URL in production
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    
+    const redirectUrl = `${frontendUrl}/oauth-success?role=${user.role}&success=true`;
+    console.log("Redirecting to:", redirectUrl);
 
     // SECURITY UPDATE: Set tokens in HttpOnly cookies instead of URL
     const options = {
@@ -316,8 +327,18 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
         .status(200)
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
-        .redirect(`${frontendUrl}/oauth-success`); // No tokens in URL
+        .redirect(redirectUrl); // Pass role for routing
 });
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            req.user,
+            "User fetched successfully"
+        ))
+})
 
 export {
     registerUser,
@@ -325,6 +346,7 @@ export {
     logoutUser,
     refreshAccessToken,
     changeCurrentPassword,
+    getCurrentUser,
     deleteUser,
     handleGoogleCallback
 };

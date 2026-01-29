@@ -13,6 +13,9 @@ interface Props {
 
 const Login = ({ onSubmit }: Props) => {
 
+
+
+
     const emailRef = useRef<HTMLInputElement>(null)
     const passRef = useRef<HTMLInputElement>(null)
     const roleRef = useRef<HTMLSelectElement>(null)
@@ -26,8 +29,8 @@ const Login = ({ onSubmit }: Props) => {
         })
     }
 
-    
-    return ( 
+
+    return (
         <div className="auth-container">
             <div className="auth-card">
                 <div className="auth-header">
@@ -73,22 +76,22 @@ const Login = ({ onSubmit }: Props) => {
                         Login
                     </button>
 
-                     <button 
-                        type="button" 
-                        className="btn-auth btn-google mt-3" 
+                    <button
+                        type="button"
+                        className="btn-auth btn-google mt-3"
                         style={{ backgroundColor: "#db4437" }}
                         onClick={() => {
                             const role = roleRef.current?.value || "Client";
-                            // Adjust localhost port if different
+
                             window.location.href = `http://localhost:8000/api/v1/users/google?role=${role}`;
                         }}
                     >
-                       Sign in with Google
+                        Sign in with Google
                     </button>
 
                     <div className="auth-footer">
                         <span>Don't have an account?</span>
-                        <button type="button" onClick={() => window.location.href='/register'} className="auth-link">
+                        <button type="button" onClick={() => window.location.href = '/register'} className="auth-link">
                             Register
                         </button>
                     </div>
