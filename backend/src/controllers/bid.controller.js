@@ -5,7 +5,7 @@ import { Bid } from "../models/bid.model.js";
 import { Job } from "../models/job.model.js";
 import { ChatThread } from "../models/chat.model.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
+import { sseManager } from "../streams/SSEManager.js";
 
 const placeBid = asyncHandler(async (req, res) => {
     const { jobId } = req.params;

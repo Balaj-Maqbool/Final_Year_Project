@@ -1,10 +1,10 @@
 import http from "http";
 import { PORT } from "./constants.js";
 import { app } from "./app.js";
-import connectDB from "./db/db.js";
+import connectDB from "./config/db.js";
 
 import { WebSocketServer } from "ws";
-import { chatManager } from "./socket/ChatManager.js";
+import { chatManager } from "./streams/ChatManager.js";
 
 connectDB()
     .then(() => {

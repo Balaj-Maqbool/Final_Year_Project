@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Task } from "../models/task.model.js";
 import { Job } from "../models/job.model.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
+import { sseManager } from "../streams/SSEManager.js";
 
 const createTask = asyncHandler(async (req, res) => {
     const { jobId } = req.params;

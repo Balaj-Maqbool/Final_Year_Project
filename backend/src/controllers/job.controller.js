@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
 import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
+import { sseManager } from "../streams/SSEManager.js";
 
 import { Task } from "../models/task.model.js";
 

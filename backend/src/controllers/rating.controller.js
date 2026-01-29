@@ -5,7 +5,7 @@ import { Rating } from "../models/rating.model.js";
 import { Job } from "../models/job.model.js";
 import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
+import { sseManager } from "../streams/SSEManager.js";
 
 const addRating = asyncHandler(async (req, res) => {
     const { jobId } = req.params;

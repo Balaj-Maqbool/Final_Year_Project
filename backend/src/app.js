@@ -11,7 +11,7 @@ app.use(
     cors({
         origin: CORS_ORIGIN,
         credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     })
 );
 
@@ -21,7 +21,7 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 import passport from "passport";
-import "./passport/passport.config.js";
+import "./config/passport.js";
 app.use(passport.initialize());
 
 // router imports

@@ -1,6 +1,6 @@
 import { ChatThread, Message } from "../models/chat.model.js";
 import { Bid } from "../models/bid.model.js";
-import { sseManager } from "../utils/SSEManager.js";
+import { sseManager } from "../streams/SSEManager.js";
 import { ApiError } from "../utils/ApiError.js";
 
 class ChatService {
