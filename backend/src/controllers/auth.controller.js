@@ -3,36 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import {
-    REFRESH_TOKEN_SECRET,
-    ACCESS_TOKEN_EXPIRY,
-    REFRESH_TOKEN_EXPIRY
-} from "../constants.js";
-import crypto from "crypto";
-import { parseDuration } from "../utils/helpers.js";
-
-const getCookieOptions = () => ({
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-});
-
-const accessTokenCookieMaxAge = parseDuration(ACCESS_TOKEN_EXPIRY);
-const refreshTokenCookieMaxAge = parseDuration(REFRESH_TOKEN_EXPIRY);
-
-const generateAccessAndRefreshTokens = async (userId) => {
-    try {
-        const user = await User.findById(userId);
-        const accessToken = user.generateAccessToken();
-        const refreshToken = user.generateRefreshToken();
-
-        user.refreshToken = refreshToken;
-        await user.save({ validateBeforeSave: false });
-
-        return { accessToken, refreshToken };
-    } catch (error) {
-        throw new ApiError(500, "Something went wrong while generating referesh and access token");
-    }
-};
+import { REFRESH_TOKEN_SECRET } from "../constants.js";
+import { AuthService } from "../services/auth.service.js";
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
@@ -56,8 +28,6 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(409, "User with email or username already exists");
     }
 
-
-
     const user = await User.create({
         fullName,
         email,
@@ -68,9 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
         coverImage: ""
     });
 
-    const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-    );
+    const createdUser = await User.findById(user._id).select("-password -refreshToken");
 
     if (!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user");
@@ -95,53 +63,36 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(404, "User does not exist");
     }
 
-    // Check if the user is trying to login with the correct role
     if (user.role !== role) {
         throw new ApiError(401, `Access Denied: You are registered as a ${user.role}, not a ${role}`);
     }
 
     const isPasswordValid = await user.isPasswordCorrect(password);
-
     if (!isPasswordValid) {
         throw new ApiError(401, "Invalid user credentials");
     }
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
-
-
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
-
-    const options = getCookieOptions();
+    const { accessToken, refreshToken } = await AuthService.generateAccessAndRefreshTokens(user._id);
+    const { accessTokenMaxAge, refreshTokenMaxAge } = AuthService.getCookieMaxAges();
+    const options = AuthService.getCookieOptions();
 
     return res
         .status(200)
-        .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenCookieMaxAge })
-        .cookie("refreshToken", refreshToken, { ...options, maxAge: refreshTokenCookieMaxAge })
+        .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenMaxAge })
+        .cookie("refreshToken", refreshToken, { ...options, maxAge: refreshTokenMaxAge })
         .json(
-            new ApiResponse(
-                200,
-                {
-                    user: loggedInUser
-                },
-                "User logged In Successfully"
-            )
+            new ApiResponse(200, { user: user.toObject({ transform: (doc, ret) => { delete ret.password; delete ret.refreshToken; return ret; } }) }, "User logged In Successfully")
         );
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
-        {
-            $unset: {
-                refreshToken: 1
-            }
-        },
-        {
-            new: true
-        }
+        { $unset: { refreshToken: 1 } },
+        { new: true }
     );
 
-    const options = getCookieOptions();
+    const options = AuthService.getCookieOptions();
 
     return res
         .status(200)
@@ -158,34 +109,22 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 
     try {
-        const decodedToken = jwt.verify(
-            incomingRefreshToken,
-            REFRESH_TOKEN_SECRET
-        );
-
+        const decodedToken = jwt.verify(incomingRefreshToken, REFRESH_TOKEN_SECRET);
         const user = await User.findById(decodedToken?._id);
 
-        if (!user) {
-            throw new ApiError(401, "Invalid refresh token");
+        if (!user || incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError(401, "Invalid or expired refresh token");
         }
 
-        if (incomingRefreshToken !== user?.refreshToken) {
-            throw new ApiError(401, "Refresh token is expired or used");
-        }
-
-        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshTokens(user._id);
-
-        const options = getCookieOptions();
+        const { accessToken, refreshToken: newRefreshToken } = await AuthService.generateAccessAndRefreshTokens(user._id);
+        const { accessTokenMaxAge, refreshTokenMaxAge } = AuthService.getCookieMaxAges();
+        const options = AuthService.getCookieOptions();
 
         return res
             .status(200)
-            .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenCookieMaxAge })
-            .cookie("refreshToken", newRefreshToken, { ...options, maxAge: refreshTokenCookieMaxAge })
-            .json(new ApiResponse(
-                200,
-                {},
-                "Access token refreshed"
-            ));
+            .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenMaxAge })
+            .cookie("refreshToken", newRefreshToken, { ...options, maxAge: refreshTokenMaxAge })
+            .json(new ApiResponse(200, {}, "Access token refreshed"));
     } catch (error) {
         throw new ApiError(401, error?.message || "Invalid refresh token");
     }
@@ -193,59 +132,30 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
-
     if (!oldPassword || !newPassword) throw new ApiError(400, "Old and New password are required");
-    if (oldPassword === newPassword) throw new ApiError(400, "Old and New password cannot be same");
 
     const user = await User.findById(req.user._id);
-    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
-
-    if (!isPasswordCorrect) {
+    if (!(await user.isPasswordCorrect(oldPassword))) {
         throw new ApiError(400, "Invalid old password");
     }
 
     user.password = newPassword;
     await user.save({ validateBeforeSave: false });
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Password changed successfully"));
+    return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"));
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
     const { email, password, role } = req.body;
-
-    // 1. Validation
-    if (!email?.trim()) throw new ApiError(400, "Email is required to confirm deletion");
-    if (!password?.trim()) throw new ApiError(400, "Password is required to confirm deletion");
-    if (!role) throw new ApiError(400, "Role is required to confirm deletion");
-
     const user = await User.findById(req.user._id);
 
-    if (!user) {
-        throw new ApiError(404, "User not found");
+    if (!user || user.email !== email || user.role !== role || !(await user.isPasswordCorrect(password))) {
+        throw new ApiError(401, "Authentication failed. Account deletion denied.");
     }
-
-    // 2. Security Checks
-    if (user.email !== email) {
-        throw new ApiError(400, "Email does not match your account");
-    }
-
-    if (user.role !== role) {
-        throw new ApiError(400, "Role does not match your account");
-    }
-
-    const isPasswordValid = await user.isPasswordCorrect(password);
-    if (!isPasswordValid) {
-        throw new ApiError(401, "Invalid password. Account deletion failed.");
-    }
-
-    // 3. User is Verified -> Delete
-    // Perform cleanup or cascading deletes here if needed in future (e.g. jobs, messages)
 
     await User.findByIdAndDelete(req.user._id);
+    const options = AuthService.getCookieOptions();
 
-    const options = getCookieOptions();
     return res
         .status(200)
         .clearCookie("accessToken", options)
@@ -254,74 +164,23 @@ const deleteUser = asyncHandler(async (req, res) => {
 });
 
 const handleGoogleCallback = asyncHandler(async (req, res) => {
-    // req.user is the profile returned from Passport Strategy
     const profile = req.user;
-    const role = req.query.state || "Client"; // Get role from state, default to Client
+    const requestedRole = req.query.state || "Client";
 
-    if (!profile) {
-        throw new ApiError(400, "Google Authentication Failed");
-    }
-    // console.log(profile);
+    if (!profile) throw new ApiError(400, "Google Authentication Failed");
 
-    const email = profile.emails?.[0]?.value;
-    const googleId = profile.id;
-    const fullName = profile.displayName;
-    const profileImage = profile.photos?.[0]?.value;
+    const user = await AuthService.processGoogleAuth(profile, requestedRole);
+    const { accessToken, refreshToken } = await AuthService.generateAccessAndRefreshTokens(user._id);
 
-    if (!email) {
-        throw new ApiError(400, "Email not found in Google Profile");
-    }
-
-    // 1. Check if user exists
-    let user = await User.findOne({
-        $or: [{ googleId }, { email }]
-    });
-
-    if (user) {
-        // User exists
-        if (!user.googleId) {
-            // Link account if email matches but no googleId
-            user.googleId = googleId;
-            // Optionally update profile image if empty
-            if (!user.profileImage) user.profileImage = profileImage;
-            await user.save({ validateBeforeSave: false });
-        }
-    } else {
-        // Create new user
-        // Generate random password
-        const randomPassword = crypto.randomBytes(20).toString("hex");
-
-        // Generate unique username
-        const baseUsername = email.split("@")[0];
-        const uniqueUsername = `${baseUsername}_${crypto.randomInt(1000, 9999)}`;
-
-        user = await User.create({
-            fullName,
-            email,
-            username: uniqueUsername,
-            password: randomPassword,
-            googleId,
-            role, // Use the role passed in state
-            profileImage,
-            coverImage: ""
-        });
-    }
-
-    // Generate tokens
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
-
-    // Redirect to frontend
-    // Use an env variable for frontend URL in production
+    const { accessTokenMaxAge, refreshTokenMaxAge } = AuthService.getCookieMaxAges();
+    const options = AuthService.getCookieOptions();
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-
-    // SECURITY UPDATE: Set tokens in HttpOnly cookies instead of URL
-    const options = getCookieOptions();
 
     return res
         .status(200)
-        .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenCookieMaxAge })
-        .cookie("refreshToken", refreshToken, { ...options, maxAge: refreshTokenCookieMaxAge })
-        .redirect(`${frontendUrl}/oauth-success`); // No tokens in URL
+        .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenMaxAge })
+        .cookie("refreshToken", refreshToken, { ...options, maxAge: refreshTokenMaxAge })
+        .redirect(`${frontendUrl}/oauth-success`);
 });
 
 export {
