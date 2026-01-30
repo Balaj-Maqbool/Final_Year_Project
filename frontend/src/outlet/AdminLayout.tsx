@@ -1,12 +1,12 @@
 
 import { Outlet } from "react-router-dom"
-import Navbar from "../components/Navbar"
+import ClientNavbar from "../components/ClientNavbar"
 const AdminLayout=()=>{
 
     return(
 
 <>
-<Navbar/>
+<ClientNavbar/>
 <div id="main">
     <Outlet/>
 </div>

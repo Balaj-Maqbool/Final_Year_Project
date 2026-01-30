@@ -16,6 +16,9 @@ import ClientDashboard from "./src/client/ClientDashboard";
 import PostJob from "./src/client/PostJob";
 import AllJobs from "./src/client/AllJobs";
 import ViewBids from "./src/client/ViewBids";
+import Notifications from "./src/client/Notifications";
+import FreelancerNotifications from "./src/freelancer/FreelancerNotifications";
+import AdminLayout from "./src/outlet/AdminLayout";
 
 const router = createBrowserRouter([
   //// Authentication pages
@@ -56,7 +59,8 @@ const router = createBrowserRouter([
       {path:'jobs',element:<BrowseJobs/>},
       {path:'jobs/:jobId',element:<Bids/>},
       {path:'my-bids',element:<MyBids/>},
-      {path:'profile',element:<ProfilePage/>}
+      {path:'profile',element:<ProfilePage/>},
+      {path:'notifications',element:<FreelancerNotifications/>}
     
     ],
   },
@@ -68,7 +72,7 @@ const router = createBrowserRouter([
    element: (
       <RequireToken>
         <RequireRole allowedRole="Client">
-          <FreelancerLayout  />
+          <AdminLayout  />
         </RequireRole>
       </RequireToken>
     ),
@@ -76,7 +80,8 @@ const router = createBrowserRouter([
       { path: "clientDashboard", element: <ClientDashboard /> },
       {path:"postjob" , element:<PostJob/>},
       {path:"alljobs" , element:<AllJobs/>},
-      {path:"view-bids/:jobId",element:<ViewBids/>}
+      {path:"view-bids/:jobId",element:<ViewBids/>},
+      {path:'notifications',element:<Notifications/>}
     ]
 },
 
