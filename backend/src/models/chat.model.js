@@ -35,7 +35,7 @@ const chatThreadSchema = new Schema(
         }],
         lastMessage: {
             content: String,
-            senderId: {
+            from: {
                 type: Schema.Types.ObjectId,
                 ref: "User"
             },
@@ -67,7 +67,12 @@ const messageSchema = new Schema(
             required: true,
             index: true
         },
-        senderId: {
+        from: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: true
+        },
+        to: {
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true

@@ -14,7 +14,7 @@ const addRating = asyncHandler(async (req, res) => {
 
     ValidationHelper.validateId(jobId, "Invalid Job ID");
 
-    // 1. Role Check: Only Clients can rate
+
     if (req.user.role !== "Client") {
         throw new ApiError(403, "Only Clients can submit ratings");
     }
@@ -32,17 +32,17 @@ const addRating = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-    // 2. Authorization: Client must be the Job Poster
+
     if (job.poster_id.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "You can only rate freelancers for your own jobs");
     }
 
-    // 3. Job Status: Should be Assigned or Completed
+
     if (job.status === "Open") {
         throw new ApiError(400, "Cannot rate a freelancer on an Open job. Job must be Assigned or Completed.");
     }
 
-    // 4. Target User: Must be the assigned freelancer
+
     const freelancerId = job.assigned_to;
     if (!freelancerId) {
         throw new ApiError(400, "No freelancer is assigned to this job");
@@ -67,7 +67,7 @@ const addRating = asyncHandler(async (req, res) => {
         comment
     });
 
-    // 5. Update Freelancer's Average Rating
+
     const stats = await Rating.aggregate([
         {
             $match: {

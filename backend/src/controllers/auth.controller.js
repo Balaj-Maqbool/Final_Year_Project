@@ -10,7 +10,7 @@ import { ValidationHelper } from "../utils/validation.utils.js";
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
 
-    // 1. Validation
+
     if (ValidationHelper.isEmpty(fullName)) throw new ApiError(400, "Full Name is required");
     if (ValidationHelper.isEmpty(email)) throw new ApiError(400, "Email is required");
     if (ValidationHelper.isEmpty(username)) throw new ApiError(400, "Username is required");
@@ -20,7 +20,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Role must be 'Client' or 'Freelancer'");
     }
 
-    // 2. Strict Uniqueness Checks
+
     const existingEmail = await User.findOne({ email });
     if (existingEmail) throw new ApiError(409, "User with this email already exists");
 
@@ -60,7 +60,7 @@ const loginUser = asyncHandler(async (req, res) => {
     if (!ValidationHelper.isEmpty(email)) {
         user = await User.findOne({ email });
         if (!user) throw new ApiError(404, "User with this email does not exist");
-    }  
+    }
     if (!ValidationHelper.isEmpty(username)) {
         user = await User.findOne({ username });
         if (!user) throw new ApiError(404, "User with this username does not exist");

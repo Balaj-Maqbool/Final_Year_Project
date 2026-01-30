@@ -45,13 +45,13 @@ class NotificationService {
      * If the job has required skills, it only notifies matching freelancers.
      */
     static async notifyNewJob(job) {
-        // 1. Global Broadcast for the general feed
+
         sseManager.broadcast("NEW_JOB_AVAILABLE", {
             message: "New Job Posted",
             job
         }, "Freelancer");
 
-        // 2. Targeted Notifications for skill matches
+
         if (job.required_skills && job.required_skills.length > 0) {
             try {
                 const matchedFreelancers = await User.find({

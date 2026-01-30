@@ -9,11 +9,11 @@ const router = Router();
 
 router.use(verifyJWT);
 
-// GET /api/v1/dashboard/client
+
 router.route("/client")
     .get(getClientDashboard);
 
-// GET /api/v1/dashboard/freelancer
+
 router.route("/freelancer")
     .get(getFreelancerDashboard);
 

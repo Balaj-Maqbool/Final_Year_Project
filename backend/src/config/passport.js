@@ -11,7 +11,7 @@ passport.use(
         {
             clientID: GOOGLE_CLIENT_ID,
             clientSecret: GOOGLE_CLIENT_SECRET,
-            callbackURL: GOOGLE_REDIRECT_URI, // e.g. /api/v1/users/google/callback
+            callbackURL: GOOGLE_REDIRECT_URI,
             passReqToCallback: true
         },
         async (req, accessToken, refreshToken, profile, done) => {

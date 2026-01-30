@@ -68,21 +68,21 @@ class AuthService {
 
         if (!email) throw new ApiError(400, "Email not found in Google profile");
 
-        // 1. Check if user already exists
+
         let user = await User.findOne({
             $or: [{ googleId }, { email }]
         });
 
         if (user) {
-            // Case A: Exists via email but not linked to Google
+
             if (!user.googleId) {
                 user.googleId = googleId;
                 if (!user.profileImage) user.profileImage = profileImage;
                 await user.save({ validateBeforeSave: false });
             }
-            // Case B: Already linked - proceed to token generation
+
         } else {
-            // Case C: Brand new user
+
             const randomPassword = crypto.randomBytes(20).toString("hex");
             const baseUsername = email.split("@")[0].replace(/[^a-zA-Z0-0]/g, "");
             const uniqueUsername = `${baseUsername}_${crypto.randomInt(1000, 9999)}`;

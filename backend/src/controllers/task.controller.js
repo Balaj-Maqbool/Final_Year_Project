@@ -135,7 +135,7 @@ const approveTask = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Task not found");
     }
 
-    // Must search for job to verify ownership
+
     const job = await Job.findById(task.job_id);
     if (!job) {
         throw new ApiError(404, "Associated Job not found");

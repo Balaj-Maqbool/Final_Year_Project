@@ -13,21 +13,21 @@ import {
 
 const router = Router();
 
-// Apply auth middleware to all chat routes
+
 router.use(verifyJWT);
 
-// Chat Management
-router.post("/start/:bidId", initializeChat); // Start a new chat (Lazy init)
-router.get("/", getMyThreads); // Get all active threads
+
+router.post("/start/:bidId", initializeChat);
+router.get("/", getMyThreads);
 router.route("/:threadId")
-    .delete(deleteThread); // Hide/Delete thread for me
+    .delete(deleteThread);
 
-// Messages
-router.get("/:threadId/messages", getThreadMessages); // Get messages (with pagination)
-router.delete("/messages/:messageId", deleteMessage); // Soft delete message
-router.patch("/:threadId/read", markMessagesAsRead); // Mark messages as read
 
-// Blocking
+router.get("/:threadId/messages", getThreadMessages);
+router.delete("/messages/:messageId", deleteMessage);
+router.patch("/:threadId/read", markMessagesAsRead);
+
+
 router.post("/:threadId/block", blockThread);
 router.post("/:threadId/unblock", unblockThread);
 

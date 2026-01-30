@@ -7,7 +7,6 @@
 const parseDuration = (durationStr) => {
     if (!durationStr) return undefined;
 
-    // If it's already a number or string number, return it
     if (!isNaN(durationStr)) return parseInt(durationStr);
 
     const match = durationStr.match(/^(\d+)([dDhHmMsS]+)$/);

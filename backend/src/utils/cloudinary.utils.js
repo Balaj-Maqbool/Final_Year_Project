@@ -20,14 +20,12 @@ class CloudinaryHelper {
                 folder: "Project-00",
             });
 
-            // Async delete: doesn't block the event loop
             fs.unlink(localFilePath, (err) => {
                 if (err) console.error("Error deleting temp file:", err);
             });
 
             return response;
         } catch (error) {
-            // Async delete on error too
             fs.unlink(localFilePath, (err) => {
                 if (err) console.error("Error deleting temp file on upload failure:", err);
             });
@@ -67,14 +65,13 @@ class CloudinaryHelper {
         if (!url || typeof url !== "string") return null;
 
         try {
-            // Split by '/' and get the last two parts (folder and filename)
             const parts = url.split("/");
             if (parts.length < 2) return null;
 
-            const filenameWithExt = parts[parts.length - 1]; // e.g., image.jpg
-            const folder = parts[parts.length - 2];         // e.g., folder
+            const filenameWithExt = parts[parts.length - 1];
+            const folder = parts[parts.length - 2];
 
-            // Remove extension from filename
+
             const publicIdWithoutFolder = filenameWithExt.split(".")[0];
 
             return `${folder}/${publicIdWithoutFolder}`;

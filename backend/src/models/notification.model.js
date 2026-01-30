@@ -30,8 +30,6 @@ const notificationSchema = new Schema(
         },
         relatedId: {
             type: Schema.Types.ObjectId,
-            // Dynamic ref could be complex, keeping it simple as ID.
-            // Or we can add relatedModel if needed.
         },
         isRead: {
             type: Boolean,

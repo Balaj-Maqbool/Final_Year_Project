@@ -24,7 +24,7 @@ import passport from "passport";
 import "./config/passport.js";
 app.use(passport.initialize());
 
-// router imports
+
 import authRouter from "./routes/auth.routes.js";
 import profileRouter from "./routes/profile.routes.js";
 
@@ -61,7 +61,7 @@ app.get("/", (req, res) => {
     res.send("API is running...");
 });
 
-// Global Error Handler
+
 app.use((err, req, res, next) => {
     console.error("Global Error Handler Catch:", err);
     if (err instanceof ApiError) {
@@ -69,14 +69,14 @@ app.use((err, req, res, next) => {
             new ApiResponse(err.statusCode, null, err.message)
         );
     }
-    // Mongoose Validation Error
+
     if (err.name === 'ValidationError') {
         return res.status(400).json(
             new ApiResponse(400, null, err.message)
         );
     }
 
-    // Default 500
+
     return res.status(500).json(
         new ApiResponse(500, null, "Internal Server Error: " + err.message)
     );
