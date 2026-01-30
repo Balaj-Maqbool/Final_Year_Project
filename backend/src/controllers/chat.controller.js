@@ -5,6 +5,7 @@ import { ChatThread, Message } from "../models/chat.model.js";
 import { Bid } from "../models/bid.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
+import { chatManager } from "../streams/ChatManager.js";
 import mongoose from "mongoose";
 
 /**
@@ -12,7 +13,9 @@ import mongoose from "mongoose";
  * Called when a Client initiates a chat with a Freelancer from a Bid.
  */
 const initializeChat = asyncHandler(async (req, res) => {
-    const { bidId } = req.body;
+    const { bidId } = req.params;
+    console.log(bidId);
+
 
     ValidationHelper.validateId(bidId, "Invalid Bid ID");
 
@@ -53,9 +56,15 @@ const initializeChat = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Associated Job not found");
     }
 
+    // Security: Only Job Poster (Client) can start a new conversation
+    // If the user is a Freelancer, they can only open existing threads (handled above).
+    if (req.user.role !== "Client") {
+        throw new ApiError(403, "Only the Client can initiate a new conversation.");
+    }
+
     const participants = [job.poster_id, bid.user_id];
 
-    // Ensure requester is one of them
+    // Ensure requester is one of them (Double check)
     if (!participants.some(p => p.toString() === req.user._id.toString())) {
         throw new ApiError(403, "You are not authorized to start this chat");
     }
@@ -81,12 +90,43 @@ const initializeChat = asyncHandler(async (req, res) => {
  * Filters out threads hidden by the user.
  */
 const getMyThreads = asyncHandler(async (req, res) => {
-    const threads = await ChatThread.find({
-        participants: req.user._id,
-        hiddenFor: { $ne: req.user._id } // Exclude hidden threads
-    })
-        .populate("participants", "fullName profileImage email")
-        .sort({ "lastMessage.timestamp": -1 }); // Recently active first
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = ChatThread.aggregate([
+        {
+            $match: {
+                participants: req.user._id,
+                hiddenFor: { $ne: req.user._id }
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "participants",
+                foreignField: "_id",
+                as: "participants",
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            profileImage: 1,
+                            email: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $sort: { "lastMessage.timestamp": -1 }
+        }
+    ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const threads = await ChatThread.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
         new ApiResponse(200, threads, "Chats retrieved successfully")
@@ -108,13 +148,18 @@ const getThreadMessages = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Chat thread not found or access denied");
     }
 
-    const messages = await Message.find({ threadId })
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(parseInt(limit));
+    // Use Aggregate Paginate
+    const aggregate = Message.aggregate([
+        { $match: { threadId: new mongoose.Types.ObjectId(threadId) } },
+        { $sort: { createdAt: -1 } }
+    ]);
 
-    // Reverse to show oldest to newest on frontend (or handle in frontend)
-    // Typically APIs return newest first for pagination efficiency.
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const messages = await Message.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
         new ApiResponse(200, messages, "Messages retrieved successfully")
@@ -142,8 +187,12 @@ const deleteMessage = asyncHandler(async (req, res) => {
     message.content = "This message was deleted"; // Placeholder
     await message.save();
 
-    // Ideally, we should also emit a socket event 'MESSAGE_DELETED' to update real-time
-    // But for this MVP controller scope, we just update DB.
+    // Broadcast Deletion Event
+    await chatManager.broadcastToThread(message.threadId, {
+        type: "MESSAGE_DELETED",
+        messageId: message._id,
+        threadId: message.threadId
+    });
 
     return res.status(200).json(
         new ApiResponse(200, message, "Message deleted successfully")
@@ -217,6 +266,43 @@ const unblockThread = asyncHandler(async (req, res) => {
 });
 
 
+const markMessagesAsRead = asyncHandler(async (req, res) => {
+    const { threadId } = req.params;
+
+    ValidationHelper.validateId(threadId, "Invalid Thread ID");
+
+    // 1. Verify membership
+    const thread = await ChatThread.findById(threadId);
+    if (!thread || !thread.participants.includes(req.user._id)) {
+        throw new ApiError(404, "Thread not found or access denied");
+    }
+
+    // 2. Update DB: Mark all messages Sent by OTHER where status != read
+    await Message.updateMany(
+        {
+            threadId,
+            senderId: { $ne: req.user._id },
+            status: { $ne: "read" }
+        },
+        { $set: { status: "read" } }
+    );
+
+    // 3. Reset Unread Count in Thread (for the reader)
+    if (thread.unreadCounts) {
+        thread.unreadCounts.set(req.user._id.toString(), 0);
+        await thread.save();
+    }
+
+    // 4. Real-time Broadcast
+    await chatManager.broadcastToThread(threadId, {
+        type: "MESSAGES_READ",
+        threadId,
+        readerId: req.user._id
+    });
+
+    return res.status(200).json(new ApiResponse(200, {}, "Messages marked as read"));
+});
+
 export {
     initializeChat,
     getMyThreads,
@@ -224,5 +310,6 @@ export {
     deleteMessage,
     deleteThread,
     blockThread,
-    unblockThread
+    unblockThread,
+    markMessagesAsRead
 };

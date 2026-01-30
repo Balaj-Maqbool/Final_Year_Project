@@ -108,7 +108,9 @@ const getFreelancerRatings = asyncHandler(async (req, res) => {
 
     ValidationHelper.validateId(freelancerId, "Invalid Freelancer ID");
 
-    const ratings = await Rating.aggregate([
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Rating.aggregate([
         {
             $match: {
                 rated_user_id: new mongoose.Types.ObjectId(freelancerId)
@@ -137,6 +139,13 @@ const getFreelancerRatings = asyncHandler(async (req, res) => {
             $sort: { createdAt: -1 }
         }
     ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const ratings = await Rating.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
         new ApiResponse(200, ratings, "Ratings fetched successfully")

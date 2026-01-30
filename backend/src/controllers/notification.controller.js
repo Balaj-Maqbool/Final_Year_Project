@@ -6,35 +6,26 @@ import { ValidationHelper } from "../utils/validation.utils.js";
 
 const getUserNotifications = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, type } = req.query;
-    // console.log(page, limit, type);
 
-    const filter = { recipient: req.user._id };
+    const matchStage = { recipient: req.user._id };
     if (type) {
-        filter.type = type;
+        matchStage.type = type;
     }
 
+    const aggregate = Notification.aggregate([
+        { $match: matchStage },
+        { $sort: { createdAt: -1 } }
+    ]);
+
     const options = {
-        page: parseInt(page) || 1,
-        limit: parseInt(limit) || 10,
-        sort: { createdAt: -1 }
+        page: parseInt(page),
+        limit: parseInt(limit)
     };
 
-    const skip = (options.page - 1) * options.limit;
-
-    const notifications = await Notification.find(filter)
-        .sort(options.sort)
-        .skip(skip)
-        .limit(options.limit);
-
-    const total = await Notification.countDocuments(filter);
+    const notifications = await Notification.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
-        new ApiResponse(200, {
-            notifications,
-            currentPage: options.page,
-            totalPages: Math.ceil(total / options.limit),
-            totalNotifications: total
-        }, "Notifications fetched successfully")
+        new ApiResponse(200, notifications, "Notifications fetched successfully")
     );
 });
 

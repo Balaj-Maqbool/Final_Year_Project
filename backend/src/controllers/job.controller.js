@@ -37,7 +37,7 @@ const createJob = asyncHandler(async (req, res) => {
 });
 
 const getAllJobs = asyncHandler(async (req, res) => {
-    const { search, category, minBudget, maxBudget } = req.query;
+    const { search, category, minBudget, maxBudget, page = 1, limit = 10 } = req.query;
 
     const matchStage = {
         status: "Open"
@@ -57,7 +57,7 @@ const getAllJobs = asyncHandler(async (req, res) => {
         if (maxBudget) matchStage.budget.$lte = parseInt(maxBudget);
     }
 
-    const jobs = await Job.aggregate([
+    const aggregate = Job.aggregate([
         {
             $match: matchStage
         },
@@ -90,14 +90,32 @@ const getAllJobs = asyncHandler(async (req, res) => {
         }
     ]);
 
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const jobs = await Job.aggregatePaginate(aggregate, options);
+
     return res.status(200).json(
         new ApiResponse(200, jobs, "Jobs fetched successfully")
     );
 });
 
 const getMyJobs = asyncHandler(async (req, res) => {
-    const jobs = await Job.find({ poster_id: req.user?._id })
-        .sort({ createdAt: -1 });
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Job.aggregate([
+        { $match: { poster_id: req.user._id } },
+        { $sort: { createdAt: -1 } }
+    ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const jobs = await Job.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
         new ApiResponse(200, jobs, "My jobs fetched successfully")

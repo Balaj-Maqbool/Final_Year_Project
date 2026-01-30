@@ -5,28 +5,27 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
 import { AuthService } from "../services/auth.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
-    if (!fullName?.trim()) throw new ApiError(400, "Full Name is required");
-    if (!email?.trim()) throw new ApiError(400, "Email is required");
-    if (!username?.trim()) throw new ApiError(400, "Username is required");
-    if (!password?.trim()) throw new ApiError(400, "Password is required");
 
-    if (!role) {
-        throw new ApiError(400, "Role is required (Client or Freelancer)");
+    // 1. Validation
+    if (ValidationHelper.isEmpty(fullName)) throw new ApiError(400, "Full Name is required");
+    if (ValidationHelper.isEmpty(email)) throw new ApiError(400, "Email is required");
+    if (ValidationHelper.isEmpty(username)) throw new ApiError(400, "Username is required");
+    if (ValidationHelper.isEmpty(password)) throw new ApiError(400, "Password is required");
+
+    if (!["Freelancer", "Client"].includes(role)) {
+        throw new ApiError(400, "Role must be 'Client' or 'Freelancer'");
     }
 
-    const allowedRoles = ["Freelancer", "Client"];
-    if (!allowedRoles.includes(role)) throw new ApiError(400, "Invalid Role. Allowed: Freelancer, Client");
+    // 2. Strict Uniqueness Checks
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) throw new ApiError(409, "User with this email already exists");
 
-    const existedUser = await User.findOne({
-        $or: [{ username }, { email }]
-    });
-
-    if (existedUser) {
-        throw new ApiError(409, "User with email or username already exists");
-    }
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) throw new ApiError(409, "User with this username already exists");
 
     const user = await User.create({
         fullName,
@@ -52,15 +51,19 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     const { email, username, password, role } = req.body;
 
-    if (!username && !email) throw new ApiError(400, "username or email is required");
-    if (!role) throw new ApiError(400, "Role is required to login");
+    if (ValidationHelper.isEmpty(username) && ValidationHelper.isEmpty(email)) {
+        throw new ApiError(400, "Username or Email is required");
+    }
+    if (ValidationHelper.isEmpty(role)) throw new ApiError(400, "Role is required to login");
 
-    const user = await User.findOne({
-        $or: [{ username }, { email }]
-    });
-
-    if (!user) {
-        throw new ApiError(404, "User does not exist");
+    let user;
+    if (!ValidationHelper.isEmpty(email)) {
+        user = await User.findOne({ email });
+        if (!user) throw new ApiError(404, "User with this email does not exist");
+    }  
+    if (!ValidationHelper.isEmpty(username)) {
+        user = await User.findOne({ username });
+        if (!user) throw new ApiError(404, "User with this username does not exist");
     }
 
     if (user.role !== role) {
@@ -69,7 +72,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const isPasswordValid = await user.isPasswordCorrect(password);
     if (!isPasswordValid) {
-        throw new ApiError(401, "Invalid user credentials");
+        throw new ApiError(401, "Invalid Password");
     }
 
     const { accessToken, refreshToken } = await AuthService.generateAccessAndRefreshTokens(user._id);

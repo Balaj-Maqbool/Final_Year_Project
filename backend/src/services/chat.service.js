@@ -26,22 +26,6 @@ class ChatService {
                 reason: "Chat disabled: This conversation has been blocked"
             };
         }
-
-        // 3. Rate Limit for Pending Bids (Freelancer only)
-        if (bid.status === "Pending" && user.role === "Freelancer") {
-            const messageCount = await Message.countDocuments({
-                threadId: thread._id,
-                senderId: user._id
-            });
-
-            if (messageCount >= 10) {
-                return {
-                    canSend: false,
-                    reason: "Limit reached: You can only send 10 messages until your bid is accepted"
-                };
-            }
-        }
-
         return { canSend: true };
     }
 
@@ -58,20 +42,31 @@ class ChatService {
         });
 
         // 2. Update Thread Metadata & Unhide
+        // 2. Update Thread Metadata & Unhide
         thread.lastMessage = {
             content,
             senderId: sender._id,
             timestamp: message.createdAt
         };
-        // Unhide for all participants (they should see the new message)
         thread.hiddenFor = [];
-        await thread.save();
 
-        // 3. Trigger Notifications for participants
+        // Increment unread count for RECIPIENTS (everyone except sender)
         const participantsToNotify = thread.participants.filter(
             id => id.toString() !== sender._id.toString()
         );
 
+        // Note: Mix of $set and $inc is simpler with findOneAndUpdate or direct assignment if we loaded the doc.
+        // Since we have 'thread' loaded, let's update it in memory and save.
+
+
+        participantsToNotify.forEach(pId => {
+            const currentCount = thread.unreadCounts.get(pId.toString()) || 0;
+            thread.unreadCounts.set(pId.toString(), currentCount + 1);
+        });
+
+        await thread.save();
+
+        // 3. Trigger Notifications for participants
         participantsToNotify.forEach(participantId => {
             sseManager.sendToUser(participantId, "NEW_CHAT_MESSAGE", {
                 type: "CHAT",
@@ -84,5 +79,6 @@ class ChatService {
         return message;
     }
 }
+
 
 export { ChatService };

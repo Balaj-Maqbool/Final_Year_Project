@@ -80,7 +80,9 @@ const getJobBids = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not authorized to view bids for this job");
     }
 
-    const bids = await Bid.aggregate([
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Bid.aggregate([
         {
             $match: {
                 job_id: new mongoose.Types.ObjectId(jobId)
@@ -116,6 +118,13 @@ const getJobBids = asyncHandler(async (req, res) => {
             }
         }
     ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const bids = await Bid.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
         new ApiResponse(200, bids, "Bids fetched successfully")
@@ -220,7 +229,9 @@ const getMyBids = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Unauthorized to view bids");
     }
 
-    const bids = await Bid.aggregate([
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Bid.aggregate([
         {
             $match: {
                 user_id: new mongoose.Types.ObjectId(req.user._id)
@@ -256,6 +267,13 @@ const getMyBids = asyncHandler(async (req, res) => {
             }
         }
     ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const bids = await Bid.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
         new ApiResponse(200, bids, "My bids fetched successfully")

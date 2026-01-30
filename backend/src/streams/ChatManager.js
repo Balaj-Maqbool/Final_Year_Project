@@ -4,6 +4,7 @@ import { ACCESS_TOKEN_SECRET } from "../constants.js";
 import { User } from "../models/user.model.js";
 import { ChatService } from "../services/chat.service.js";
 import { ChatThread } from "../models/chat.model.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 class ChatManager {
     #HEARTBEAT_INTERVAL_MS = 30000;
@@ -100,7 +101,14 @@ class ChatManager {
             const payload = JSON.parse(data);
             const { threadId, content, attachments } = payload;
 
-            if (!threadId || !content) return;
+            // Validate using Helper
+            if (!ValidationHelper.isValidObjectId(threadId)) return;
+
+            // Logic: Must have Content OR Attachments
+            const hasContent = !ValidationHelper.isEmpty(content);
+            const hasAttachments = !ValidationHelper.isEmpty(attachments);
+
+            if (!hasContent && !hasAttachments) return;
 
             // 1. Fetch Thread
             const thread = await ChatThread.findById(threadId);
@@ -122,6 +130,14 @@ class ChatManager {
 
             // 3. Process Message (Persistence + Notifications via Service)
             const message = await ChatService.processNewMessage(thread, ws.user, content, attachments);
+
+            // Check if Recipient is Online -> Mark as DELIVERED
+            const recipientId = thread.participants.find(p => p.toString() !== ws.user._id.toString());
+            if (recipientId && this.isUserOnline(recipientId)) {
+                message.status = "delivered";
+                await message.save();
+            }
+console.log(message);
 
             // 4. Forward to all participants via WebSocket
             const responsePayload = {
@@ -175,6 +191,23 @@ class ChatManager {
                     ws.send(payload);
                 }
             });
+        }
+    }
+
+    /**
+     * Broadcasts an event to all ALL participants of a thread (if they are online).
+     * Used for system events like "MESSAGE_DELETED" or "READ_RECEIPT".
+     */
+    async broadcastToThread(threadId, payload) {
+        try {
+            const thread = await ChatThread.findById(threadId).select("participants");
+            if (!thread) return;
+
+            thread.participants.forEach(participantId => {
+                this.sendToUser(participantId, payload);
+            });
+        } catch (error) {
+            console.error(`Broadcast Error for Thread ${threadId}:`, error);
         }
     }
 }

@@ -7,7 +7,8 @@ import {
     deleteMessage,
     deleteThread,
     blockThread,
-    unblockThread
+    unblockThread,
+    markMessagesAsRead
 } from "../controllers/chat.controller.js";
 
 const router = Router();
@@ -16,7 +17,7 @@ const router = Router();
 router.use(verifyJWT);
 
 // Chat Management
-router.post("/start", initializeChat); // Start a new chat (Lazy init)
+router.post("/start/:bidId", initializeChat); // Start a new chat (Lazy init)
 router.get("/", getMyThreads); // Get all active threads
 router.route("/:threadId")
     .delete(deleteThread); // Hide/Delete thread for me
@@ -24,6 +25,7 @@ router.route("/:threadId")
 // Messages
 router.get("/:threadId/messages", getThreadMessages); // Get messages (with pagination)
 router.delete("/messages/:messageId", deleteMessage); // Soft delete message
+router.patch("/:threadId/read", markMessagesAsRead); // Mark messages as read
 
 // Blocking
 router.post("/:threadId/block", blockThread);

@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const chatThreadSchema = new Schema(
     {
@@ -42,6 +43,11 @@ const chatThreadSchema = new Schema(
                 type: Date,
                 default: Date.now
             }
+        },
+        unreadCounts: {
+            type: Map,
+            of: Number,
+            default: {}
         }
     },
     { timestamps: true }
@@ -49,6 +55,9 @@ const chatThreadSchema = new Schema(
 
 // Add index for fast participant lookup
 chatThreadSchema.index({ participants: 1 });
+chatThreadSchema.plugin(mongooseAggregatePaginate);
+
+
 
 const messageSchema = new Schema(
     {
@@ -84,6 +93,8 @@ const messageSchema = new Schema(
     },
     { timestamps: true }
 );
+
+messageSchema.plugin(mongooseAggregatePaginate);
 
 export const ChatThread = mongoose.model("ChatThread", chatThreadSchema);
 export const Message = mongoose.model("Message", messageSchema);

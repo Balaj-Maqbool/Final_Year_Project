@@ -51,4 +51,8 @@ const jobSchema = new Schema(
     }
 );
 
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
+jobSchema.plugin(mongooseAggregatePaginate);
+
 export const Job = mongoose.model("Job", jobSchema);

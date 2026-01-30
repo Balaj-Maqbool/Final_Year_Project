@@ -65,7 +65,19 @@ const getJobTasks = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not authorized to view tasks for this job");
     }
 
-    const tasks = await Task.find({ job_id: jobId }).sort({ createdAt: 1 });
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Task.aggregate([
+        { $match: { job_id: new mongoose.Types.ObjectId(jobId) } },
+        { $sort: { createdAt: 1 } }
+    ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const tasks = await Task.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
         new ApiResponse(200, tasks, "Tasks fetched successfully")
