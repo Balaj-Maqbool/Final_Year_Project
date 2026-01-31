@@ -16,7 +16,7 @@ import ClientDashboard from "./src/client/ClientDashboard";
 import PostJob from "./src/client/PostJob";
 import AllJobs from "./src/client/AllJobs";
 import ViewBids from "./src/client/ViewBids";
-import Notifications from "./src/client/Notifications";
+import Notifications from "./src/client/ClientNotifications";
 import FreelancerNotifications from "./src/freelancer/FreelancerNotifications";
 import AdminLayout from "./src/outlet/AdminLayout";
 

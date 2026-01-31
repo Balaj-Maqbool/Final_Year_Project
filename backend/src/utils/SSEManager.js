@@ -79,6 +79,8 @@ class SSEManager {
                 // Determine 'relatedId' from data if possible (e.g. jobId, taskId)
                 const relatedId = data.jobId || data.taskId || data.relatedId || null;
 
+                console.log(`SAVING NOTIFICATION -> Recipient: ${userId}, Type: ${data.type}`); // DEBUG
+
                 await Notification.create({
                     recipient: userId,
                     type: data.type || "SYSTEM", // Use specific type if inside data, else generic

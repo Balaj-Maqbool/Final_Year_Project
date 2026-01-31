@@ -10,9 +10,11 @@ import { Task } from "../models/task.model.js";
 
 const createJob = asyncHandler(async (req, res) => {
     const { title, description, budget, deadline, category, required_skills } = req.body;
+    
+    console.log("createJob - User:", req.user?._id, "Role:", req.user?.role); // DEBUG LOG
 
     if (req.user.role !== "Client") {
-        throw new ApiError(403, "Only Clients can post jobs");
+        throw new ApiError(403, `Only Clients can post jobs. You are: ${req.user.role}`);
     }
 
     if (!title || !description || !budget || !deadline || !category) {

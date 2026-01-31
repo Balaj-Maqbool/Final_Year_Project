@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { getNotifications, markAsRead } from "../notifications/notification.services";
+import { getNotifications, markAsRead } from "./notification.services";
 
-const FreelancerNotifications = () => {
+const Notifications = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -34,17 +34,19 @@ const FreelancerNotifications = () => {
         if (!relatedId) return "#";
 
         switch (type) {
+            case "NEW_BID":
+            case "BID_WITHDRAWN":
+                return `/client/view-bids/${relatedId}`;
             case "BID_STATUS_UPDATE":
-                // If bid status changed, maybe go to "My Bids" or the Job details
-                return `/freelancer/my-bids`;
             case "NEW_JOB_AVAILABLE":
             case "JOB_MATCH":
+                // If relatedId is job ID
+                return `/freelancer/jobs/${relatedId}`;
             case "NEW_JOB":
                 // If relatedId is job ID
                 return `/freelancer/jobs/${relatedId}`;
             default:
-                // Fallback
-                return `/freelancer/freelancerDashboard`;
+                return "#";
         }
     };
 
@@ -69,7 +71,7 @@ const FreelancerNotifications = () => {
 
     return (
         <div className="container mt-4">
-            <h2 className="mb-4">Freelancer Notifications</h2>
+            <h2 className="mb-4">Notifications</h2>
 
             {data.length === 0 ? (
                 <p className="text-muted">No notifications yet.</p>
@@ -115,4 +117,4 @@ const FreelancerNotifications = () => {
     );
 };
 
-export default FreelancerNotifications;
+export default Notifications;

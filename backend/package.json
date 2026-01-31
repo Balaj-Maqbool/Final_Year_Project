@@ -26,6 +26,8 @@
         "prettier": "^3.5.3"
     },
     "dependencies": {
+        "@tanstack/react-query": "^5.90.20",
+        "axios": "^1.13.4",
         "bcryptjs": "^3.0.3",
         "cloudinary": "^2.9.0",
         "cookie-parser": "^1.4.7",

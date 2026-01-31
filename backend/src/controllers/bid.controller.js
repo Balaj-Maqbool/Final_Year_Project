@@ -157,21 +157,25 @@ const updateBidStatus = asyncHandler(async (req, res) => {
     bid.status = status;
     await bid.save();
 
+    // ... (inside updateBidStatus)
     if (status === "Accepted") {
         // Assign freelancer to job and close job
         job.status = "Assigned";
         job.assigned_to = bid.user_id;
         await job.save();
+        console.log(`Job ${job._id} assigned to ${bid.user_id}`);
 
         // Optional: Reject all other pending bids? For now, we leave them or logic can be added here.
     }
 
     // SSE: Notify Freelancer of decision
-    sseManager.sendToUser(bid.user_id, "DASHBOARD_UPDATE", {
+    console.log(`Sending notification to user ${bid.user_id}`);
+    const notificationResult = await sseManager.sendToUser(bid.user_id, "DASHBOARD_UPDATE", {
         type: "BID_STATUS_UPDATE",
         message: `Your bid was ${status}`,
         jobId: job._id
     });
+    console.log("Notification send result:", notificationResult);
 
     return res.status(200).json(
         new ApiResponse(200, bid, `Bid ${status.toLowerCase()} successfully`)
