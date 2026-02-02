@@ -18,8 +18,8 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email, bio, skills, portfolio } = req.body;
 
     // Validation
-    if (!fullName?.trim()) throw new ApiError(400, "Full Name is required");
-    if (!email?.trim()) throw new ApiError(400, "Email is required");
+    if (ValidationHelper.isEmpty(fullName)) throw new ApiError(400, "Full Name is required");
+    if (ValidationHelper.isEmpty(email)) throw new ApiError(400, "Email is required");
 
     // Prepare update object
     const updateData = {
@@ -138,7 +138,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
     let { role } = req.query;
 
     const query = {};
-    if (role) {
+    if (!ValidationHelper.isEmpty(role)) {
         // Normalize role: "freelancer" -> "Freelancer"
         role = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 

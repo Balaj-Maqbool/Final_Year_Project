@@ -178,7 +178,7 @@ const updateRating = asyncHandler(async (req, res) => {
         existingRating.rating = rating;
     }
 
-    if (comment) {
+    if (!ValidationHelper.isEmpty(comment)) {
         existingRating.comment = comment;
     }
 

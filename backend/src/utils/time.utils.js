@@ -4,8 +4,10 @@
  * @param {string} durationStr 
  * @returns {number | undefined} milliseconds
  */
+import { ValidationHelper } from "./validation.utils.js";
+
 const parseDuration = (durationStr) => {
-    if (!durationStr) return undefined;
+    if (ValidationHelper.isEmpty(durationStr)) return undefined;
 
     if (!isNaN(durationStr)) return parseInt(durationStr);
 

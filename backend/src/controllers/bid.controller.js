@@ -299,9 +299,9 @@ const updateBid = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot update a bid that has been accepted or rejected");
     }
 
-    if (bid_amount) bid.bid_amount = bid_amount;
-    if (message) bid.message = message;
-    if (timeline) bid.timeline = timeline;
+    if (!ValidationHelper.isEmpty(bid_amount)) bid.bid_amount = bid_amount;
+    if (!ValidationHelper.isEmpty(message)) bid.message = message;
+    if (!ValidationHelper.isEmpty(timeline)) bid.timeline = timeline;
 
     await bid.save();
 

@@ -8,7 +8,7 @@ const getUserNotifications = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, type } = req.query;
 
     const matchStage = { recipient: req.user._id };
-    if (type) {
+    if (!ValidationHelper.isEmpty(type)) {
         matchStage.type = type;
     }
 

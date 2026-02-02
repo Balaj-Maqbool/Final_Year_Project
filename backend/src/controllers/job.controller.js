@@ -14,7 +14,13 @@ const createJob = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Clients can post jobs");
     }
 
-    if (!title || !description || !budget || !deadline || !category) {
+    if (
+        ValidationHelper.isEmpty(title) ||
+        ValidationHelper.isEmpty(description) ||
+        ValidationHelper.isEmpty(budget) ||
+        ValidationHelper.isEmpty(deadline) ||
+        ValidationHelper.isEmpty(category)
+    ) {
         throw new ApiError(400, "All fields (title, description, budget, deadline, category) are required");
     }
 
@@ -43,15 +49,15 @@ const getAllJobs = asyncHandler(async (req, res) => {
         status: "Open"
     };
 
-    if (search) {
+    if (!ValidationHelper.isEmpty(search)) {
         matchStage.title = { $regex: search, $options: "i" };
     }
 
-    if (category) {
+    if (!ValidationHelper.isEmpty(category)) {
         matchStage.category = category;
     }
 
-    if (minBudget || maxBudget) {
+    if (!ValidationHelper.isEmpty(minBudget) || !ValidationHelper.isEmpty(maxBudget)) {
         matchStage.budget = {};
         if (minBudget) matchStage.budget.$gte = parseInt(minBudget);
         if (maxBudget) matchStage.budget.$lte = parseInt(maxBudget);

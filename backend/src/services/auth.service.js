@@ -6,6 +6,7 @@ import {
     ACCESS_TOKEN_EXPIRY,
     REFRESH_TOKEN_EXPIRY
 } from "../constants.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 /**
  * AuthService handles business and system logic for authentication.
@@ -66,7 +67,7 @@ class AuthService {
         const fullName = profile.displayName;
         const profileImage = profile.photos?.[0]?.value;
 
-        if (!email) throw new ApiError(400, "Email not found in Google profile");
+        if (ValidationHelper.isEmpty(email)) throw new ApiError(400, "Email not found in Google profile");
 
 
         let user = await User.findOne({
@@ -75,9 +76,9 @@ class AuthService {
 
         if (user) {
 
-            if (!user.googleId) {
+            if (ValidationHelper.isEmpty(user.googleId)) {
                 user.googleId = googleId;
-                if (!user.profileImage) user.profileImage = profileImage;
+                if (ValidationHelper.isEmpty(user.profileImage)) user.profileImage = profileImage;
                 await user.save({ validateBeforeSave: false });
             }
 

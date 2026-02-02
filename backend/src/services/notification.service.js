@@ -1,5 +1,6 @@
 import { sseManager } from "../streams/SSEManager.js";
 import { User } from "../models/user.model.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 /**
  * NotificationService centralizes all domain-specific real-time alerts.
@@ -52,7 +53,7 @@ class NotificationService {
         }, "Freelancer");
 
 
-        if (job.required_skills && job.required_skills.length > 0) {
+        if (!ValidationHelper.isEmpty(job.required_skills)) {
             try {
                 const matchedFreelancers = await User.find({
                     role: "Freelancer",

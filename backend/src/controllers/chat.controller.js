@@ -5,7 +5,7 @@ import { ChatThread, Message } from "../models/chat.model.js";
 import { Bid } from "../models/bid.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
-import { socketManager } from "../streams/socket.js";
+import { socketManager } from "../streams/SocketManager.js";
 import { chatService } from "../services/chat.service.js";
 import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import mongoose from "mongoose";
@@ -192,7 +192,7 @@ const deleteMessage = asyncHandler(async (req, res) => {
     }
 
     // 1. Delete attachments from Cloudinary (Prevent Orphaned Files)
-    if (message.attachments && message.attachments.length > 0) {
+    if (!ValidationHelper.isEmpty(message.attachments)) {
         const deletePromises = message.attachments.map(async (att) => {
             if (att.publicId) {
                 await CloudinaryHelper.delete(att.publicId, att.resourceType || "image");

@@ -1,6 +1,7 @@
 import { cloudinary } from "../config/cloudinary.js";
 import fs from "fs";
 import { CLOUDINARY_ROOT_FOLDER } from "../constants.js";
+import { ValidationHelper } from "./validation.utils.js";
 
 /**
  * CloudinaryHelper provides utility functions for managing Cloudinary assets.
@@ -14,14 +15,14 @@ class CloudinaryHelper {
      */
     static async upload(localFilePath, folder = CLOUDINARY_ROOT_FOLDER) {
         try {
-            if (!localFilePath) return null;
+            if (ValidationHelper.isEmpty(localFilePath)) return null;
 
             const response = await cloudinary.uploader.upload(localFilePath, {
                 resource_type: "auto",
                 folder: folder,
             });
             // console.log(response);
-            
+
             fs.unlink(localFilePath, (err) => {
                 if (err) console.error("Error deleting temp file:", err);
             });
@@ -43,7 +44,7 @@ class CloudinaryHelper {
      */
     static async delete(publicId, type) {
         try {
-            if (!publicId) return "public id not found to delete the file from cloudinary";
+            if (ValidationHelper.isEmpty(publicId)) return "public id not found to delete the file from cloudinary";
 
             const response = await cloudinary.uploader.destroy(publicId, {
                 resource_type: type,
@@ -63,7 +64,7 @@ class CloudinaryHelper {
      * @returns {string|null} - The public ID or null if extraction fails.
      */
     static getPublicIdFromUrl(url) {
-        if (!url || typeof url !== "string") return null;
+        if (ValidationHelper.isEmpty(url)) return null;
 
         try {
             // Logic: Find the segment after version number (v12345) OR after 'upload/'

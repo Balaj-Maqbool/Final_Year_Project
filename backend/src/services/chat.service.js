@@ -61,12 +61,12 @@ class ChatService {
         const recipientId = participantIds.find(id => id !== senderId.toString());
 
         // 1. Validation: Must have Content OR Attachments
-        if (!content && (!attachments || attachments.length === 0)) {
+        if (ValidationHelper.isEmpty(content) && ValidationHelper.isEmpty(attachments)) {
             throw new Error("Message cannot be empty. Post text or an attachment.");
         }
 
         // 2. Handle "Attachment Only" messages (Mongoose requires content)
-        if (!content && attachments.length > 0) {
+        if (ValidationHelper.isEmpty(content) && !ValidationHelper.isEmpty(attachments)) {
             content = "Sent an attachment";
         }
 

@@ -58,7 +58,7 @@ class SocketManager {
                     }
                 }
 
-                if (!token) {
+                if (ValidationHelper.isEmpty(token)) {
                     return next(new Error("Authentication error: Token missing"));
                 }
 
