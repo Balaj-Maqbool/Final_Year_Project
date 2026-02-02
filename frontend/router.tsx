@@ -19,6 +19,8 @@ import ViewBids from "./src/client/ViewBids";
 import Notifications from "./src/client/ClientNotifications";
 import FreelancerNotifications from "./src/freelancer/FreelancerNotifications";
 import AdminLayout from "./src/outlet/AdminLayout";
+import Tasks from "./src/client/WorkRoom/Tasks";
+import FreelancerTasks from "./src/freelancer/WorkRoom/FreelancerTasks";
 
 const router = createBrowserRouter([
   //// Authentication pages
@@ -27,16 +29,16 @@ const router = createBrowserRouter([
     element: <LandingPage />,
   },
   {
-      path: "/register",
-      element: <RegisterPage />,
+    path: "/register",
+    element: <RegisterPage />,
   },
   {
-      path: "/login",
-      element: <Loginpage />,
+    path: "/login",
+    element: <Loginpage />,
   },
   {
-      path: "/oauth-success",
-      element: <OAuthSuccess />,
+    path: "/oauth-success",
+    element: <OAuthSuccess />,
   },
   ////////Freelancer pages
 
@@ -46,50 +48,52 @@ const router = createBrowserRouter([
     element: (
       <RequireToken>
         <RequireRole allowedRole="Freelancer">
-          <FreelancerLayout  />
+          <FreelancerLayout />
         </RequireRole>
       </RequireToken>
     ),
     children: [
       { path: "freelancerDashboard", element: <FreelancerDashboard /> },
-      {path:'jobs',element:<BrowseJobs/>},
-        {path:'jobs/:jobId',element:<Bids/>},
-        {path:'my-bids',element:<MyBids/>},
+      { path: 'jobs', element: <BrowseJobs /> },
+      { path: 'jobs/:jobId', element: <Bids /> },
+      { path: 'my-bids', element: <MyBids /> },
       { path: "freelancerDashboard", element: <FreelancerDashboard /> },
-      {path:'jobs',element:<BrowseJobs/>},
-      {path:'jobs/:jobId',element:<Bids/>},
-      {path:'my-bids',element:<MyBids/>},
-      {path:'profile',element:<ProfilePage/>},
-      {path:'notifications',element:<FreelancerNotifications/>}
-    
+      { path: 'jobs', element: <BrowseJobs /> },
+      { path: 'jobs/:jobId', element: <Bids /> },
+      { path: 'my-bids', element: <MyBids /> },
+      { path: 'profile', element: <ProfilePage /> },
+      { path: 'notifications', element: <FreelancerNotifications /> },
+      { path: "tasks/:jobId", element: <FreelancerTasks /> }
+
     ],
   },
 
-//Admin Pages
-{
-  path:'/client',
+  //Admin Pages
+  {
+    path: '/client',
 
-   element: (
+    element: (
       <RequireToken>
         <RequireRole allowedRole="Client">
-          <AdminLayout  />
+          <AdminLayout />
         </RequireRole>
       </RequireToken>
     ),
-    children:[
+    children: [
       { path: "clientDashboard", element: <ClientDashboard /> },
-      {path:"postjob" , element:<PostJob/>},
-      {path:"alljobs" , element:<AllJobs/>},
-      {path:"view-bids/:jobId",element:<ViewBids/>},
-      {path:'notifications',element:<Notifications/>}
+      { path: "postjob", element: <PostJob /> },
+      { path: "alljobs", element: <AllJobs /> },
+      { path: "view-bids/:jobId", element: <ViewBids /> },
+      { path: 'notifications', element: <Notifications /> },
+      { path: "tasks/:jobId", element: <Tasks /> }
     ]
-},
+  },
 
-//profile pages
-{
-  path:'/profile',
-  element:<ProfilePage/>
-},
+  //profile pages
+  {
+    path: '/profile',
+    element: <ProfilePage />
+  },
 
 ]);
 

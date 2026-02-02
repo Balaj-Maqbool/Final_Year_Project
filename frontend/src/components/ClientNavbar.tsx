@@ -12,8 +12,9 @@ const Navbar = () => {
         <ul className="nav-menu">
            <li><Link to="/client/postjob" className="nav-link">Post a Job</Link></li>
            <li><Link to="/client/alljobs" className="nav-link">All Jobs</Link></li>
-           {/* <li><Link to="/client/clientDashboard" className="nav-link">View Proposals</Link></li> */}
+           <li><Link to="/client/dashboard" className="nav-link">Dashboard</Link></li>
            <li><Link to="/client/notifications" className="nav-link">Notifications</Link></li>
+           <li><Link to="/client/tasks" className="nav-link">Tasks</Link></li>
 
         </ul>
 

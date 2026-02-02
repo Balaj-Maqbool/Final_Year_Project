@@ -7,6 +7,7 @@ import { jobHandler } from "./services/jobHandler";
 export interface Job {
   _id: string;
   title: string;
+  status: string;
   description: string;
   budget: number;
   deadline: string;
@@ -71,9 +72,13 @@ const AllJobs = () => {
                 </p>
 
 
-                <Button onClick={() => navigate(`/client/view-bids/${job._id}`)} variant="primary" size="sm">
+                <Button style={{marginRight: "10px"}} onClick={() => navigate(`/client/view-bids/${job._id}`)} variant="secondary" size="sm">
                   View Bids
                 </Button>
+
+                <Button disabled={job.status !== "Assigned"} onClick={() => navigate(`/client/tasks/${job._id}`)} variant="tertiary" size="sm">
+                  View Tasks
+                </Button> 
 
                 {/* <Button onClick={()=>console.log(job)}  className="m-2" variant="secondary" size="sm">
                   Details
