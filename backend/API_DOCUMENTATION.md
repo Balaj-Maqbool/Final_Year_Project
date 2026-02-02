@@ -91,10 +91,11 @@
 
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
-| **POST** | `/start` | Start/Get Chat Thread | **JSON**: <br>`{ "recipientId": "user_id_here" }` <br>*(Used for Lazy Initialization)* |
+| **POST** | `/start/:bidId` | Start/Get Chat Thread | **Param**: `bidId` <br>*(Used for Lazy Initialization)* |
 | **GET** | `/` | Get my threads | **Query**: `?page=1` `?limit=10` |
 | **DELETE** | `/:threadId` | Hide/Delete thread | **Param**: `threadId` |
 | **GET** | `/:threadId/messages` | Get/Load messages | **Param**: `threadId` <br>**Query**: `?page=1` `?limit=20` |
+| **PATCH** | `/:threadId/read` | Mark Messages as Read | **Param**: `threadId` |
 | **DELETE** | `/messages/:messageId` | Delete a specific message | **Param**: `messageId` |
 | **POST** | `/:threadId/block` | Block a thread/user | **Param**: `threadId` |
 | **POST** | `/:threadId/unblock` | Unblock a thread/user | **Param**: `threadId` |

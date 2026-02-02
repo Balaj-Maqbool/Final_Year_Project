@@ -5,20 +5,19 @@ import { ChatThread, Message } from "../models/chat.model.js";
 import { Bid } from "../models/bid.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
+import { socketManager } from "../streams/socket.js";
+import { chatService } from "../services/chat.service.js";
 import mongoose from "mongoose";
 
 /**
  * Lazy Initialization of Chat Thread.
- * Called when a Client initiates a chat with a Freelancer from a Bid.
  */
 const initializeChat = asyncHandler(async (req, res) => {
     const { bidId } = req.params;
-    console.log(bidId);
-
 
     ValidationHelper.validateId(bidId, "Invalid Bid ID");
 
-
+    // 1. Check if thread already exists
     const existingThread = await ChatThread.findOne({ bidId });
     if (existingThread) {
         // If it was hidden for this user, unhide it
@@ -34,14 +33,11 @@ const initializeChat = asyncHandler(async (req, res) => {
         );
     }
 
-
+    // 2. Fetch Bid details
     const bid = await Bid.findById(bidId);
     if (!bid) {
         throw new ApiError(404, "Bid not found");
     }
-
-    // Security: Only Job Poster (Client) or Bidder (Freelancer) can start
-
 
     await bid.populate("job_id");
     const job = bid.job_id;
@@ -50,26 +46,24 @@ const initializeChat = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Associated Job not found");
     }
 
-    // Security: Only Job Poster (Client) can start a new conversation
     if (req.user.role !== "Client") {
         throw new ApiError(403, "Only the Client can initiate a new conversation.");
     }
 
     const participants = [job.poster_id, bid.user_id];
 
-
     if (!participants.some(p => p.toString() === req.user._id.toString())) {
         throw new ApiError(403, "You are not authorized to start this chat");
     }
 
-
+    // 3. Create New Thread
     const newThread = await ChatThread.create({
         participants,
         jobId: job._id,
         bidId: bid._id
     });
 
-
+    // 4. Notify (DB Notification for this important event)
     const recipientId = participants.find(p => p.toString() !== req.user._id.toString());
     await NotificationService.notifyChatInitiated(recipientId, req.user);
 
@@ -80,7 +74,6 @@ const initializeChat = asyncHandler(async (req, res) => {
 
 /**
  * Get all threads for the current user.
- * Filters out threads hidden by the user.
  */
 const getMyThreads = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
@@ -127,7 +120,7 @@ const getMyThreads = asyncHandler(async (req, res) => {
 });
 
 /**
- * Get messages for a specific thread with pagination.
+ * Get messages for a specific thread.
  */
 const getThreadMessages = asyncHandler(async (req, res) => {
     const { threadId } = req.params;
@@ -135,16 +128,37 @@ const getThreadMessages = asyncHandler(async (req, res) => {
 
     ValidationHelper.validateId(threadId, "Invalid Thread ID");
 
-
     const thread = await ChatThread.findById(threadId);
     if (!thread || !thread.participants.includes(req.user._id)) {
         throw new ApiError(404, "Chat thread not found or access denied");
     }
 
-
     const aggregate = Message.aggregate([
         { $match: { threadId: new mongoose.Types.ObjectId(threadId) } },
-        { $sort: { createdAt: -1 } }
+        { $sort: { createdAt: -1 } },
+        {
+            $lookup: {
+                from: "messages",
+                localField: "replyTo",
+                foreignField: "_id",
+                as: "replyTo",
+                pipeline: [
+                    {
+                        $project: {
+                            content: 1,
+                            attachments: 1,
+                            from: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $unwind: {
+                path: "$replyTo",
+                preserveNullAndEmptyArrays: true
+            }
+        }
     ]);
 
     const options = {
@@ -177,12 +191,12 @@ const deleteMessage = asyncHandler(async (req, res) => {
     }
 
     message.isDeleted = true;
-    message.content = "This message was deleted"; // Placeholder
+    message.content = "This message was deleted";
+    message.attachments = []; // Clear attachments
     await message.save();
 
-    // Broadcast Deletion Event
-    await chatManager.broadcastToThread(message.threadId, {
-        type: "MESSAGE_DELETED",
+    // Broadcast Deletion Event via Socket
+    socketManager.emitToRoom(message.threadId.toString(), "message_deleted", {
         messageId: message._id,
         threadId: message.threadId
     });
@@ -193,11 +207,10 @@ const deleteMessage = asyncHandler(async (req, res) => {
 });
 
 /**
- * Hide/Delete Thread for Me.
+ * Hide Thread for Me.
  */
 const deleteThread = asyncHandler(async (req, res) => {
     const { threadId } = req.params;
-
     ValidationHelper.validateId(threadId, "Invalid Thread ID");
 
     const thread = await ChatThread.findById(threadId);
@@ -209,7 +222,6 @@ const deleteThread = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Access denied");
     }
 
-    // Add user to hiddenFor array if not already there
     if (!thread.hiddenFor.includes(req.user._id)) {
         thread.hiddenFor.push(req.user._id);
         await thread.save();
@@ -222,7 +234,6 @@ const deleteThread = asyncHandler(async (req, res) => {
 
 const blockThread = asyncHandler(async (req, res) => {
     const { threadId } = req.params;
-
     ValidationHelper.validateId(threadId, "Invalid Thread ID");
 
     const thread = await ChatThread.findById(threadId);
@@ -231,7 +242,7 @@ const blockThread = asyncHandler(async (req, res) => {
     if (!thread.participants.includes(req.user._id)) {
         throw new ApiError(403, "Access denied");
     }
-    if (thread.status == "blocked") {
+    if (thread.status === "blocked") {
         throw new ApiError(403, "Thread is already blocked");
     }
 
@@ -239,12 +250,17 @@ const blockThread = asyncHandler(async (req, res) => {
     thread.blockedBy = req.user._id;
     await thread.save();
 
+    // Broadcast Block Event
+    socketManager.emitToRoom(threadId, "thread_blocked", {
+        threadId,
+        blockedBy: req.user._id
+    });
+
     return res.status(200).json(new ApiResponse(200, thread, "Thread blocked"));
 });
 
 const unblockThread = asyncHandler(async (req, res) => {
     const { threadId } = req.params;
-
     ValidationHelper.validateId(threadId, "Invalid Thread ID");
 
     const thread = await ChatThread.findById(threadId);
@@ -254,7 +270,7 @@ const unblockThread = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only the user who blocked this thread can unblock it");
     }
 
-    if (thread.status == "active") {
+    if (thread.status === "active") {
         throw new ApiError(403, "Thread is already unblocked");
     }
 
@@ -262,43 +278,29 @@ const unblockThread = asyncHandler(async (req, res) => {
     thread.blockedBy = null;
     await thread.save();
 
+    // Broadcast Unblock Event
+    socketManager.emitToRoom(threadId, "thread_unblocked", {
+        threadId,
+        unblockedBy: req.user._id
+    });
+
     return res.status(200).json(new ApiResponse(200, thread, "Thread unblocked"));
 });
 
-
 const markMessagesAsRead = asyncHandler(async (req, res) => {
     const { threadId } = req.params;
-
     ValidationHelper.validateId(threadId, "Invalid Thread ID");
 
+    // Delegate to Service
+    const success = await chatService.markMessagesAsRead(threadId, req.user._id);
 
-    const thread = await ChatThread.findById(threadId);
-    if (!thread || !thread.participants.includes(req.user._id)) {
-        throw new ApiError(404, "Thread not found or access denied");
-    }
-
-
-    await Message.updateMany(
-        {
+    if (success) {
+        // Broadcast Read Receipt
+        socketManager.emitToRoom(threadId, "messages_read", {
             threadId,
-            from: { $ne: req.user._id },
-            status: { $ne: "read" }
-        },
-        { $set: { status: "read" } }
-    );
-
-
-    if (thread.unreadCounts) {
-        thread.unreadCounts.set(req.user._id.toString(), 0);
-        await thread.save();
+            readerId: req.user._id
+        });
     }
-
-
-    await chatManager.broadcastToThread(threadId, {
-        type: "MESSAGES_READ",
-        threadId,
-        readerId: req.user._id
-    });
 
     return res.status(200).json(new ApiResponse(200, {}, "Messages marked as read"));
 });

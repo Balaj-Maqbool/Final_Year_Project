@@ -1,7 +1,7 @@
 # Chat Architecture & Workflow
 
 ## 1. Core Concept
-A real-time chat system built on **WebSockets (`ws`)** running on the same port as the Express server. It uses a **2-Model Approach** to separate conversation context (`ChatThread`) from the actual content (`Message`), with strict access control based on **Bid Status**.
+A real-time chat system built on **Socket.io** running on the same port as the Express server. It uses a **2-Model Approach** to separate conversation context (`ChatThread`) from the actual content (`Message`), with strict access control based on **Bid Status**.
 
 ---
 
@@ -32,14 +32,13 @@ Represents a unique conversation channel between a Client and a Freelancer for a
 2.  **Action**: System automatically checks if a thread exists. If not, it creates a new `ChatThread` linked to that Job+Bid.
 
 ### Phase 2: Sending Messages (The Gatekeeper)
-When a user attempts to send a message via WebSocket:
+When a user attempts to send a message via Socket.io:
 
 1.  **Participant Check**: Is the sender part of this Thread?
 2.  **Bid Status Check**:
     *   **Pending Bid**:
         *   ✅ **Text**: Allowed (Negotiation).
-        *   ❌ **Files**: Blocked (Security).
-        *   ⚠️ **Rate Limit**: Applied.
+        *   ❌ **Files**: Blocked (Security logic in Controller).
     *   **Accepted Bid**:
         *   ✅ **Text**: Allowed.
         *   ✅ **Files**: Allowed.
@@ -47,28 +46,29 @@ When a user attempts to send a message via WebSocket:
         *   ❌ **All Actions**: Blocked (Read-Only).
 
 ### Phase 3: Delivery & Status
-1.  **Server Receive**: Server gets JSON payload.
-2.  **Save**: Message saved to MongoDB with status `"sent"`.
-3.  **Forward**:
-    *   **One-on-One**: Lookup recipient in `ChatManager`.
-    *   **If Online**: Send immediately via WS. Status -> `"delivered"`.
-    *   **If Offline**: Do nothing (Client fetches on reconnect).
-4.  **Read Receipt**: When recipient opens chat, front-end sends `READ_ACK`, server updates message status to `"read"`.
+1.  **Server Receive**: Server gets `send_message` event.
+2.  **Check Presence**: 
+    *   Is Recipient Online? -> Status = `"delivered"`.
+    *   Is Recipient Offline? -> Status = `"sent"`.
+3.  **Save**: Message saved to MongoDB.
+4.  **Forward**:
+    *   **Broadcast**: Emits `new_message` to the thread Room (Thread ID).
+    *   **Notification**: If Recipient is online but NOT in the thread room, emit `new_message_notification`.
+5.  **Read Receipt**: When recipient calls API `mark_read` or emits `mark_read`, server updates DB + emits `messages_read`.
 
 ---
 
 ## 4. File Handling (Future / Postponed)
 *   **Strategy**: Signed URLs (Direct Upload).
 *   **Flow**:
-    1.  Client requests "Upload Signature" from API (`POST /api/chat/sign-upload`).
-    2.  Server verifies logic (Bid Accepted?) and returns Signed URL (Cloudinary/S3).
-    3.  Client uploads file directly to Cloud.
-    4.  Client sends the *Link* via WebSocket as a normal message attachment.
+    1.  Client uploads file to Cloudinary via REST API.
+    2.  Client receives URL.
+    3.  Client sends URL in `attachments` array via Socket.io.
 
 ---
 
 ## 5. Technical Implementation Steps
-1.  **Server Upgrade**: Modify `index.js` to expose raw HTTP server for dual HTTP/WS handling.
-2.  **Handshake Auth**: Manual JWT verification during WebSocket `upgrade` event (reading Cookies).
-3.  **ChatManager**: In-memory Map for `UserId -> WebSocket` management.
-4.  **Disconnect Handling**: Auto-update "Last Seen" and cleanup connections.
+1.  **Server Upgrade**: `SocketManager` initialized with `httpServer`.
+2.  **Handshake Auth**: JWT verification via Cookies or `Authorization` header during handshake.
+3.  **SocketManager**: Singleton class handling `io` instance, online presence (`Map<UserId, Set<SocketId>>`), and room management.
+4.  **Disconnect Handling**: Auto-cleanup of `onlineUsers` map.

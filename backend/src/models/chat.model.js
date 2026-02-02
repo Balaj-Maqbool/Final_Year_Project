@@ -86,6 +86,11 @@ const messageSchema = new Schema(
             enum: ["sent", "delivered", "read"],
             default: "sent"
         },
+        replyTo: {
+            type: Schema.Types.ObjectId,
+            ref: "Message",
+            default: null
+        },
         isDeleted: {
             type: Boolean,
             default: false
