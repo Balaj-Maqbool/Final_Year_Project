@@ -84,9 +84,26 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Task not found");
     }
 
-    // Only assigned freelancer can update status
-    if (task.assigned_user_id.toString() !== req.user._id.toString()) {
-        throw new ApiError(403, "Only the assigned freelancer can update task status");
+    // Auth check: User must be either Assigned Freelancer OR Job Poster (Client)
+    const job = await Job.findById(task.job_id);
+    if (!job) {
+        throw new ApiError(404, "Job not found");
+    }
+
+    const isFreelancer = task.assigned_user_id.toString() === req.user._id.toString();
+    const isPoster = job.poster_id.toString() === req.user._id.toString();
+
+    if (!isFreelancer && !isPoster) {
+        throw new ApiError(403, "You are not authorized to update this task");
+    }
+
+    // Business Logic:
+    // Freelancer can move to: "In Progress", "Done" (Submit)
+    // Client can move to: "In Progress" (Request Changes)
+    
+    // Optional: Prevent Client from marking as "Done" directly? (Let freelancer do it)
+    if (isPoster && status === "Done") {
+         // Maybe allow it or leave strict? Let's allow flexibility for now.
     }
 
     // If task is already approved, status shouldn't change? (Optional business rule)
@@ -97,13 +114,13 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     task.status = status;
     await task.save();
 
-    // SSE: Notify Client (Job Poster)
-    // Need to fetch job to find poster
-    const job = await Job.findById(task.job_id);
+    // SSE: Notify proper recipient
+    const recipientId = isPoster ? task.assigned_user_id : job.poster_id;
+
     if (job) {
-        sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
+        sseManager.sendToUser(recipientId, "DASHBOARD_UPDATE", {
             type: "TASK_STATUS_UPDATE",
-            message: `Task '${task.title}' moved to ${status}`,
+            message: `Task '${task.title}' updated to ${status}`,
             taskId: task._id
         });
     }

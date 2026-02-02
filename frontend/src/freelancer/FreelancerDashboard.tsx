@@ -131,6 +131,7 @@ const Dashboard = () => {
                     <th>Status</th>
                     <th>Deadline</th>
                     <th>Action</th>
+                    <th>Tasks</th>
                   </tr>
                 </thead>
 
@@ -150,12 +151,16 @@ const Dashboard = () => {
                       <td>
                         <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}`}>View Details</Button>
                       </td>
+                      <td>
+                        <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}/tasks`}>View Tasks</Button>
+                      </td>
                     </tr>
                   ))}
                   {(!data?.activeJobs || data.activeJobs.length === 0) && (
                     <tr>
                       <td colSpan={4} className="text-center py-4 text-muted">No active jobs found</td>
                     </tr>
+                    
                   )}
                 </tbody>
               </Table>

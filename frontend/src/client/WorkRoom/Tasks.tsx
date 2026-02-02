@@ -44,8 +44,25 @@ const Tasks = () => {
         }
     });
 
+    const submitTaskMutation = useMutation({
+        mutationFn: ({ taskId, status }: { taskId: string; status: string }) =>
+            updateTaskStatus(taskId, status),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
+        },
+        onError: (err: any) => {
+            alert(`Failed to update task: ${err.message}`);
+        }
+    });
+
     const handleCreateTask = (title: string, description: string) => {
         createTaskMutation.mutate({ title, description });
+    };
+
+    const handleRequestChanges = (taskId: string) => {
+        if (window.confirm("Request changes for this task? It will be moved back to 'In Progress'.")) {
+            submitTaskMutation.mutate({ taskId, status: "In Progress" });
+        }
     };
 
     const handleApprove = (taskId: string) => {
@@ -92,10 +109,10 @@ const Tasks = () => {
                                 <td>{task.description}</td>
                                 <td>
                                     <Badge bg={
-                                        task.status === "Completed" ? "success" :
+                                        task.status === "Done" ? "info" :
                                             task.status === "In Progress" ? "warning" : "secondary"
                                     }>
-                                        {task.status}
+                                        {task.status === "Done" ? "Submitted" : task.status}
                                     </Badge>
                                 </td>
                                 <td>
@@ -106,15 +123,25 @@ const Tasks = () => {
                                     )}
                                 </td>
                                 <td>
-                                    {!task.is_approved && task.status === "Completed" && (
-                                        <Button
-                                            variant="success"
-                                            size="sm"
-                                            onClick={() => handleApprove(task._id)}
-                                            disabled={approveTaskMutation.isPending}
-                                        >
-                                            Approve
-                                        </Button>
+                                    {!task.is_approved && task.status === "Done" && (
+                                        <div className="d-flex gap-2">
+                                            <Button
+                                                variant="success"
+                                                size="sm"
+                                                onClick={() => handleApprove(task._id)}
+                                                disabled={approveTaskMutation.isPending}
+                                            >
+                                                Approve
+                                            </Button>
+                                            <Button
+                                                variant="warning"
+                                                size="sm"
+                                                onClick={() => handleRequestChanges(task._id)}
+                                                disabled={submitTaskMutation.isPending}
+                                            >
+                                                Request Changes
+                                            </Button>
+                                        </div>
                                     )}
                                 </td>
                             </tr>

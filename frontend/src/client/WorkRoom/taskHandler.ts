@@ -4,7 +4,7 @@ export interface Task {
     _id: string;
     title: string;
     description: string;
-    status: "Pending" | "In Progress" | "Completed";
+    status: "Pending" | "In Progress" | "Completed" | "Done";
     is_approved: boolean;
     job_id: string;
     assigned_to: string;

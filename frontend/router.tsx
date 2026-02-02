@@ -63,7 +63,7 @@ const router = createBrowserRouter([
       { path: 'my-bids', element: <MyBids /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'notifications', element: <FreelancerNotifications /> },
-      { path: "tasks/:jobId", element: <FreelancerTasks /> }
+      { path: "jobs/:jobId/tasks", element: <FreelancerTasks /> }
 
     ],
   },

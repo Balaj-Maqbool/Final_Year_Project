@@ -3,14 +3,14 @@
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, Button, Badge, Alert, Spinner, Container } from "react-bootstrap";
-import { getTasks,  updateTaskStatus,  } from "../../client/WorkRoom/taskHandler";
+import { getTasks, updateTaskStatus, } from "../../client/WorkRoom/taskHandler";
 import type { Task } from "../../client/WorkRoom/taskHandler";
 
 
 const FreelancerTasks = () => {
     const { jobId } = useParams<{ jobId: string }>();
     const queryClient = useQueryClient();
-  
+
 
     // Fetch Tasks
     const { data: tasks = [], isLoading, isError, error } = useQuery({
@@ -19,23 +19,23 @@ const FreelancerTasks = () => {
         enabled: !!jobId,
     });
 
-    
- 
-    // Approve Task Mutation
+
+
+    // Update Task Status Mutation
     const submitTaskMutation = useMutation({
-        mutationFn: updateTaskStatus,
+        mutationFn: ({ taskId, status }: { taskId: string; status: string }) =>
+            updateTaskStatus(taskId, status),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
         },
         onError: (err: any) => {
-            alert(`Failed to approve task: ${err.message}`);
+            alert(`Failed to update task: ${err.message}`);
         }
     });
 
-
-    const handleApprove = (taskId: string) => {
-        if (window.confirm("Approve this task?")) {
-            submitTaskMutation.mutate(taskId);
+    const handleStatusUpdate = (taskId: string, newStatus: string) => {
+        if (window.confirm(`Mark this task as ${newStatus}?`)) {
+            submitTaskMutation.mutate({ taskId, status: newStatus });
         }
     };
 
@@ -46,7 +46,6 @@ const FreelancerTasks = () => {
         <Container className="my-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Project Tasks</h2>
-              
             </div>
 
 
@@ -70,10 +69,10 @@ const FreelancerTasks = () => {
                                 <td>{task.description}</td>
                                 <td>
                                     <Badge bg={
-                                        task.status === "Completed" ? "success" :
+                                        task.status === "Done" ? "success" :
                                             task.status === "In Progress" ? "warning" : "secondary"
                                     }>
-                                        {task.status}
+                                        {task.status === "Done" ? "Submitted" : task.status}
                                     </Badge>
                                 </td>
                                 <td>
@@ -84,14 +83,24 @@ const FreelancerTasks = () => {
                                     )}
                                 </td>
                                 <td>
-                                    {!task.is_approved && task.status === "Completed" && (
+                                    {task.status === "Pending" && (
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => handleStatusUpdate(task._id, "In Progress")}
+                                            disabled={submitTaskMutation.isPending}
+                                        >
+                                            Start Task
+                                        </Button>
+                                    )}
+                                    {task.status === "In Progress" && (
                                         <Button
                                             variant="success"
                                             size="sm"
-                                            onClick={() => handleApprove(task._id)}
-                                            disabled={approveTaskMutation.isPending}
+                                            onClick={() => handleStatusUpdate(task._id, "Done")}
+                                            disabled={submitTaskMutation.isPending}
                                         >
-                                            Approve
+                                            Submit Task
                                         </Button>
                                     )}
                                 </td>
