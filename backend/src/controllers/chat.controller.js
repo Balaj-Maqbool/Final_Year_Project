@@ -7,6 +7,7 @@ import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 import { socketManager } from "../streams/socket.js";
 import { chatService } from "../services/chat.service.js";
+import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import mongoose from "mongoose";
 
 /**
@@ -190,9 +191,19 @@ const deleteMessage = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You can only delete your own messages");
     }
 
+    // 1. Delete attachments from Cloudinary (Prevent Orphaned Files)
+    if (message.attachments && message.attachments.length > 0) {
+        const deletePromises = message.attachments.map(async (att) => {
+            if (att.publicId) {
+                await CloudinaryHelper.delete(att.publicId, att.resourceType || "image");
+            }
+        });
+        await Promise.all(deletePromises);
+    }
+
     message.isDeleted = true;
     message.content = "This message was deleted";
-    message.attachments = []; // Clear attachments
+    message.attachments = []; // Clear attachments in DB
     await message.save();
 
     // Broadcast Deletion Event via Socket

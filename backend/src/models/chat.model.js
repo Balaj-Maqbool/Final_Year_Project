@@ -97,7 +97,9 @@ const messageSchema = new Schema(
         },
         attachments: [
             {
-                type: String // Cloudinary URLs
+                url: { type: String, required: true },
+                publicId: { type: String, required: true },
+                resourceType: { type: String, default: "auto" }
             }
         ]
     },

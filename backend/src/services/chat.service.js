@@ -50,7 +50,8 @@ class ChatService {
     }
 
     /**
-     * Persist a new message and update the thread.
+     * Persist a new message.
+     * @param {Array<{url: string, publicId: string, resourceType: string}>} attachments 
      */
     async saveMessage(threadId, senderId, content, attachments = [], status = "sent", replyTo = null) {
         const thread = await ChatThread.findById(threadId);

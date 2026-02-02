@@ -63,7 +63,8 @@ const sendMessage = (content, attachments = []) => {
   socket.emit("send_message", {
     threadId,
     content,
-    attachments // Array of URLs (Strings)
+    // Attachments must be uploaded via Media API first
+    attachments // Array of { url, publicId, resourceType }
   });
   // Optimistically add to UI with status: "sending"
 };
@@ -132,4 +133,4 @@ The `new_message` event payload matches the API response:
 ## 5. Implementation Tips
 1.  **Optimistic UI**: Add messages to the list immediately when sending. Update their status when the server ack/event comes back (or just trust the `new_message` event).
 2.  **Unread Counts**: Use the `unreadCounts` map from the `ChatThread` object returned by `/api/v1/chats`.
-3.  **Attachments**: Upload file to your Media API first -> Get URL -> Send URL in Socket message.
+3.  **Attachments**: See `FRONTEND_MEDIA_GUIDE.md`. Upload file -> Get Metadata (url, publicId) -> Send in Socket message.

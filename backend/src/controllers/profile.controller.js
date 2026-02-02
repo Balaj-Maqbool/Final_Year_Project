@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { CLOUDINARY_ROOT_FOLDER } from "../constants.js";
 
 const getCurrentUser = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
@@ -57,9 +58,12 @@ const updateUserProfileImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Profile Image file is missing");
     }
 
-    const profileImage = await CloudinaryHelper.upload(profileImageLocalPath);
+    const profileImage = await CloudinaryHelper.upload(
+        profileImageLocalPath,
+        `${CLOUDINARY_ROOT_FOLDER}/Users/${req.user._id}/Profile`
+    );
 
-    if (!profileImage.url) {
+    if (!profileImage.secure_url) {
         throw new ApiError(400, "Error while uploading profile image");
     }
 
@@ -67,7 +71,7 @@ const updateUserProfileImage = asyncHandler(async (req, res) => {
         req.user._id,
         {
             $set: {
-                profileImage: profileImage.url
+                profileImage: profileImage.secure_url
             }
         },
         { new: true }
@@ -85,9 +89,14 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cover Image file is missing");
     }
 
-    const coverImage = await CloudinaryHelper.upload(coverImageLocalPath);
+    const coverImage = await CloudinaryHelper.upload(
+        coverImageLocalPath,
+        `${CLOUDINARY_ROOT_FOLDER}/Users/${req.user._id}/Cover`
+    );
 
-    if (!coverImage.url) {
+
+
+    if (!coverImage.secure_url) {
         throw new ApiError(400, "Error while uploading cover image");
     }
 
@@ -95,7 +104,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         req.user._id,
         {
             $set: {
-                coverImage: coverImage.url
+                coverImage: coverImage.secure_url
             }
         },
         { new: true }

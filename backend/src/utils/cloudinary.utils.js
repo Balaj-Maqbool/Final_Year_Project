@@ -1,5 +1,6 @@
 import { cloudinary } from "../config/cloudinary.js";
 import fs from "fs";
+import { CLOUDINARY_ROOT_FOLDER } from "../constants.js";
 
 /**
  * CloudinaryHelper provides utility functions for managing Cloudinary assets.
@@ -11,19 +12,19 @@ class CloudinaryHelper {
      * @param {string} localFilePath - Path to the local file.
      * @returns {Promise<object|null>} - Cloudinary upload response or null.
      */
-    static async upload(localFilePath) {
+    static async upload(localFilePath, folder = CLOUDINARY_ROOT_FOLDER) {
         try {
             if (!localFilePath) return null;
 
             const response = await cloudinary.uploader.upload(localFilePath, {
                 resource_type: "auto",
-                folder: "Project-00",
+                folder: folder,
             });
-
+            // console.log(response);
+            
             fs.unlink(localFilePath, (err) => {
                 if (err) console.error("Error deleting temp file:", err);
             });
-
             return response;
         } catch (error) {
             fs.unlink(localFilePath, (err) => {
@@ -65,16 +66,17 @@ class CloudinaryHelper {
         if (!url || typeof url !== "string") return null;
 
         try {
-            const parts = url.split("/");
-            if (parts.length < 2) return null;
+            // Logic: Find the segment after version number (v12345) OR after 'upload/'
+            // URL: https://res.cloudinary.com/cloudname/image/upload/v12345678/Folder/Subfolder/image.jpg
 
-            const filenameWithExt = parts[parts.length - 1];
-            const folder = parts[parts.length - 2];
+            const regex = /\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/;
+            const match = url.match(regex);
 
+            if (match && match[1]) {
+                return match[1]; // Returns "Folder/Subfolder/image"
+            }
 
-            const publicIdWithoutFolder = filenameWithExt.split(".")[0];
-
-            return `${folder}/${publicIdWithoutFolder}`;
+            return null;
         } catch (error) {
             console.error("Error extracting Public ID from Cloudinary URL:", error);
             return null;

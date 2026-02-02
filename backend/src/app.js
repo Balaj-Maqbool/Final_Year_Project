@@ -56,6 +56,9 @@ app.use("/api/v1/stream", streamRouter);
 import chatRouter from "./routes/chat.routes.js";
 app.use("/api/v1/chats", chatRouter);
 
+import mediaRouter from "./routes/media.routes.js";
+app.use("/api/v1/media", mediaRouter);
+
 
 app.get("/", (req, res) => {
     res.send("API is running...");
