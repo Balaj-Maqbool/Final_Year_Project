@@ -1,5 +1,5 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
-import { sseManager } from "../utils/SSEManager.js";
+import { sseManager } from "../streams/SSEManager.js";
 import { ApiError } from "../utils/ApiError.js";
 
 /**

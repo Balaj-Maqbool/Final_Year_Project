@@ -3,14 +3,16 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Task } from "../models/task.model.js";
 import { Job } from "../models/job.model.js";
-import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
+import { NotificationService } from "../services/notification.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const createTask = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
     const { title, description } = req.body;
 
-    if (!title) {
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
+
+    if (ValidationHelper.isEmpty(title)) {
         throw new ApiError(400, "Task title is required");
     }
 
@@ -36,11 +38,8 @@ const createTask = asyncHandler(async (req, res) => {
         assigned_user_id: job.assigned_to
     });
 
-    sseManager.sendToUser(job.assigned_to, "DASHBOARD_UPDATE", {
-        type: "NEW_TASK",
-        message: "New task assigned to you",
-        taskId: task._id
-    });
+    // Use NotificationService
+    await NotificationService.notifyNewTask(job.assigned_to, task);
 
     return res.status(201).json(
         new ApiResponse(201, task, "Task created successfully")
@@ -49,6 +48,8 @@ const createTask = asyncHandler(async (req, res) => {
 
 const getJobTasks = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
+
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     // Validate Job exists
     const job = await Job.findById(jobId);
@@ -64,7 +65,19 @@ const getJobTasks = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not authorized to view tasks for this job");
     }
 
-    const tasks = await Task.find({ job_id: jobId }).sort({ createdAt: 1 });
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Task.aggregate([
+        { $match: { job_id: new mongoose.Types.ObjectId(jobId) } },
+        { $sort: { createdAt: 1 } }
+    ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const tasks = await Task.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
         new ApiResponse(200, tasks, "Tasks fetched successfully")
@@ -74,6 +87,8 @@ const getJobTasks = asyncHandler(async (req, res) => {
 const updateTaskStatus = asyncHandler(async (req, res) => {
     const { taskId } = req.params;
     const { status } = req.body;
+
+    ValidationHelper.validateId(taskId, "Invalid Task ID");
 
     if (!["To Do", "In Progress", "Done"].includes(status)) {
         throw new ApiError(400, "Invalid status");
@@ -101,11 +116,8 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     // Need to fetch job to find poster
     const job = await Job.findById(task.job_id);
     if (job) {
-        sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
-            type: "TASK_STATUS_UPDATE",
-            message: `Task '${task.title}' moved to ${status}`,
-            taskId: task._id
-        });
+        // Use NotificationService
+        await NotificationService.notifyTaskStatusUpdate(job.poster_id, task, status);
     }
 
     return res.status(200).json(
@@ -116,12 +128,14 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
 const approveTask = asyncHandler(async (req, res) => {
     const { taskId } = req.params;
 
+    ValidationHelper.validateId(taskId, "Invalid Task ID");
+
     const task = await Task.findById(taskId);
     if (!task) {
         throw new ApiError(404, "Task not found");
     }
 
-    // Must search for job to verify ownership
+
     const job = await Job.findById(task.job_id);
     if (!job) {
         throw new ApiError(404, "Associated Job not found");
@@ -140,11 +154,8 @@ const approveTask = asyncHandler(async (req, res) => {
     await task.save();
 
     // SSE: Notify Freelancer of approval
-    sseManager.sendToUser(task.assigned_user_id, "DASHBOARD_UPDATE", {
-        type: "TASK_APPROVED",
-        message: `Your task '${task.title}' was approved`,
-        taskId: task._id
-    });
+    // Use NotificationService
+    await NotificationService.notifyTaskApproved(task.assigned_user_id, task);
 
     return res.status(200).json(
         new ApiResponse(200, task, "Task approved successfully")

@@ -5,18 +5,21 @@ import { Rating } from "../models/rating.model.js";
 import { Job } from "../models/job.model.js";
 import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
+import { NotificationService } from "../services/notification.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const addRating = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
     const { rating, comment } = req.body;
 
-    // 1. Role Check: Only Clients can rate
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
+
+
     if (req.user.role !== "Client") {
         throw new ApiError(403, "Only Clients can submit ratings");
     }
 
-    if (!rating || !comment) {
+    if (ValidationHelper.isEmpty(rating) || ValidationHelper.isEmpty(comment)) {
         throw new ApiError(400, "Rating (1-5) and comment are required");
     }
 
@@ -29,17 +32,17 @@ const addRating = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-    // 2. Authorization: Client must be the Job Poster
+
     if (job.poster_id.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "You can only rate freelancers for your own jobs");
     }
 
-    // 3. Job Status: Should be Assigned or Completed
+
     if (job.status === "Open") {
         throw new ApiError(400, "Cannot rate a freelancer on an Open job. Job must be Assigned or Completed.");
     }
 
-    // 4. Target User: Must be the assigned freelancer
+
     const freelancerId = job.assigned_to;
     if (!freelancerId) {
         throw new ApiError(400, "No freelancer is assigned to this job");
@@ -64,7 +67,7 @@ const addRating = asyncHandler(async (req, res) => {
         comment
     });
 
-    // 5. Update Freelancer's Average Rating
+
     const stats = await Rating.aggregate([
         {
             $match: {
@@ -92,12 +95,8 @@ const addRating = asyncHandler(async (req, res) => {
         await job.save();
     }
 
-    // SSE: Notify User of new Rating
-    sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
-        type: "NEW_RATING",
-        message: `You received a ${rating}-star rating on job '${job.title}'`,
-        jobId: jobId
-    });
+    // Use NotificationService
+    await NotificationService.notifyNewRating(freelancerId, job, rating);
 
     return res.status(201).json(
         new ApiResponse(201, newRating, "Rating submitted successfully")
@@ -107,7 +106,11 @@ const addRating = asyncHandler(async (req, res) => {
 const getFreelancerRatings = asyncHandler(async (req, res) => {
     const { freelancerId } = req.params;
 
-    const ratings = await Rating.aggregate([
+    ValidationHelper.validateId(freelancerId, "Invalid Freelancer ID");
+
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Rating.aggregate([
         {
             $match: {
                 rated_user_id: new mongoose.Types.ObjectId(freelancerId)
@@ -137,6 +140,13 @@ const getFreelancerRatings = asyncHandler(async (req, res) => {
         }
     ]);
 
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const ratings = await Rating.aggregatePaginate(aggregate, options);
+
     return res.status(200).json(
         new ApiResponse(200, ratings, "Ratings fetched successfully")
     );
@@ -146,7 +156,9 @@ const updateRating = asyncHandler(async (req, res) => {
     const { ratingId } = req.params;
     const { rating, comment } = req.body;
 
-    if (!rating && !comment) {
+    ValidationHelper.validateId(ratingId, "Invalid Rating ID");
+
+    if (ValidationHelper.isEmpty(rating) && ValidationHelper.isEmpty(comment)) {
         throw new ApiError(400, "Provide rating or comment to update");
     }
 
@@ -166,7 +178,7 @@ const updateRating = asyncHandler(async (req, res) => {
         existingRating.rating = rating;
     }
 
-    if (comment) {
+    if (!ValidationHelper.isEmpty(comment)) {
         existingRating.comment = comment;
     }
 

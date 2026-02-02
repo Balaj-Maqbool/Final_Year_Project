@@ -21,7 +21,7 @@ const getClientDashboard = asyncHandler(async (req, res) => {
         },
         {
             $facet: {
-                // 1. Overall Job Statistics
+
                 "jobStats": [
                     {
                         $group: {
@@ -48,7 +48,7 @@ const getClientDashboard = asyncHandler(async (req, res) => {
                         }
                     }
                 ],
-                // 2. Recent Jobs
+
                 "recentJobs": [
                     { $sort: { createdAt: -1 } },
                     { $limit: 5 },
@@ -120,7 +120,7 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
 
     const userId = req.user._id;
 
-    // 1. Bid Statistics
+
     const bidStats = await Bid.aggregate([
         {
             $match: {
@@ -234,7 +234,7 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
         }
     ]);
 
-    // 3. Pending Tasks (Across active jobs)
+
     const pendingTasks = await Task.aggregate([
         {
             $match: {

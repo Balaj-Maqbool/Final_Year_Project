@@ -1,4 +1,5 @@
 import { Notification } from "../models/notification.model.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 class SSEManager {
     // private variables
@@ -40,6 +41,12 @@ class SSEManager {
      * @param {object} req - The Express request object.
      */
     registerConnection(userId, role, res, req) {
+        if (ValidationHelper.isEmpty(userId)) {
+            res.writeHead(400);
+            res.end("Invalid User ID");
+            return;
+        }
+
         // 1. Set SSE Headers
         res.writeHead(200, {
             "Content-Type": "text/event-stream",
@@ -84,6 +91,7 @@ class SSEManager {
      * Sends an event to a specific user.
      */
     async sendToUser(userId, type, data, saveToDb = true) {
+        if (ValidationHelper.isEmpty(userId)) return false;
         const id = userId.toString();
 
         // 1. Persist to Database (if requested)

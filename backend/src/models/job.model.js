@@ -13,7 +13,8 @@ const jobSchema = new Schema(
         },
         budget: {
             type: Number,
-            required: true
+            required: true,
+            min: [1, "Budget must be at least 1"]
         },
         deadline: {
             type: Date,
@@ -49,5 +50,9 @@ const jobSchema = new Schema(
         timestamps: true
     }
 );
+
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
+jobSchema.plugin(mongooseAggregatePaginate);
 
 export const Job = mongoose.model("Job", jobSchema);

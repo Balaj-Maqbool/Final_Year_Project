@@ -41,4 +41,8 @@ const bidSchema = new Schema(
     }
 );
 
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
+bidSchema.plugin(mongooseAggregatePaginate);
+
 export const Bid = mongoose.model("Bid", bidSchema);

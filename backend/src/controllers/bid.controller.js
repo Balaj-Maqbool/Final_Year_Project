@@ -3,19 +3,23 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Bid } from "../models/bid.model.js";
 import { Job } from "../models/job.model.js";
+import { ChatThread } from "../models/chat.model.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
+import { NotificationService } from "../services/notification.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const placeBid = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
     const { bid_amount, message, timeline } = req.body;
     console.log("placeBid payload:", req.body);
 
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
+
     if (req.user.role !== "Freelancer") {
         throw new ApiError(403, "Only Freelancers can place bids");
     }
 
-    if (!bid_amount || !message || !timeline) {
+    if (ValidationHelper.isEmpty(bid_amount) || ValidationHelper.isEmpty(message) || ValidationHelper.isEmpty(timeline)) {
         throw new ApiError(400, "All fields (bid_amount, message, timeline) are required");
     }
 
@@ -54,12 +58,9 @@ const placeBid = asyncHandler(async (req, res) => {
         timeline
     });
 
-    // SSE: Notify Client (Job Poster)
-    sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
-        type: "NEW_BID",
-        message: "New bid received on your job",
-        jobId: jobId
-    });
+
+    // Use NotificationService to handle alerts
+    await NotificationService.notifyNewBid(job, bid);
 
     return res.status(201).json(
         new ApiResponse(201, bid, "Bid placed successfully")
@@ -70,9 +71,7 @@ const getJobBids = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
 
     // Validate jobId
-    if (!mongoose.isValidObjectId(jobId)) {
-        throw new ApiError(400, "Invalid Job ID");
-    }
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -84,7 +83,9 @@ const getJobBids = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not authorized to view bids for this job");
     }
 
-    const bids = await Bid.aggregate([
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Bid.aggregate([
         {
             $match: {
                 job_id: new mongoose.Types.ObjectId(jobId)
@@ -121,6 +122,13 @@ const getJobBids = asyncHandler(async (req, res) => {
         }
     ]);
 
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const bids = await Bid.aggregatePaginate(aggregate, options);
+
     return res.status(200).json(
         new ApiResponse(200, bids, "Bids fetched successfully")
     );
@@ -130,6 +138,9 @@ const getJobBids = asyncHandler(async (req, res) => {
 const updateBidStatus = asyncHandler(async (req, res) => {
     const { jobId, bidId } = req.params;
     const { status } = req.body; // "Accepted" or "Rejected"
+
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
+    ValidationHelper.validateId(bidId, "Invalid Bid ID");
 
     if (!["Accepted", "Rejected"].includes(status)) {
         throw new ApiError(400, "Invalid status. Use 'Accepted' or 'Rejected'");
@@ -166,12 +177,8 @@ const updateBidStatus = asyncHandler(async (req, res) => {
         // Optional: Reject all other pending bids? For now, we leave them or logic can be added here.
     }
 
-    // SSE: Notify Freelancer of decision
-    sseManager.sendToUser(bid.user_id, "DASHBOARD_UPDATE", {
-        type: "BID_STATUS_UPDATE",
-        message: `Your bid was ${status}`,
-        jobId: job._id
-    });
+    // Use NotificationService
+    await NotificationService.notifyBidStatusUpdate(bid.user_id, job, status);
 
     return res.status(200).json(
         new ApiResponse(200, bid, `Bid ${status.toLowerCase()} successfully`)
@@ -180,6 +187,9 @@ const updateBidStatus = asyncHandler(async (req, res) => {
 
 const withdrawBid = asyncHandler(async (req, res) => {
     const { jobId, bidId } = req.params;
+
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
+    ValidationHelper.validateId(bidId, "Invalid Bid ID");
 
     const bid = await Bid.findOne({ _id: bidId, job_id: jobId });
 
@@ -197,17 +207,12 @@ const withdrawBid = asyncHandler(async (req, res) => {
 
     await Bid.findByIdAndDelete(bidId);
 
-    // SSE: Notify Client that bid was withdrawn
+    // Use NotificationService
     if (bid.job_id) {
-        // Need to fetch job poster
         try {
             const job = await Job.findById(bid.job_id);
             if (job) {
-                sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
-                    type: "BID_WITHDRAWN",
-                    message: "A freelancer withdrew their bid",
-                    jobId: job._id
-                });
+                await NotificationService.notifyBidWithdrawn(job.poster_id, job._id);
             }
         } catch (error) {
             console.error("Error sending withdrawal notification:", error);
@@ -229,7 +234,9 @@ const getMyBids = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Unauthorized to view bids");
     }
 
-    const bids = await Bid.aggregate([
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Bid.aggregate([
         {
             $match: {
                 user_id: new mongoose.Types.ObjectId(req.user._id)
@@ -266,6 +273,13 @@ const getMyBids = asyncHandler(async (req, res) => {
         }
     ]);
 
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const bids = await Bid.aggregatePaginate(aggregate, options);
+
     return res.status(200).json(
         new ApiResponse(200, bids, "My bids fetched successfully")
     );
@@ -274,6 +288,8 @@ const getMyBids = asyncHandler(async (req, res) => {
 const updateBid = asyncHandler(async (req, res) => {
     const { bidId } = req.params;
     const { bid_amount, message, timeline } = req.body;
+
+    ValidationHelper.validateId(bidId, "Invalid Bid ID");
 
     const bid = await Bid.findById(bidId);
     if (!bid) {
@@ -288,9 +304,9 @@ const updateBid = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot update a bid that has been accepted or rejected");
     }
 
-    if (bid_amount) bid.bid_amount = bid_amount;
-    if (message) bid.message = message;
-    if (timeline) bid.timeline = timeline;
+    if (!ValidationHelper.isEmpty(bid_amount)) bid.bid_amount = bid_amount;
+    if (!ValidationHelper.isEmpty(message)) bid.message = message;
+    if (!ValidationHelper.isEmpty(timeline)) bid.timeline = timeline;
 
     await bid.save();
 
@@ -300,6 +316,8 @@ const updateBid = asyncHandler(async (req, res) => {
 });
 const getMyBidForJob = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
+
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     if (!req.user) {
         throw new ApiError(401, "Unauthorized");

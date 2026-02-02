@@ -4,10 +4,11 @@
  * @param {string} durationStr 
  * @returns {number | undefined} milliseconds
  */
-const parseDuration = (durationStr) => {
-    if (!durationStr) return undefined;
+import { ValidationHelper } from "./validation.utils.js";
 
-    // If it's already a number or string number, return it
+const parseDuration = (durationStr) => {
+    if (ValidationHelper.isEmpty(durationStr)) return undefined;
+
     if (!isNaN(durationStr)) return parseInt(durationStr);
 
     const match = durationStr.match(/^(\d+)([dDhHmMsS]+)$/);

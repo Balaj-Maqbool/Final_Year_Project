@@ -1,0 +1,12 @@
+import { Router } from "express";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { generateUploadSignature } from "../controllers/media.controller.js";
+
+const router = Router();
+
+// Secure this route: Only logged-in users can upload
+router.use(verifyJWT);
+
+router.get("/config", generateUploadSignature);
+
+export default router;

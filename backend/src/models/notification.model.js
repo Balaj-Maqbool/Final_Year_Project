@@ -19,6 +19,8 @@ const notificationSchema = new Schema(
                 "TASK_APPROVED",
                 "JOB_COMPLETED",
                 "NEW_RATING",
+                "CHAT",
+                "NEW_CHAT_MESSAGE",
                 "SYSTEM"],
             required: true
         },
@@ -28,8 +30,6 @@ const notificationSchema = new Schema(
         },
         relatedId: {
             type: Schema.Types.ObjectId,
-            // Dynamic ref could be complex, keeping it simple as ID.
-            // Or we can add relatedModel if needed.
         },
         isRead: {
             type: Boolean,
@@ -40,5 +40,9 @@ const notificationSchema = new Schema(
         timestamps: true
     }
 );
+
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
+notificationSchema.plugin(mongooseAggregatePaginate);
 
 export const Notification = mongoose.model("Notification", notificationSchema);

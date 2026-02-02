@@ -122,4 +122,20 @@ userSchema.methods.generateRefreshToken = function () {
     );
 };
 
+userSchema.set("toJSON", {
+    transform: function (doc, ret) {
+        delete ret.password;
+        delete ret.refreshToken;
+        return ret;
+    },
+});
+
+userSchema.set("toObject", {
+    transform: function (doc, ret) {
+        delete ret.password;
+        delete ret.refreshToken;
+        return ret;
+    },
+});
+
 export const User = mongoose.model("User", userSchema);

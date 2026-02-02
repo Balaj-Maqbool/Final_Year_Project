@@ -11,7 +11,7 @@ app.use(
     cors({
         origin: CORS_ORIGIN,
         credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     })
 );
 
@@ -21,10 +21,10 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 import passport from "passport";
-import "./passport/passport.config.js";
+import "./config/passport.js";
 app.use(passport.initialize());
 
-// router imports
+
 import authRouter from "./routes/auth.routes.js";
 import profileRouter from "./routes/profile.routes.js";
 
@@ -53,12 +53,18 @@ app.use("/api/v1/notifications", notificationRouter);
 import streamRouter from "./routes/stream.routes.js";
 app.use("/api/v1/stream", streamRouter);
 
+import chatRouter from "./routes/chat.routes.js";
+app.use("/api/v1/chats", chatRouter);
+
+import mediaRouter from "./routes/media.routes.js";
+app.use("/api/v1/media", mediaRouter);
+
 
 app.get("/", (req, res) => {
     res.send("API is running...");
 });
 
-// Global Error Handler
+
 app.use((err, req, res, next) => {
     console.error("Global Error Handler Catch:", err);
     if (err instanceof ApiError) {
@@ -66,14 +72,14 @@ app.use((err, req, res, next) => {
             new ApiResponse(err.statusCode, null, err.message)
         );
     }
-    // Mongoose Validation Error
+
     if (err.name === 'ValidationError') {
         return res.status(400).json(
             new ApiResponse(400, null, err.message)
         );
     }
 
-    // Default 500
+
     return res.status(500).json(
         new ApiResponse(500, null, "Internal Server Error: " + err.message)
     );

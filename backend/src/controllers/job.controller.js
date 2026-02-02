@@ -2,10 +2,9 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
-import { User } from "../models/user.model.js";
+import { NotificationService } from "../services/notification.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
-
 import { Task } from "../models/task.model.js";
 
 const createJob = asyncHandler(async (req, res) => {
@@ -15,7 +14,13 @@ const createJob = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Clients can post jobs");
     }
 
-    if (!title || !description || !budget || !deadline || !category) {
+    if (
+        ValidationHelper.isEmpty(title) ||
+        ValidationHelper.isEmpty(description) ||
+        ValidationHelper.isEmpty(budget) ||
+        ValidationHelper.isEmpty(deadline) ||
+        ValidationHelper.isEmpty(category)
+    ) {
         throw new ApiError(400, "All fields (title, description, budget, deadline, category) are required");
     }
 
@@ -29,29 +34,8 @@ const createJob = asyncHandler(async (req, res) => {
         poster_id: req.user?._id
     });
 
-    sseManager.broadcast("NEW_JOB_AVAILABLE", {
-        message: "New Job Posted",
-        job
-    }, "Freelancer");
-
-    if (required_skills && required_skills.length > 0) {
-        try {
-            const matchedFreelancers = await User.find({
-                role: "Freelancer",
-                skills: { $in: required_skills }
-            }).select("_id");
-
-            matchedFreelancers.forEach(user => {
-                sseManager.sendToUser(user._id, "DASHBOARD_UPDATE", {
-                    type: "JOB_MATCH",
-                    message: `New job matches your skills: ${title}`,
-                    jobId: job._id
-                });
-            });
-        } catch (error) {
-            console.error("Error sending skill match notifications:", error);
-        }
-    }
+    // Use NotificationService to handle broadcast and skill matching
+    await NotificationService.notifyNewJob(job);
 
     return res.status(201).json(
         new ApiResponse(201, job, "Job posted successfully")
@@ -59,27 +43,27 @@ const createJob = asyncHandler(async (req, res) => {
 });
 
 const getAllJobs = asyncHandler(async (req, res) => {
-    const { search, category, minBudget, maxBudget } = req.query;
+    const { search, category, minBudget, maxBudget, page = 1, limit = 10 } = req.query;
 
     const matchStage = {
         status: "Open"
     };
 
-    if (search) {
+    if (!ValidationHelper.isEmpty(search)) {
         matchStage.title = { $regex: search, $options: "i" };
     }
 
-    if (category) {
+    if (!ValidationHelper.isEmpty(category)) {
         matchStage.category = category;
     }
 
-    if (minBudget || maxBudget) {
+    if (!ValidationHelper.isEmpty(minBudget) || !ValidationHelper.isEmpty(maxBudget)) {
         matchStage.budget = {};
         if (minBudget) matchStage.budget.$gte = parseInt(minBudget);
         if (maxBudget) matchStage.budget.$lte = parseInt(maxBudget);
     }
 
-    const jobs = await Job.aggregate([
+    const aggregate = Job.aggregate([
         {
             $match: matchStage
         },
@@ -112,14 +96,32 @@ const getAllJobs = asyncHandler(async (req, res) => {
         }
     ]);
 
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const jobs = await Job.aggregatePaginate(aggregate, options);
+
     return res.status(200).json(
         new ApiResponse(200, jobs, "Jobs fetched successfully")
     );
 });
 
 const getMyJobs = asyncHandler(async (req, res) => {
-    const jobs = await Job.find({ poster_id: req.user?._id })
-        .sort({ createdAt: -1 });
+    const { page = 1, limit = 10 } = req.query;
+
+    const aggregate = Job.aggregate([
+        { $match: { poster_id: req.user._id } },
+        { $sort: { createdAt: -1 } }
+    ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const jobs = await Job.aggregatePaginate(aggregate, options);
 
     return res.status(200).json(
         new ApiResponse(200, jobs, "My jobs fetched successfully")
@@ -133,10 +135,8 @@ const getJobById = asyncHandler(async (req, res) => {
     // However, findById casts automatically. Aggregate does not.
     // We need mongoose.Types.ObjectId
 
-    // Check if valid ObjectId
-    if (!mongoose.isValidObjectId(jobId)) {
-        throw new ApiError(400, "Invalid Job ID");
-    }
+    // Validate jobId format
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     const job = await Job.aggregate([
         {
@@ -194,17 +194,17 @@ const updateJob = asyncHandler(async (req, res) => {
 
     // Critical Business Rule: Limits on updating Assigned/Completed jobs
 
-    // 1. If currently Completed, it's final. Partition logic: Status cannot change from Completed.
+
     if (job.status === "Completed") {
         throw new ApiError(400, "Job is already Completed. No further updates allowed.");
     }
 
-    // 2. If currently Assigned, allow move to Completed, but BLOCK revert to Open.
+
     if (job.status === "Assigned" && status === "Open") {
         throw new ApiError(400, "Cannot revert an Assigned job to Open status.");
     }
 
-    // 3. New Rule: ALL tasks must be APPROVED by Client before marking job as Completed
+
     if (status === "Completed") {
         // We check if there are any tasks where is_approved is NOT true
         const unapprovedTasks = await Task.countDocuments({
@@ -226,13 +226,9 @@ const updateJob = asyncHandler(async (req, res) => {
 
     await job.save();
 
-    // SSE: Notify Freelancer if job is completed
+    // Use NotificationService
     if (job.status === "Completed" && job.assigned_to) {
-        sseManager.sendToUser(job.assigned_to, "DASHBOARD_UPDATE", {
-            type: "JOB_COMPLETED",
-            message: `Job '${job.title}' has been marked as Completed`,
-            jobId: job._id
-        });
+        await NotificationService.notifyJobCompleted(job.assigned_to, job);
     }
 
     return res.status(200).json(

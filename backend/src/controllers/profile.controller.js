@@ -1,11 +1,13 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
+import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { CLOUDINARY_ROOT_FOLDER } from "../constants.js";
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id).select("email username fullName role _id");
+    const user = await User.findById(req.user._id);
 
     return res
         .status(200)
@@ -16,8 +18,8 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email, bio, skills, portfolio } = req.body;
 
     // Validation
-    if (!fullName?.trim()) throw new ApiError(400, "Full Name is required");
-    if (!email?.trim()) throw new ApiError(400, "Email is required");
+    if (ValidationHelper.isEmpty(fullName)) throw new ApiError(400, "Full Name is required");
+    if (ValidationHelper.isEmpty(email)) throw new ApiError(400, "Email is required");
 
     // Prepare update object
     const updateData = {
@@ -42,7 +44,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
             $set: updateData
         },
         { new: true }
-    ).select("-password");
+    );
 
     return res
         .status(200)
@@ -56,9 +58,12 @@ const updateUserProfileImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Profile Image file is missing");
     }
 
-    const profileImage = await uploadOnCloudinary(profileImageLocalPath);
+    const profileImage = await CloudinaryHelper.upload(
+        profileImageLocalPath,
+        `${CLOUDINARY_ROOT_FOLDER}/Users/${req.user._id}/Profile`
+    );
 
-    if (!profileImage.url) {
+    if (!profileImage.secure_url) {
         throw new ApiError(400, "Error while uploading profile image");
     }
 
@@ -66,11 +71,11 @@ const updateUserProfileImage = asyncHandler(async (req, res) => {
         req.user._id,
         {
             $set: {
-                profileImage: profileImage.url
+                profileImage: profileImage.secure_url
             }
         },
         { new: true }
-    ).select("-password -refreshToken");
+    );
 
     return res
         .status(200)
@@ -84,9 +89,14 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cover Image file is missing");
     }
 
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    const coverImage = await CloudinaryHelper.upload(
+        coverImageLocalPath,
+        `${CLOUDINARY_ROOT_FOLDER}/Users/${req.user._id}/Cover`
+    );
 
-    if (!coverImage.url) {
+
+
+    if (!coverImage.secure_url) {
         throw new ApiError(400, "Error while uploading cover image");
     }
 
@@ -94,11 +104,11 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         req.user._id,
         {
             $set: {
-                coverImage: coverImage.url
+                coverImage: coverImage.secure_url
             }
         },
         { new: true }
-    ).select("-password -refreshToken");
+    );
 
     return res
         .status(200)
@@ -108,9 +118,10 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 const getUserProfileById = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    // Validate ID format (optional but good practice, though Mongoose usually handles casting)
-    // Here retrieving FULL details (excluding sensitive auth data)
-    const user = await User.findById(id).select("-password -refreshToken");
+    // Validate jobId format
+    ValidationHelper.validateId(id, "Invalid User ID");
+
+    const user = await User.findById(id);
 
     if (!user) {
         throw new ApiError(404, "User not found");
@@ -127,7 +138,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
     let { role } = req.query;
 
     const query = {};
-    if (role) {
+    if (!ValidationHelper.isEmpty(role)) {
         // Normalize role: "freelancer" -> "Freelancer"
         role = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 
@@ -153,7 +164,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
     // Or just simple find if scale corresponds to FYP
     // User requested "get all users", normally implies pagination but for now plain find is enough for MVP
 
-    const users = await User.find(query).select("-password -refreshToken");
+    const users = await User.find(query);
 
     return res
         .status(200)
@@ -161,22 +172,10 @@ const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 const deleteUserProfileImage = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id).select("-password -refreshToken");
+    const user = await User.findById(req.user._id);
 
     if (user.profileImage) {
-        try {
-            const urlParts = user.profileImage.split("/");
-            const filenameWithExt = urlParts[urlParts.length - 1];
-            const folder = urlParts[urlParts.length - 2];
-
-            const publicId = `${folder}/${filenameWithExt.split(".")[0]}`;
-
-            await deleteFromCloudinary(publicId);
-        } catch (error) {
-            console.log("Error deleting profile image from Cloudinary:", error);
-            // Optionally throw error, but usually better to proceed with DB clear
-        }
-
+        await CloudinaryHelper.safeDelete(user.profileImage);
         user.profileImage = "";
         await user.save({ validateBeforeSave: false });
     }
@@ -187,20 +186,10 @@ const deleteUserProfileImage = asyncHandler(async (req, res) => {
 });
 
 const deleteUserCoverImage = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id).select("-password -refreshToken");
+    const user = await User.findById(req.user._id);
 
     if (user.coverImage) {
-        try {
-            const urlParts = user.coverImage.split("/");
-            const filenameWithExt = urlParts[urlParts.length - 1];
-            const folder = urlParts[urlParts.length - 2];
-            const publicId = `${folder}/${filenameWithExt.split(".")[0]}`;
-
-            await deleteFromCloudinary(publicId);
-        } catch (error) {
-            console.log("Error deleting cover image from Cloudinary:", error);
-        }
-
+        await CloudinaryHelper.safeDelete(user.coverImage);
         user.coverImage = "";
         await user.save({ validateBeforeSave: false });
     }
