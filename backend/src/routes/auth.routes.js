@@ -12,12 +12,14 @@ import {
     handleGoogleCallback
 } from "../controllers/auth.controller.js";
 
+import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
+
 const router = Router();
 
 // --- PUBLIC AUTH ROUTES ---
 
-router.route("/register").post(registerUser);
-router.route("/login").post(loginUser);
+router.route("/register").post(registerUser); // Register might need a slightly different limit, keeping it open for now or we can reuse auth()
+router.route("/login").post(RateLimitManager.auth(), loginUser);
 router.route("/refresh-token").post(refreshAccessToken);
 
 // Google Auth

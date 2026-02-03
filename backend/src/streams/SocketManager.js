@@ -4,6 +4,7 @@ import { ACCESS_TOKEN_SECRET, CORS_ORIGIN } from "../constants.js";
 import { User } from "../models/user.model.js";
 import { chatService } from "../services/chat.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
+import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
 
 class SocketManager {
     #io;
@@ -11,6 +12,7 @@ class SocketManager {
 
     constructor() {
         this.#onlineUsers = new Map();
+        this.socketLimiter = RateLimitManager.socket(); // 20 messages / minute
     }
 
     /**
@@ -149,6 +151,17 @@ class SocketManager {
 
         // 3. Send Message
         socket.on("send_message", async (payload) => {
+            try {
+                // Rate Limit Check
+                await this.socketLimiter.consume(socket.user._id.toString()); // Limit by User ID (better than IP for sockets)
+            } catch (rateLimitError) {
+                console.warn(`Rate Limit Exceeded for user ${socket.user.username}`);
+                return socket.emit("error", {
+                    type: "RATE_LIMIT",
+                    message: "You are sending messages too fast. Please slow down."
+                });
+            }
+
             console.log("Received send_message payload:", payload, typeof payload);
             try {
                 // Handle potential JSON string from tools like Hoppscotch
