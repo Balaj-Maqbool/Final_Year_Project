@@ -39,3 +39,20 @@ router.route("/:bidId").patch(updateBid);
 router.route("/:jobId/:bidId/status").patch(updateBidStatus);
 
 export default router;
+
+
+
+
+
+router.route("/my-bids").get(getMyBids);
+
+router.route("/job/:jobId/my-bid").get(getMyBidForJob);
+
+router.route("/:jobId").post(placeBid).get(getJobBids);
+
+router.route("/:jobId/:bidId").delete(withdrawBid);
+
+router.route("/:bidId").patch(updateBid);
+
+router.route("/:jobId/:bidId/status").patch(updateBidStatus);
+
