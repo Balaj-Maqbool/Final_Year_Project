@@ -4,21 +4,20 @@ import cors from "cors";
 import { CORS_ORIGIN } from "./constants.js";
 import { ApiError } from "./utils/ApiError.js";
 import { ApiResponse } from "./utils/ApiResponse.js";
-import 'dotenv/config'
+import "dotenv/config";
 const app = express();
 
 app.use(
     cors({
         origin: CORS_ORIGIN,
         credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
     })
 );
 
 import { RateLimitManager } from "./middlewares/rateLimiter.middleware.js";
 // Global Rate Limiter: 500 requests per 15 minutes
 app.use("/api", RateLimitManager.global());
-
 
 app.use(express.json({ limit: "24kb" }));
 
@@ -28,7 +27,6 @@ app.use(cookieParser());
 import passport from "passport";
 import "./config/passport.js";
 app.use(passport.initialize());
-
 
 import authRouter from "./routes/auth.routes.js";
 import profileRouter from "./routes/profile.routes.js";
@@ -44,7 +42,6 @@ app.use("/api/v1/bids", bidRouter);
 
 import ratingRouter from "./routes/rating.routes.js";
 app.use("/api/v1/ratings", ratingRouter);
-
 
 import taskRouter from "./routes/task.routes.js";
 app.use("/api/v1/tasks", taskRouter);
@@ -64,30 +61,21 @@ app.use("/api/v1/chats", chatRouter);
 import mediaRouter from "./routes/media.routes.js";
 app.use("/api/v1/media", mediaRouter);
 
-
 app.get("/", (req, res) => {
     res.send("API is running...");
 });
 
-
 app.use((err, req, res, next) => {
     console.error("Global Error Handler Catch:", err);
     if (err instanceof ApiError) {
-        return res.status(err.statusCode).json(
-            new ApiResponse(err.statusCode, null, err.message)
-        );
+        return res.status(err.statusCode).json(new ApiResponse(err.statusCode, null, err.message));
     }
 
-    if (err.name === 'ValidationError') {
-        return res.status(400).json(
-            new ApiResponse(400, null, err.message)
-        );
+    if (err.name === "ValidationError") {
+        return res.status(400).json(new ApiResponse(400, null, err.message));
     }
 
-
-    return res.status(500).json(
-        new ApiResponse(500, null, "Internal Server Error: " + err.message)
-    );
+    return res.status(500).json(new ApiResponse(500, null, "Internal Server Error: " + err.message));
 });
 
 export { app };

@@ -8,33 +8,37 @@ This guide details how to integrate the **Forgot Password**, **Reset Password**,
 **Goal:** User requests a password reset link.
 
 ### API Endpoint
+
 - **URL:** `POST /api/v1/users/password/forgot`
 - **Auth Required:** No
 
 ### Request Payload
+
 ```json
 {
-  "email": "user@example.com"
+    "email": "user@example.com"
 }
 ```
 
 ### Response
+
 - **Success (200 OK):**
-  ```json
-  {
-    "statusCode": 200,
-    "data": {},
-    "message": "Email sent",
-    "success": true
-  }
-  ```
+    ```json
+    {
+        "statusCode": 200,
+        "data": {},
+        "message": "Email sent",
+        "success": true
+    }
+    ```
 - **Error (404 Not Found):** User not found (Show "Email not registered").
 - **Error (500 Server Error):** Email failed to send (Show "Something went wrong, please try again").
 
 ### Frontend Logic
+
 1.  Create a simple form with an `email` input.
 2.  On submit, call the API.
-3.  Show a success message: *"If an account exists with this email, you will receive a reset link shortly."* (Security best practice).
+3.  Show a success message: _"If an account exists with this email, you will receive a reset link shortly."_ (Security best practice).
 
 ---
 
@@ -43,6 +47,7 @@ This guide details how to integrate the **Forgot Password**, **Reset Password**,
 **Page:** `/reset-password/:token`
 **Formula:** `Base URL` + `/reset-password` + `/` + `token`
 **Example Route (React Router):**
+
 ```jsx
 <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 ```
@@ -50,31 +55,35 @@ This guide details how to integrate the **Forgot Password**, **Reset Password**,
 **Goal:** User sets a new password using the token from the email.
 
 ### API Endpoint
+
 - **URL:** `PATCH /api/v1/users/password/reset/:token`
 - **Auth Required:** No
 
 ### Request Payload
+
 ```json
 {
-  "password": "NewStrongPassword123!"
+    "password": "NewStrongPassword123!"
 }
 ```
 
 ### Response
+
 - **Success (200 OK):**
-  ```json
-  {
-    "statusCode": 200,
-    "data": {},
-    "message": "Password Reset Successfully",
-    "success": true
-  }
-  ```
+    ```json
+    {
+        "statusCode": 200,
+        "data": {},
+        "message": "Password Reset Successfully",
+        "success": true
+    }
+    ```
 - **Error (400 Bad Request):**
-  - "Invalid Reset Token" (Token expired or invalid).
-  - "New password cannot be the same as the old password".
+    - "Invalid Reset Token" (Token expired or invalid).
+    - "New password cannot be the same as the old password".
 
 ### Frontend Logic
+
 1.  Extract `token` from the URL parameters.
 2.  Create a form with `New Password` and `Confirm Password` fields.
 3.  Validate that passwords match on client-side.
@@ -89,17 +98,19 @@ This guide details how to integrate the **Forgot Password**, **Reset Password**,
 **Goal:** User receives a welcome email immediately after signing up.
 
 ### Frontend Logic
+
 - No extra API calls needed.
 - Just ensure the **Register** flow includes the `role` ("Client" or "Freelancer") and `fullName` fields correctly, as the email is customized based on these.
 
 ### Registration Payload Reminder
+
 ```json
 {
-  "fullName": "John Doe",
-  "username": "johndoe",
-  "email": "john@example.com",
-  "password": "securepassword",
-  "role": "Client" // or "Freelancer"
+    "fullName": "John Doe",
+    "username": "johndoe",
+    "email": "john@example.com",
+    "password": "securepassword",
+    "role": "Client" // or "Freelancer"
 }
 ```
 
@@ -111,12 +122,12 @@ The Backend is configured to redirect users to specific frontend paths. The Fron
 
 ### Required Routes
 
-| Route | Description | Backend Variable (for reference) |
-| :--- | :--- | :--- |
-| `/login` | The main login page. Google Auth redirects here on failure. | `FRONTEND_LOGIN_PATH` |
-| `/oauth-success` | Land here after successful Google Login. Should extract tokens from cookies/URL. | `FRONTEND_OAUTH_SUCCESS_PATH` |
-| `/reset-password/:token` | The page to set a new password. | `FRONTEND_RESET_PASSWORD_PATH` |
-| `/dashboard` | The main user dashboard. Welcome emails link here. | `FRONTEND_DASHBOARD_PATH` |
+| Route                    | Description                                                                      | Backend Variable (for reference) |
+| :----------------------- | :------------------------------------------------------------------------------- | :------------------------------- |
+| `/login`                 | The main login page. Google Auth redirects here on failure.                      | `FRONTEND_LOGIN_PATH`            |
+| `/oauth-success`         | Land here after successful Google Login. Should extract tokens from cookies/URL. | `FRONTEND_OAUTH_SUCCESS_PATH`    |
+| `/reset-password/:token` | The page to set a new password.                                                  | `FRONTEND_RESET_PASSWORD_PATH`   |
+| `/dashboard`             | The main user dashboard. Welcome emails link here.                               | `FRONTEND_DASHBOARD_PATH`        |
 
 ### Environment Variables (For Frontend UI Developer)
 

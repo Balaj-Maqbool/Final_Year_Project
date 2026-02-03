@@ -13,20 +13,15 @@ import {
 
 const router = Router();
 
-
 router.use(verifyJWT);
-
 
 router.post("/start/:bidId", initializeChat);
 router.get("/", getMyThreads);
-router.route("/:threadId")
-    .delete(deleteThread);
-
+router.route("/:threadId").delete(deleteThread);
 
 router.get("/:threadId/messages", getThreadMessages);
 router.delete("/messages/:messageId", deleteMessage);
 router.patch("/:threadId/read", markMessagesAsRead);
-
 
 router.post("/:threadId/block", blockThread);
 router.post("/:threadId/unblock", unblockThread);

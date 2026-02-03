@@ -12,10 +12,7 @@ const getUserNotifications = asyncHandler(async (req, res) => {
         matchStage.type = type;
     }
 
-    const aggregate = Notification.aggregate([
-        { $match: matchStage },
-        { $sort: { createdAt: -1 } }
-    ]);
+    const aggregate = Notification.aggregate([{ $match: matchStage }, { $sort: { createdAt: -1 } }]);
 
     const options = {
         page: parseInt(page),
@@ -24,9 +21,7 @@ const getUserNotifications = asyncHandler(async (req, res) => {
 
     const notifications = await Notification.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(
-        new ApiResponse(200, notifications, "Notifications fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, notifications, "Notifications fetched successfully"));
 });
 
 const markNotificationAsRead = asyncHandler(async (req, res) => {
@@ -47,20 +42,13 @@ const markNotificationAsRead = asyncHandler(async (req, res) => {
     notification.isRead = true;
     await notification.save();
 
-    return res.status(200).json(
-        new ApiResponse(200, notification, "Notification marked as read")
-    );
+    return res.status(200).json(new ApiResponse(200, notification, "Notification marked as read"));
 });
 
 const markAllAsRead = asyncHandler(async (req, res) => {
-    await Notification.updateMany(
-        { recipient: req.user._id, isRead: false },
-        { $set: { isRead: true } }
-    );
+    await Notification.updateMany({ recipient: req.user._id, isRead: false }, { $set: { isRead: true } });
 
-    return res.status(200).json(
-        new ApiResponse(200, {}, "All notifications marked as read")
-    );
+    return res.status(200).json(new ApiResponse(200, {}, "All notifications marked as read"));
 });
 
 const deleteNotification = asyncHandler(async (req, res) => {
@@ -80,14 +68,7 @@ const deleteNotification = asyncHandler(async (req, res) => {
 
     await Notification.findByIdAndDelete(notificationId);
 
-    return res.status(200).json(
-        new ApiResponse(200, {}, "Notification deleted successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, {}, "Notification deleted successfully"));
 });
 
-export {
-    getUserNotifications,
-    markNotificationAsRead,
-    markAllAsRead,
-    deleteNotification
-};
+export { getUserNotifications, markNotificationAsRead, markAllAsRead, deleteNotification };

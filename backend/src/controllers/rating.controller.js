@@ -14,7 +14,6 @@ const addRating = asyncHandler(async (req, res) => {
 
     ValidationHelper.validateId(jobId, "Invalid Job ID");
 
-
     if (req.user.role !== "Client") {
         throw new ApiError(403, "Only Clients can submit ratings");
     }
@@ -32,16 +31,13 @@ const addRating = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-
     if (job.poster_id.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "You can only rate freelancers for your own jobs");
     }
 
-
     if (job.status === "Open") {
         throw new ApiError(400, "Cannot rate a freelancer on an Open job. Job must be Assigned or Completed.");
     }
-
 
     const freelancerId = job.assigned_to;
     if (!freelancerId) {
@@ -66,7 +62,6 @@ const addRating = asyncHandler(async (req, res) => {
         rating,
         comment
     });
-
 
     const stats = await Rating.aggregate([
         {
@@ -98,9 +93,7 @@ const addRating = asyncHandler(async (req, res) => {
     // Use NotificationService
     await NotificationService.notifyNewRating(freelancerId, job, rating);
 
-    return res.status(201).json(
-        new ApiResponse(201, newRating, "Rating submitted successfully")
-    );
+    return res.status(201).json(new ApiResponse(201, newRating, "Rating submitted successfully"));
 });
 
 const getFreelancerRatings = asyncHandler(async (req, res) => {
@@ -147,9 +140,7 @@ const getFreelancerRatings = asyncHandler(async (req, res) => {
 
     const ratings = await Rating.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(
-        new ApiResponse(200, ratings, "Ratings fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, ratings, "Ratings fetched successfully"));
 });
 
 const updateRating = asyncHandler(async (req, res) => {
@@ -208,13 +199,7 @@ const updateRating = asyncHandler(async (req, res) => {
         }
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, existingRating, "Rating updated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, existingRating, "Rating updated successfully"));
 });
 
-export {
-    addRating,
-    getFreelancerRatings,
-    updateRating
-};
+export { addRating, getFreelancerRatings, updateRating };

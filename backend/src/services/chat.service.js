@@ -51,14 +51,14 @@ class ChatService {
 
     /**
      * Persist a new message.
-     * @param {Array<{url: string, publicId: string, resourceType: string}>} attachments 
+     * @param {Array<{url: string, publicId: string, resourceType: string}>} attachments
      */
     async saveMessage(threadId, senderId, content, attachments = [], status = "sent", replyTo = null) {
         const thread = await ChatThread.findById(threadId);
         if (!thread) throw new Error("Thread not found");
 
-        const participantIds = thread.participants.map(p => p.toString());
-        const recipientId = participantIds.find(id => id !== senderId.toString());
+        const participantIds = thread.participants.map((p) => p.toString());
+        const recipientId = participantIds.find((id) => id !== senderId.toString());
 
         // 1. Validation: Must have Content OR Attachments
         if (ValidationHelper.isEmpty(content) && ValidationHelper.isEmpty(attachments)) {
@@ -99,7 +99,7 @@ class ChatService {
 
         // If thread was hidden/archived for recipient, allow it to reappear (optional, good UX)
         if (thread.hiddenFor.includes(recipientId)) {
-            thread.hiddenFor = thread.hiddenFor.filter(id => id.toString() !== recipientId);
+            thread.hiddenFor = thread.hiddenFor.filter((id) => id.toString() !== recipientId);
         }
 
         await thread.save();

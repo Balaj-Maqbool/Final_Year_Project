@@ -21,7 +21,8 @@ const getPasswordResetTemplate = (resetUrl) => {
 const getWelcomeEmailTemplate = ({ name, role }) => {
     const isClient = role === "Client";
 
-    const features = isClient ? `
+    const features = isClient
+        ? `
         <li style="margin-bottom: 15px; padding-left: 25px; position: relative;">
             <span style="position: absolute; left: 0; color: #4F46E5;">✓</span>
             <strong style="color: #333;">Post Projects:</strong> Easily publish your requirements and reach thousands of experts.
@@ -81,7 +82,7 @@ const getWelcomeEmailTemplate = ({ name, role }) => {
                 </div>
 
                 <div style="text-align: center; margin-top: 40px;">
-                    <a href="${process.env.FRONTEND_URL || '#'}${process.env.FRONTEND_DASHBOARD_PATH || '/dashboard'}" style="background-color: #4F46E5; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; transition: background-color 0.3s;">
+                    <a href="${process.env.FRONTEND_URL || "#"}${process.env.FRONTEND_DASHBOARD_PATH || "/dashboard"}" style="background-color: #4F46E5; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; transition: background-color 0.3s;">
                         ${isClient ? "Post a Job Now" : "Find Jobs Now"}
                     </a>
                 </div>

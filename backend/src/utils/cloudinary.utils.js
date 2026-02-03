@@ -19,7 +19,7 @@ class CloudinaryHelper {
 
             const response = await cloudinary.uploader.upload(localFilePath, {
                 resource_type: "auto",
-                folder: folder,
+                folder: folder
             });
             // console.log(response);
 
@@ -48,7 +48,7 @@ class CloudinaryHelper {
 
             const response = await cloudinary.uploader.destroy(publicId, {
                 resource_type: type,
-                invalidate: true,
+                invalidate: true
             });
             return response;
         } catch (error) {
@@ -59,7 +59,7 @@ class CloudinaryHelper {
     /**
      * Extracts the public ID from a Cloudinary URL, including the folder name.
      * Example: https://res.cloudinary.com/.../v12345/folder/image.jpg -> folder/image
-     * 
+     *
      * @param {string} url - The full Cloudinary URL.
      * @returns {string|null} - The public ID or null if extraction fails.
      */

@@ -41,9 +41,7 @@ const createTask = asyncHandler(async (req, res) => {
     // Use NotificationService
     await NotificationService.notifyNewTask(job.assigned_to, task);
 
-    return res.status(201).json(
-        new ApiResponse(201, task, "Task created successfully")
-    );
+    return res.status(201).json(new ApiResponse(201, task, "Task created successfully"));
 });
 
 const getJobTasks = asyncHandler(async (req, res) => {
@@ -79,9 +77,7 @@ const getJobTasks = asyncHandler(async (req, res) => {
 
     const tasks = await Task.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(
-        new ApiResponse(200, tasks, "Tasks fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, tasks, "Tasks fetched successfully"));
 });
 
 const updateTaskStatus = asyncHandler(async (req, res) => {
@@ -120,9 +116,7 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
         await NotificationService.notifyTaskStatusUpdate(job.poster_id, task, status);
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, task, "Task status updated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, task, "Task status updated successfully"));
 });
 
 const approveTask = asyncHandler(async (req, res) => {
@@ -134,7 +128,6 @@ const approveTask = asyncHandler(async (req, res) => {
     if (!task) {
         throw new ApiError(404, "Task not found");
     }
-
 
     const job = await Job.findById(task.job_id);
     if (!job) {
@@ -157,14 +150,7 @@ const approveTask = asyncHandler(async (req, res) => {
     // Use NotificationService
     await NotificationService.notifyTaskApproved(task.assigned_user_id, task);
 
-    return res.status(200).json(
-        new ApiResponse(200, task, "Task approved successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, task, "Task approved successfully"));
 });
 
-export {
-    createTask,
-    getJobTasks,
-    updateTaskStatus,
-    approveTask
-};
+export { createTask, getJobTasks, updateTaskStatus, approveTask };

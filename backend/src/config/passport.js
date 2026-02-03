@@ -1,10 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import {
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    GOOGLE_REDIRECT_URI
-} from "../constants.js";
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } from "../constants.js";
 
 passport.use(
     new GoogleStrategy(
@@ -16,7 +12,6 @@ passport.use(
         },
         async (req, accessToken, refreshToken, profile, done) => {
             try {
-
                 return done(null, profile);
             } catch (error) {
                 return done(error, null);
@@ -24,7 +19,6 @@ passport.use(
         }
     )
 );
-
 
 passport.serializeUser((user, done) => {
     done(null, user);

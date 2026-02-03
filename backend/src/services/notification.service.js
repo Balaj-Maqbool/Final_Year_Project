@@ -46,12 +46,14 @@ class NotificationService {
      * If the job has required skills, it only notifies matching freelancers.
      */
     static async notifyNewJob(job) {
-
-        sseManager.broadcast("NEW_JOB_AVAILABLE", {
-            message: "New Job Posted",
-            job
-        }, "Freelancer");
-
+        sseManager.broadcast(
+            "NEW_JOB_AVAILABLE",
+            {
+                message: "New Job Posted",
+                job
+            },
+            "Freelancer"
+        );
 
         if (!ValidationHelper.isEmpty(job.required_skills)) {
             try {
@@ -60,7 +62,7 @@ class NotificationService {
                     skills: { $in: job.required_skills }
                 }).select("_id");
 
-                matchedFreelancers.forEach(user => {
+                matchedFreelancers.forEach((user) => {
                     sseManager.sendToUser(user._id, "DASHBOARD_UPDATE", {
                         type: "JOB_MATCH",
                         message: `New job matches your skills: ${job.title}`,

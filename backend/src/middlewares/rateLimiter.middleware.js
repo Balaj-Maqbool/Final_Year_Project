@@ -11,7 +11,7 @@ class RateLimitManager {
     static create(points = 10, duration = 1, message = "Too many requests") {
         const rateLimiter = new RateLimiterMemory({
             points: points,
-            duration: duration,
+            duration: duration
         });
 
         return (req, res, next) => {
@@ -34,11 +34,7 @@ class RateLimitManager {
      * 500 requests per 15 mins (900 seconds)
      */
     static global() {
-        return this.create(
-            500,
-            15 * 60,
-            "Too many requests from this IP, please try again later"
-        );
+        return this.create(500, 15 * 60, "Too many requests from this IP, please try again later");
     }
 
     /**
@@ -46,11 +42,7 @@ class RateLimitManager {
      * 15 requests per hour (3600 seconds)
      */
     static auth() {
-        return this.create(
-            15,
-            60 * 60,
-            "Too many login attempts, please try again after an hour"
-        );
+        return this.create(15, 60 * 60, "Too many login attempts, please try again after an hour");
     }
 
     /**
@@ -58,22 +50,18 @@ class RateLimitManager {
      * 10 requests per hour
      */
     static media() {
-        return this.create(
-            10,
-            60 * 60,
-            "Too many file uploads, please try again after an hour"
-        );
+        return this.create(10, 60 * 60, "Too many file uploads, please try again after an hour");
     }
 
     /**
      * Creates a raw limiter (NOT middleware) for use in Sockets/Logic
-     * @param {number} points 
-     * @param {number} duration 
+     * @param {number} points
+     * @param {number} duration
      */
     static createWithoutMiddleware(points = 10, duration = 1) {
         return new RateLimiterMemory({
             points: points,
-            duration: duration,
+            duration: duration
         });
     }
 

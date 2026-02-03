@@ -16,24 +16,21 @@ import {
 
 const router = Router();
 
-
 router.use(verifyJWT);
-
-
 
 router.route("/me").get(getCurrentUser);
 router.route("/").get(getAllUsers);
 
-
 router.route("/profile").patch(updateAccountDetails);
 router.route("/profile/:id").get(getUserProfileById);
 
-
-router.route("/profile/image")
+router
+    .route("/profile/image")
     .patch(RateLimitManager.media(), upload.single("profileImage"), updateUserProfileImage)
     .delete(deleteUserProfileImage);
 
-router.route("/profile/cover")
+router
+    .route("/profile/cover")
     .patch(RateLimitManager.media(), upload.single("coverImage"), updateUserCoverImage)
     .delete(deleteUserCoverImage);
 

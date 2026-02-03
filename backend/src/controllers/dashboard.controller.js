@@ -21,8 +21,7 @@ const getClientDashboard = asyncHandler(async (req, res) => {
         },
         {
             $facet: {
-
-                "jobStats": [
+                jobStats: [
                     {
                         $group: {
                             _id: null,
@@ -38,18 +37,14 @@ const getClientDashboard = asyncHandler(async (req, res) => {
                             },
                             totalBudgetSpent: {
                                 $sum: {
-                                    $cond: [
-                                        { $in: ["$status", ["Assigned", "Completed"]] },
-                                        "$budget",
-                                        0
-                                    ]
+                                    $cond: [{ $in: ["$status", ["Assigned", "Completed"]] }, "$budget", 0]
                                 }
                             }
                         }
                     }
                 ],
 
-                "recentJobs": [
+                recentJobs: [
                     { $sort: { createdAt: -1 } },
                     { $limit: 5 },
                     {
@@ -96,19 +91,27 @@ const getClientDashboard = asyncHandler(async (req, res) => {
     ]);
 
     const stats = dashboardData[0].jobStats[0] || {
-        totalJobs: 0, openJobs: 0, assignedJobs: 0, completedJobs: 0, totalBudgetSpent: 0
+        totalJobs: 0,
+        openJobs: 0,
+        assignedJobs: 0,
+        completedJobs: 0,
+        totalBudgetSpent: 0
     };
 
     const bids = bidStats[0] || { totalBidsReceived: 0, pendingBids: 0 };
 
     return res.status(200).json(
-        new ApiResponse(200, {
-            stats: {
-                ...stats,
-                ...bids
+        new ApiResponse(
+            200,
+            {
+                stats: {
+                    ...stats,
+                    ...bids
+                },
+                recentJobs: dashboardData[0].recentJobs
             },
-            recentJobs: dashboardData[0].recentJobs
-        }, "Client dashboard data fetched successfully")
+            "Client dashboard data fetched successfully"
+        )
     );
 });
 
@@ -119,7 +122,6 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
 
     const userId = req.user._id;
 
-
     const bidStats = await Bid.aggregate([
         {
             $match: {
@@ -128,7 +130,7 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
         },
         {
             $facet: {
-                "stats": [
+                stats: [
                     {
                         $group: {
                             _id: null,
@@ -182,7 +184,7 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
         },
         {
             $facet: {
-                "earnings": [
+                earnings: [
                     {
                         $group: {
                             _id: null,
@@ -205,7 +207,7 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                         }
                     }
                 ],
-                "activeJobs": [
+                activeJobs: [
                     {
                         $match: { status: "Assigned" }
                     },
@@ -225,14 +227,13 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                             budget: 1, // Still show est budget or maybe show accepted bid? lets keep budget for listing
                             deadline: 1,
                             "client.fullName": 1,
-                            "finalPrice": { $ifNull: ["$acceptedBid.bid_amount", "$budget"] } // Helpful to see
+                            finalPrice: { $ifNull: ["$acceptedBid.bid_amount", "$budget"] } // Helpful to see
                         }
                     }
                 ]
             }
         }
     ]);
-
 
     const pendingTasks = await Task.aggregate([
         {
@@ -266,19 +267,19 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
     const jStats = jobStats[0].earnings[0] || { totalEarnings: 0, completedJobsCount: 0, activeJobsCount: 0 };
 
     return res.status(200).json(
-        new ApiResponse(200, {
-            stats: {
-                ...bStats,
-                ...jStats
+        new ApiResponse(
+            200,
+            {
+                stats: {
+                    ...bStats,
+                    ...jStats
+                },
+                activeJobs: jobStats[0].activeJobs,
+                pendingTasks: pendingTasks
             },
-            activeJobs: jobStats[0].activeJobs,
-            pendingTasks: pendingTasks
-        }, "Freelancer dashboard data fetched successfully")
+            "Freelancer dashboard data fetched successfully"
+        )
     );
 });
 
-
-export {
-    getClientDashboard,
-    getFreelancerDashboard
-};
+export { getClientDashboard, getFreelancerDashboard };
