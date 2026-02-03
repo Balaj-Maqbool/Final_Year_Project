@@ -9,15 +9,19 @@ import {
     refreshAccessToken,
     changeCurrentPassword,
     deleteUser,
-    handleGoogleCallback
+    handleGoogleCallback,
+    forgotPassword,
+    resetPassword
 } from "../controllers/auth.controller.js";
+
+import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
 // --- PUBLIC AUTH ROUTES ---
 
-router.route("/register").post(registerUser);
-router.route("/login").post(loginUser);
+router.route("/register").post(RateLimitManager.auth(), registerUser);
+router.route("/login").post(RateLimitManager.auth(), loginUser);
 router.route("/refresh-token").post(refreshAccessToken);
 
 // Google Auth
@@ -30,7 +34,10 @@ router.route("/google").get((req, res, next) => {
 });
 
 router.route("/google/callback").get(
-    passport.authenticate("google", { session: false, failureRedirect: "/login" }),
+    passport.authenticate("google", {
+        session: false,
+        failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5173"}${process.env.FRONTEND_LOGIN_PATH || "/login"}`
+    }),
     handleGoogleCallback
 );
 
@@ -39,5 +46,9 @@ router.route("/google/callback").get(
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/password/change").patch(verifyJWT, changeCurrentPassword);
 router.route("/delete-account").delete(verifyJWT, deleteUser);
+
+// --- FORGOT PASSWORD ROUTES ---
+router.route("/password/forgot").post(RateLimitManager.auth(), forgotPassword);
+router.route("/password/reset/:token").patch(RateLimitManager.auth(), resetPassword);
 
 export default router;

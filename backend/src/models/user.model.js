@@ -1,12 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import {
-    ACCESS_TOKEN_SECRET,
-    ACCESS_TOKEN_EXPIRY,
-    REFRESH_TOKEN_SECRET,
-    REFRESH_TOKEN_EXPIRY
-} from "../constants.js";
+import crypto from "crypto";
+import { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY } from "../constants.js";
 
 const userSchema = new Schema(
     {
@@ -23,7 +19,7 @@ const userSchema = new Schema(
             required: [true, "Email is required"],
             unique: true,
             lowercase: true,
-            trim: true,
+            trim: true
         },
         fullName: {
             type: String,
@@ -36,7 +32,7 @@ const userSchema = new Schema(
             default: ""
         },
         coverImage: {
-            type: String, // cloudinary url
+            type: String // cloudinary url
         },
         password: {
             type: String,
@@ -60,6 +56,8 @@ const userSchema = new Schema(
             enum: ["Freelancer", "Client"],
             required: true
         },
+        resetPasswordToken: String,
+        resetPasswordExpire: Date,
         // Freelancer specific fields
         skills: {
             type: [String],
@@ -76,7 +74,7 @@ const userSchema = new Schema(
         rating: {
             type: Number,
             default: 0
-        },
+        }
     },
     {
         timestamps: true
@@ -113,7 +111,7 @@ userSchema.methods.generateAccessToken = function () {
 userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
-            _id: this._id,
+            _id: this._id
         },
         REFRESH_TOKEN_SECRET,
         {
@@ -122,12 +120,25 @@ userSchema.methods.generateRefreshToken = function () {
     );
 };
 
+userSchema.methods.getResetPasswordToken = function () {
+    // Generate token
+    const resetToken = crypto.randomBytes(20).toString("hex");
+
+    // Hash and set to resetPasswordToken
+    this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    // Set token expire time (10 minutes)
+    this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+    return resetToken;
+};
+
 userSchema.set("toJSON", {
     transform: function (doc, ret) {
         delete ret.password;
         delete ret.refreshToken;
         return ret;
-    },
+    }
 });
 
 userSchema.set("toObject", {
@@ -135,7 +146,7 @@ userSchema.set("toObject", {
         delete ret.password;
         delete ret.refreshToken;
         return ret;
-    },
+    }
 });
 
 export const User = mongoose.model("User", userSchema);

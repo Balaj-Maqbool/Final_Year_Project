@@ -14,7 +14,6 @@ const streamEvents = asyncHandler(async (req, res) => {
 
     // Pass the response object to SSEManager to handle headers and connection
     sseManager.registerConnection(req.user._id, req.user.role, res, req);
-
 });
 
 export { streamEvents };

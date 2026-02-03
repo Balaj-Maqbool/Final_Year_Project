@@ -3,7 +3,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Bid } from "../models/bid.model.js";
 import { Job } from "../models/job.model.js";
-import { ChatThread } from "../models/chat.model.js";
 import mongoose from "mongoose";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
@@ -19,7 +18,11 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Freelancers can place bids");
     }
 
-    if (ValidationHelper.isEmpty(bid_amount) || ValidationHelper.isEmpty(message) || ValidationHelper.isEmpty(timeline)) {
+    if (
+        ValidationHelper.isEmpty(bid_amount) ||
+        ValidationHelper.isEmpty(message) ||
+        ValidationHelper.isEmpty(timeline)
+    ) {
         throw new ApiError(400, "All fields (bid_amount, message, timeline) are required");
     }
 
@@ -58,13 +61,10 @@ const placeBid = asyncHandler(async (req, res) => {
         timeline
     });
 
-
     // Use NotificationService to handle alerts
     await NotificationService.notifyNewBid(job, bid);
 
-    return res.status(201).json(
-        new ApiResponse(201, bid, "Bid placed successfully")
-    );
+    return res.status(201).json(new ApiResponse(201, bid, "Bid placed successfully"));
 });
 
 const getJobBids = asyncHandler(async (req, res) => {
@@ -129,9 +129,7 @@ const getJobBids = asyncHandler(async (req, res) => {
 
     const bids = await Bid.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(
-        new ApiResponse(200, bids, "Bids fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, bids, "Bids fetched successfully"));
 });
 
 // Update bid status (Accept/Reject)
@@ -180,9 +178,7 @@ const updateBidStatus = asyncHandler(async (req, res) => {
     // Use NotificationService
     await NotificationService.notifyBidStatusUpdate(bid.user_id, job, status);
 
-    return res.status(200).json(
-        new ApiResponse(200, bid, `Bid ${status.toLowerCase()} successfully`)
-    );
+    return res.status(200).json(new ApiResponse(200, bid, `Bid ${status.toLowerCase()} successfully`));
 });
 
 const withdrawBid = asyncHandler(async (req, res) => {
@@ -219,9 +215,7 @@ const withdrawBid = asyncHandler(async (req, res) => {
         }
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, {}, "Bid withdrawn successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, {}, "Bid withdrawn successfully"));
 });
 
 const getMyBids = asyncHandler(async (req, res) => {
@@ -280,9 +274,7 @@ const getMyBids = asyncHandler(async (req, res) => {
 
     const bids = await Bid.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(
-        new ApiResponse(200, bids, "My bids fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, bids, "My bids fetched successfully"));
 });
 
 const updateBid = asyncHandler(async (req, res) => {
@@ -310,9 +302,7 @@ const updateBid = asyncHandler(async (req, res) => {
 
     await bid.save();
 
-    return res.status(200).json(
-        new ApiResponse(200, bid, "Bid updated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, bid, "Bid updated successfully"));
 });
 const getMyBidForJob = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -330,22 +320,10 @@ const getMyBidForJob = asyncHandler(async (req, res) => {
 
     if (!bid) {
         // Return 200 with null data to signify "no bid exists" without causing a 404 error log
-        return res.status(200).json(
-            new ApiResponse(200, null, "No bid found for this job")
-        );
+        return res.status(200).json(new ApiResponse(200, null, "No bid found for this job"));
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, bid, "Bid fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, bid, "Bid fetched successfully"));
 });
 
-export {
-    placeBid,
-    getJobBids,
-    updateBidStatus,
-    withdrawBid,
-    getMyBids,
-    updateBid,
-    getMyBidForJob
-};
+export { placeBid, getJobBids, updateBidStatus, withdrawBid, getMyBids, updateBid, getMyBidForJob };

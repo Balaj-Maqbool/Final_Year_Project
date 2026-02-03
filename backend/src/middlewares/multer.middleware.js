@@ -4,7 +4,6 @@ import path from "path";
 
 const tempDir = "./public/temp";
 
-
 if (!fs.existsSync(tempDir)) {
     console.log(`Creating temp directory at: ${tempDir}`);
     fs.mkdirSync(tempDir, { recursive: true });
@@ -18,7 +17,7 @@ const storage = multer.diskStorage({
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e5);
         const ext = path.extname(file.originalname) || ".png";
         cb(null, file.fieldname + "-" + uniqueSuffix + ext);
-    },
+    }
 });
 
 export const upload = multer({ storage });

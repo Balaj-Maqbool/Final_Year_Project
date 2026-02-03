@@ -9,9 +9,11 @@ const notificationSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ["NEW_JOB",
+            enum: [
+                "NEW_JOB",
                 "NEW_JOB_AVAILABLE",
-                "JOB_MATCH", "NEW_BID",
+                "JOB_MATCH",
+                "NEW_BID",
                 "BID_WITHDRAWN",
                 "BID_STATUS_UPDATE",
                 "NEW_TASK",
@@ -21,7 +23,8 @@ const notificationSchema = new Schema(
                 "NEW_RATING",
                 "CHAT",
                 "NEW_CHAT_MESSAGE",
-                "SYSTEM"],
+                "SYSTEM"
+            ],
             required: true
         },
         message: {
@@ -29,7 +32,7 @@ const notificationSchema = new Schema(
             required: true
         },
         relatedId: {
-            type: Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId
         },
         isRead: {
             type: Boolean,

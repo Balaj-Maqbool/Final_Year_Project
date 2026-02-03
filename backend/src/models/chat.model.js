@@ -29,10 +29,12 @@ const chatThreadSchema = new Schema(
             ref: "User",
             default: null
         },
-        hiddenFor: [{
-            type: Schema.Types.ObjectId,
-            ref: "User"
-        }],
+        hiddenFor: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "User"
+            }
+        ],
         lastMessage: {
             content: String,
             from: {
@@ -56,8 +58,6 @@ const chatThreadSchema = new Schema(
 // Add index for fast participant lookup
 chatThreadSchema.index({ participants: 1 });
 chatThreadSchema.plugin(mongooseAggregatePaginate);
-
-
 
 const messageSchema = new Schema(
     {

@@ -4,6 +4,7 @@ import { ACCESS_TOKEN_SECRET, CORS_ORIGIN } from "../constants.js";
 import { User } from "../models/user.model.js";
 import { chatService } from "../services/chat.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
+import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
 
 class SocketManager {
     #io;
@@ -11,6 +12,7 @@ class SocketManager {
 
     constructor() {
         this.#onlineUsers = new Map();
+        this.socketLimiter = RateLimitManager.socket(); // 20 messages / minute
     }
 
     /**
@@ -21,9 +23,9 @@ class SocketManager {
         this.#io = new Server(httpServer, {
             cors: {
                 origin: CORS_ORIGIN,
-                credentials: true,
+                credentials: true
             },
-            pingTimeout: 60000,
+            pingTimeout: 60000
         });
 
         // Middleware: Authentication
@@ -88,13 +90,11 @@ class SocketManager {
 
             this.#onConnection(socket);
         });
-
-
     }
 
     /**
      * Handle new connection
-     * @param {Object} socket 
+     * @param {Object} socket
      */
     #onConnection(socket) {
         console.log(`User Connected: ${socket.user.username} (${socket.id})`);
@@ -132,11 +132,11 @@ class SocketManager {
         // 1. Join Thread (Room)
         socket.on("join_thread", (threadId) => {
             // Security: In a real app, confirm they are a participant again here.
-            // But usually we validate on 'send_message'. 
+            // But usually we validate on 'send_message'.
             // Joining a room just allows listening. If they aren't a participant,
             // they wouldn't have the threadId unless they guessed it.
             // For extra security, we could call ChatService.validateMessagePermission(threadId, socket.user._id)
-            // But let's keep it lightweight for 'read' access, assuming threadId is secret enough 
+            // But let's keep it lightweight for 'read' access, assuming threadId is secret enough
             // or perform a quick check if desired.
             socket.join(threadId);
             console.log(`User ${socket.user.username} joined thread ${threadId}`);
@@ -149,6 +149,17 @@ class SocketManager {
 
         // 3. Send Message
         socket.on("send_message", async (payload) => {
+            try {
+                // Rate Limit Check
+                await this.socketLimiter.consume(socket.user._id.toString()); // Limit by User ID (better than IP for sockets)
+            } catch (rateLimitError) {
+                console.warn(`Rate Limit Exceeded for user ${socket.user.username}`);
+                return socket.emit("error", {
+                    type: "RATE_LIMIT",
+                    message: "You are sending messages too fast. Please slow down."
+                });
+            }
+
             console.log("Received send_message payload:", payload, typeof payload);
             try {
                 // Handle potential JSON string from tools like Hoppscotch
@@ -176,7 +187,7 @@ class SocketManager {
                 // B. Save to DB
                 // Check Recipient Online Status
                 const thread = validation.thread;
-                const recipientId = thread.participants.find(p => p.toString() !== userId.toString()).toString();
+                const recipientId = thread.participants.find((p) => p.toString() !== userId.toString()).toString();
 
                 const isRecipientOnline = this.isUserOnline(recipientId);
                 const initialStatus = isRecipientOnline ? "delivered" : "sent";
@@ -191,7 +202,7 @@ class SocketManager {
                 );
 
                 if (this.isUserOnline(recipientId)) {
-                    // Ensure it's not notifying strict room match 
+                    // Ensure it's not notifying strict room match
                     // (Actually notifications are usually global toasts, so sending strict to user room is fine)
                     // The Client frontend will decide: "If I'm on /chat/threadID, ignore toast. Else show toast."
                     this.emitToRoom(recipientId, "new_message_notification", {
@@ -201,7 +212,6 @@ class SocketManager {
                         senderId: userId
                     });
                 }
-
             } catch (error) {
                 console.error("Send Message Error:", error);
                 socket.emit("error", { type: "SERVER_ERROR", message: "Failed to send message" });
@@ -250,7 +260,7 @@ class SocketManager {
 
     /**
      * Check if a user is currently online
-     * @param {string} userId 
+     * @param {string} userId
      */
     isUserOnline(userId) {
         return this.#onlineUsers.has(userId.toString());
@@ -258,9 +268,9 @@ class SocketManager {
 
     /**
      * Emit an event to a specific room
-     * @param {string} roomId 
-     * @param {string} event 
-     * @param {Object} data 
+     * @param {string} roomId
+     * @param {string} event
+     * @param {Object} data
      */
     emitToRoom(roomId, event, data) {
         if (!this.#io) return;

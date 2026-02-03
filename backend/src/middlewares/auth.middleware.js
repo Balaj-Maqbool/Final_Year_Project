@@ -6,8 +6,7 @@ import jwt from "jsonwebtoken";
 import { ValidationHelper } from "../utils/validation.utils.js";
 
 const verifyJWT = asyncHandler(async (req, res, next) => {
-    const accessToken =
-        (await req.cookies?.accessToken) || req.header("Authorization")?.replace("Bearer ", "");
+    const accessToken = (await req.cookies?.accessToken) || req.header("Authorization")?.replace("Bearer ", "");
     if (ValidationHelper.isEmpty(accessToken)) {
         throw new ApiError(401, "Unauthorized Access, Token expired");
     }

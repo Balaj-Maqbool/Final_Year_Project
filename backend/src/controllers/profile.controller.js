@@ -9,9 +9,7 @@ import { CLOUDINARY_ROOT_FOLDER } from "../constants.js";
 const getCurrentUser = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, user, "Current user fetched successfully"));
+    return res.status(200).json(new ApiResponse(200, user, "Current user fetched successfully"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -34,7 +32,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         if (Array.isArray(skills)) {
             updateData.skills = skills;
         } else {
-            updateData.skills = skills.split(",").map(skill => skill.trim());
+            updateData.skills = skills.split(",").map((skill) => skill.trim());
         }
     }
 
@@ -46,9 +44,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         { new: true }
     );
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, user, "Account details updated successfully"));
+    return res.status(200).json(new ApiResponse(200, user, "Account details updated successfully"));
 });
 
 const updateUserProfileImage = asyncHandler(async (req, res) => {
@@ -77,9 +73,7 @@ const updateUserProfileImage = asyncHandler(async (req, res) => {
         { new: true }
     );
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, user, "Profile Image updated successfully"));
+    return res.status(200).json(new ApiResponse(200, user, "Profile Image updated successfully"));
 });
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
@@ -93,8 +87,6 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         coverImageLocalPath,
         `${CLOUDINARY_ROOT_FOLDER}/Users/${req.user._id}/Cover`
     );
-
-
 
     if (!coverImage.secure_url) {
         throw new ApiError(400, "Error while uploading cover image");
@@ -110,9 +102,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         { new: true }
     );
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, user, "Cover Image updated successfully"));
+    return res.status(200).json(new ApiResponse(200, user, "Cover Image updated successfully"));
 });
 
 const getUserProfileById = asyncHandler(async (req, res) => {
@@ -127,9 +117,7 @@ const getUserProfileById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "User not found");
     }
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, user, "User profile fetched successfully"));
+    return res.status(200).json(new ApiResponse(200, user, "User profile fetched successfully"));
 });
 
 const getAllUsers = asyncHandler(async (req, res) => {
@@ -166,9 +154,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
     const users = await User.find(query);
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, users, "Users fetched successfully"));
+    return res.status(200).json(new ApiResponse(200, users, "Users fetched successfully"));
 });
 
 const deleteUserProfileImage = asyncHandler(async (req, res) => {
@@ -180,9 +166,7 @@ const deleteUserProfileImage = asyncHandler(async (req, res) => {
         await user.save({ validateBeforeSave: false });
     }
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, user, "Profile Image deleted successfully"));
+    return res.status(200).json(new ApiResponse(200, user, "Profile Image deleted successfully"));
 });
 
 const deleteUserCoverImage = asyncHandler(async (req, res) => {
@@ -194,9 +178,7 @@ const deleteUserCoverImage = asyncHandler(async (req, res) => {
         await user.save({ validateBeforeSave: false });
     }
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, user, "Cover Image deleted successfully"));
+    return res.status(200).json(new ApiResponse(200, user, "Cover Image deleted successfully"));
 });
 
 export {

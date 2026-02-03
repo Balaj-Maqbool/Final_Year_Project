@@ -29,6 +29,15 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "google client id Not F
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "google client secret Not Found";
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "google redirect uri Not Found";
 
+const SMTP_EMAIL = process.env.SMTP_EMAIL;
+const SMTP_PASSWORD = process.env.SMTP_PASSWORD;
+const SMTP_FROM_NAME = process.env.SMTP_FROM_NAME;
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const FRONTEND_LOGIN_PATH = process.env.FRONTEND_LOGIN_PATH || "/login";
+const FRONTEND_OAUTH_SUCCESS_PATH = process.env.FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success";
+const FRONTEND_RESET_PASSWORD_PATH = process.env.FRONTEND_RESET_PASSWORD_PATH || "/reset-password";
+const FRONTEND_DASHBOARD_PATH = process.env.FRONTEND_DASHBOARD_PATH || "/dashboard";
+
 export {
     DB_NAME,
     PORT,
@@ -44,5 +53,13 @@ export {
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     GOOGLE_REDIRECT_URI,
-    CLOUDINARY_ROOT_FOLDER
+    CLOUDINARY_ROOT_FOLDER,
+    SMTP_EMAIL,
+    SMTP_PASSWORD,
+    SMTP_FROM_NAME,
+    FRONTEND_URL,
+    FRONTEND_LOGIN_PATH,
+    FRONTEND_OAUTH_SUCCESS_PATH,
+    FRONTEND_RESET_PASSWORD_PATH,
+    FRONTEND_DASHBOARD_PATH
 };

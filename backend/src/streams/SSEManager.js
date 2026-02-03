@@ -11,8 +11,8 @@ class SSEManager {
         this.#activeConnections = new Map();
         this.#HEARTBEAT_INTERVAL_MS = 30000;
 
-        // Start the global heartbeat. 
-        // We do NOT need to clear this interval because this Manager 
+        // Start the global heartbeat.
+        // We do NOT need to clear this interval because this Manager
         // lives as long as the application runs.
         this.#startHeartbeat();
     }
@@ -24,7 +24,7 @@ class SSEManager {
                 for (const connection of userConnections) {
                     // If a response is closed, it might throw, so we can wrap in try-catch or rely on the 'close' event handler cleanup
                     try {
-                        connection.res.write(': keepalive\n\n');
+                        connection.res.write(": keepalive\n\n");
                     } catch (error) {
                         // Client likely disconnected, cleanup will happen via 'close' event
                     }
@@ -51,7 +51,7 @@ class SSEManager {
         res.writeHead(200, {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
+            Connection: "keep-alive",
             "Access-Control-Allow-Origin": process.env.CORS_ORIGIN || "*"
         });
 

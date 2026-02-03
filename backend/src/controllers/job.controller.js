@@ -37,9 +37,7 @@ const createJob = asyncHandler(async (req, res) => {
     // Use NotificationService to handle broadcast and skill matching
     await NotificationService.notifyNewJob(job);
 
-    return res.status(201).json(
-        new ApiResponse(201, job, "Job posted successfully")
-    );
+    return res.status(201).json(new ApiResponse(201, job, "Job posted successfully"));
 });
 
 const getAllJobs = asyncHandler(async (req, res) => {
@@ -103,18 +101,13 @@ const getAllJobs = asyncHandler(async (req, res) => {
 
     const jobs = await Job.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(
-        new ApiResponse(200, jobs, "Jobs fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, jobs, "Jobs fetched successfully"));
 });
 
 const getMyJobs = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
 
-    const aggregate = Job.aggregate([
-        { $match: { poster_id: req.user._id } },
-        { $sort: { createdAt: -1 } }
-    ]);
+    const aggregate = Job.aggregate([{ $match: { poster_id: req.user._id } }, { $sort: { createdAt: -1 } }]);
 
     const options = {
         page: parseInt(page),
@@ -123,9 +116,7 @@ const getMyJobs = asyncHandler(async (req, res) => {
 
     const jobs = await Job.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(
-        new ApiResponse(200, jobs, "My jobs fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, jobs, "My jobs fetched successfully"));
 });
 
 const getJobById = asyncHandler(async (req, res) => {
@@ -172,9 +163,7 @@ const getJobById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, job[0], "Job fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, job[0], "Job fetched successfully"));
 });
 
 const updateJob = asyncHandler(async (req, res) => {
@@ -194,16 +183,13 @@ const updateJob = asyncHandler(async (req, res) => {
 
     // Critical Business Rule: Limits on updating Assigned/Completed jobs
 
-
     if (job.status === "Completed") {
         throw new ApiError(400, "Job is already Completed. No further updates allowed.");
     }
 
-
     if (job.status === "Assigned" && status === "Open") {
         throw new ApiError(400, "Cannot revert an Assigned job to Open status.");
     }
-
 
     if (status === "Completed") {
         // We check if there are any tasks where is_approved is NOT true
@@ -213,7 +199,10 @@ const updateJob = asyncHandler(async (req, res) => {
         });
 
         if (unapprovedTasks > 0) {
-            throw new ApiError(400, `Cannot complete job. There are ${unapprovedTasks} tasks that are not yet approved by you.`);
+            throw new ApiError(
+                400,
+                `Cannot complete job. There are ${unapprovedTasks} tasks that are not yet approved by you.`
+            );
         }
     }
 
@@ -231,9 +220,7 @@ const updateJob = asyncHandler(async (req, res) => {
         await NotificationService.notifyJobCompleted(job.assigned_to, job);
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, job, "Job updated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, job, "Job updated successfully"));
 });
 
 const deleteJob = asyncHandler(async (req, res) => {
@@ -251,16 +238,7 @@ const deleteJob = asyncHandler(async (req, res) => {
 
     await Job.findByIdAndDelete(jobId);
 
-    return res.status(200).json(
-        new ApiResponse(200, {}, "Job deleted successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, {}, "Job deleted successfully"));
 });
 
-export {
-    createJob,
-    getAllJobs,
-    getMyJobs,
-    getJobById,
-    updateJob,
-    deleteJob
-};
+export { createJob, getAllJobs, getMyJobs, getJobById, updateJob, deleteJob };

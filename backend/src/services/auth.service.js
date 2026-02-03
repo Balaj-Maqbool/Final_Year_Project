@@ -2,10 +2,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { parseDuration } from "../utils/time.utils.js";
 import crypto from "crypto";
-import {
-    ACCESS_TOKEN_EXPIRY,
-    REFRESH_TOKEN_EXPIRY
-} from "../constants.js";
+import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "../constants.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 
 /**
@@ -36,7 +33,7 @@ class AuthService {
 
     /**
      * Generates both Access and Refresh tokens and saves Refresh token to DB.
-     * @param {string} userId 
+     * @param {string} userId
      */
     static async generateAccessAndRefreshTokens(userId) {
         try {
@@ -69,21 +66,17 @@ class AuthService {
 
         if (ValidationHelper.isEmpty(email)) throw new ApiError(400, "Email not found in Google profile");
 
-
         let user = await User.findOne({
             $or: [{ googleId }, { email }]
         });
 
         if (user) {
-
             if (ValidationHelper.isEmpty(user.googleId)) {
                 user.googleId = googleId;
                 if (ValidationHelper.isEmpty(user.profileImage)) user.profileImage = profileImage;
                 await user.save({ validateBeforeSave: false });
             }
-
         } else {
-
             const randomPassword = crypto.randomBytes(20).toString("hex");
             const baseUsername = email.split("@")[0].replace(/[^a-zA-Z0-0]/g, "");
             const uniqueUsername = `${baseUsername}_${crypto.randomInt(1000, 9999)}`;

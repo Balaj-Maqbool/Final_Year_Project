@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import {
     placeBid,
@@ -35,10 +34,8 @@ router.route("/bid/:bidId")
 router.route("/:jobId/:bidId")
     .delete(withdrawBid);
 
-router.route("/:bidId")
-    .patch(updateBid);
+router.route("/:bidId").patch(updateBid);
 
-router.route("/:jobId/:bidId/status")
-    .patch(updateBidStatus);
+router.route("/:jobId/:bidId/status").patch(updateBidStatus);
 
 export default router;

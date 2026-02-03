@@ -24,14 +24,12 @@ const initializeChat = asyncHandler(async (req, res) => {
         // If it was hidden for this user, unhide it
         if (existingThread.hiddenFor.includes(req.user._id)) {
             existingThread.hiddenFor = existingThread.hiddenFor.filter(
-                id => id.toString() !== req.user._id.toString()
+                (id) => id.toString() !== req.user._id.toString()
             );
             await existingThread.save();
         }
 
-        return res.status(200).json(
-            new ApiResponse(200, existingThread, "Chat thread retrieved successfully")
-        );
+        return res.status(200).json(new ApiResponse(200, existingThread, "Chat thread retrieved successfully"));
     }
 
     // 2. Fetch Bid details
@@ -53,7 +51,7 @@ const initializeChat = asyncHandler(async (req, res) => {
 
     const participants = [job.poster_id, bid.user_id];
 
-    if (!participants.some(p => p.toString() === req.user._id.toString())) {
+    if (!participants.some((p) => p.toString() === req.user._id.toString())) {
         throw new ApiError(403, "You are not authorized to start this chat");
     }
 
@@ -65,12 +63,10 @@ const initializeChat = asyncHandler(async (req, res) => {
     });
 
     // 4. Notify (DB Notification for this important event)
-    const recipientId = participants.find(p => p.toString() !== req.user._id.toString());
+    const recipientId = participants.find((p) => p.toString() !== req.user._id.toString());
     await NotificationService.notifyChatInitiated(recipientId, req.user);
 
-    return res.status(201).json(
-        new ApiResponse(201, newThread, "Chat initiated successfully")
-    );
+    return res.status(201).json(new ApiResponse(201, newThread, "Chat initiated successfully"));
 });
 
 /**
@@ -115,9 +111,7 @@ const getMyThreads = asyncHandler(async (req, res) => {
 
     const threads = await ChatThread.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(
-        new ApiResponse(200, threads, "Chats retrieved successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, threads, "Chats retrieved successfully"));
 });
 
 /**
@@ -169,9 +163,7 @@ const getThreadMessages = asyncHandler(async (req, res) => {
 
     const messages = await Message.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(
-        new ApiResponse(200, messages, "Messages retrieved successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, messages, "Messages retrieved successfully"));
 });
 
 /**
@@ -212,9 +204,7 @@ const deleteMessage = asyncHandler(async (req, res) => {
         threadId: message.threadId
     });
 
-    return res.status(200).json(
-        new ApiResponse(200, message, "Message deleted successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, message, "Message deleted successfully"));
 });
 
 /**
@@ -238,9 +228,7 @@ const deleteThread = asyncHandler(async (req, res) => {
         await thread.save();
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, {}, "Chat thread deleted from your view")
-    );
+    return res.status(200).json(new ApiResponse(200, {}, "Chat thread deleted from your view"));
 });
 
 const blockThread = asyncHandler(async (req, res) => {

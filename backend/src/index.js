@@ -17,10 +17,7 @@ connectDB()
         server.listen(PORT, () => {
             console.log(`server listening at the Port : ${PORT}`);
         });
-
     })
     .catch((error) => {
         console.log("DB Connection Failed !!!", error);
     });
-
-
