@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import {
     ACCESS_TOKEN_SECRET,
     ACCESS_TOKEN_EXPIRY,
@@ -60,6 +61,8 @@ const userSchema = new Schema(
             enum: ["Freelancer", "Client"],
             required: true
         },
+        resetPasswordToken: String,
+        resetPasswordExpire: Date,
         // Freelancer specific fields
         skills: {
             type: [String],
@@ -120,6 +123,22 @@ userSchema.methods.generateRefreshToken = function () {
             expiresIn: REFRESH_TOKEN_EXPIRY
         }
     );
+};
+
+userSchema.methods.getResetPasswordToken = function () {
+    // Generate token
+    const resetToken = crypto.randomBytes(20).toString("hex");
+
+    // Hash and set to resetPasswordToken
+    this.resetPasswordToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+
+    // Set token expire time (10 minutes)
+    this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+    return resetToken;
 };
 
 userSchema.set("toJSON", {

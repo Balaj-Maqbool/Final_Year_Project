@@ -36,6 +36,7 @@
         "mongoose": "^8.15.2",
         "mongoose-aggregate-paginate-v2": "^1.1.4",
         "multer": "^2.0.1",
+        "nodemailer": "^7.0.13",
         "passport": "^0.7.0",
         "passport-google-oauth20": "^2.0.0",
         "rate-limiter-flexible": "^9.1.0",

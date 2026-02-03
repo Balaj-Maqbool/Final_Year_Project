@@ -11,6 +11,24 @@
 
 ## 1. Authentication (`/users`)
 
+### Forgot Password
+- **URL**: `/api/v1/users/password/forgot`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  { "email": "user@example.com" }
+  ```
+- **Response**: `200 OK`
+
+### Reset Password
+- **URL**: `/api/v1/users/password/reset/:token`
+- **Method**: `PATCH`
+- **Body**:
+  ```json
+  { "password": "newPassword123" }
+  ```
+- **Response**: `200 OK`
+
 | Method | Endpoint | Description | Request Body / Params |
 | :--- | :--- | :--- | :--- |
 | **POST** | `/register` | Register a new user | **JSON**: <br>`{ "email": "user@example.com", "username": "user123", "password": "securePass123", "fullName": "John Doe", "role": "Client" or "Freelancer" }` |
