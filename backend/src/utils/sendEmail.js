@@ -10,8 +10,7 @@ const sendEmail = async (options) => {
         html: options.html
     };
 
-    let response = await transporter.sendMail(message);
-    // console.log(response);
+    await transporter.sendMail(message);
 };
 
 export default sendEmail;

@@ -14,7 +14,6 @@ const generateUploadSignature = asyncHandler(async (req, res) => {
 
     let folder = `${CLOUDINARY_ROOT_FOLDER}/General`;
 
-    // Dynamic Folder Logic
     if (folderType === "chat" && threadId) {
         folder = `${CLOUDINARY_ROOT_FOLDER}/Chat/${threadId}`;
     }

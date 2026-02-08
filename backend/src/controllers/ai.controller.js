@@ -8,6 +8,9 @@ const generateJobDetails = asyncHandler(async (req, res) => {
 
     if (!userPrompt) throw new ApiError(400, "User prompt is required");
 
+    // Sanitize input to prevent prompt injection
+    const sanitizedPrompt = userPrompt.replace(/"/g, '\\"');
+
     const systemPrompt = `
         You are an expert Job Architect. The user will give you a rough idea of a job they need done.
         Generate a professional Job Description JSON with the following fields:
@@ -17,7 +20,7 @@ const generateJobDetails = asyncHandler(async (req, res) => {
         - budget_estimate: A suggested budget range (e.g., "$500 - $1000").
         - category: The most relevant category (e.g., "Web Development", "Design", "Writing").
 
-        User Input: "${userPrompt}"
+        User Input: "${sanitizedPrompt}"
     `;
 
     const jobData = await aiService.generateJSON(systemPrompt);
@@ -28,10 +31,14 @@ const generateJobDetails = asyncHandler(async (req, res) => {
 const policeUserProfile = asyncHandler(async (req, res) => {
     const { currentBio, currentSkills } = req.body;
 
+    // Sanitize inputs
+    const safeBio = (currentBio || "N/A").replace(/"/g, '\\"');
+    const safeSkills = (currentSkills || "N/A").replace(/"/g, '\\"');
+
     const systemPrompt = `
         You are an expert Profile Consultant.
-        The user has the following Bio: "${currentBio || "N/A"}"
-        And the following Skills: "${currentSkills || "N/A"}"
+        The user has the following Bio: "${safeBio}"
+        And the following Skills: "${safeSkills}"
 
         Please polish this profile.
         Return a JSON with:
@@ -49,10 +56,14 @@ const generateProposal = asyncHandler(async (req, res) => {
 
     if (!jobDescription) throw new ApiError(400, "Job Description is required");
 
+    // Sanitize inputs. For objects like freelancerProfile, stringify first then escape.
+    const safeJobDesc = jobDescription.replace(/"/g, '\\"');
+    const safeProfile = JSON.stringify(freelancerProfile).replace(/"/g, '\\"');
+
     const systemPrompt = `
         You are an expert Proposal Writer.
-        Job Description: "${jobDescription}"
-        Freelancer Profile: "${JSON.stringify(freelancerProfile)}"
+        Job Description: "${safeJobDesc}"
+        Freelancer Profile: "${safeProfile}"
 
         Write a compelling cover letter (proposal) that highlights why this freelancer is the best fit.
         Return a JSON with:
@@ -69,9 +80,11 @@ const generateTaskBreakdown = asyncHandler(async (req, res) => {
 
     if (!jobDescription) throw new ApiError(400, "Job Description is required");
 
+    const safeJobDesc = jobDescription.replace(/"/g, '\\"');
+
     const systemPrompt = `
         You are an expert Project Manager.
-        Job Description: "${jobDescription}"
+        Job Description: "${safeJobDesc}"
 
         Break this project down into 5-10 actionable tasks for a Kanban board.
         Return a JSON object with a "tasks" array, where each item has:

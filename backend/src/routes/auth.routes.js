@@ -18,13 +18,10 @@ import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
-// --- PUBLIC AUTH ROUTES ---
-
 router.route("/register").post(RateLimitManager.apiAuth(), registerUser);
 router.route("/login").post(RateLimitManager.apiAuth(), loginUser);
 router.route("/refresh-token").post(refreshAccessToken);
 
-// Google Auth
 router.route("/google").get((req, res, next) => {
     const role = req.query.role || "Client";
     passport.authenticate("google", {
@@ -41,13 +38,10 @@ router.route("/google/callback").get(
     handleGoogleCallback
 );
 
-// --- SECURED AUTH ROUTES ---
-
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/password/change").patch(verifyJWT, changeCurrentPassword);
 router.route("/delete-account").delete(verifyJWT, deleteUser);
 
-// --- FORGOT PASSWORD ROUTES ---
 router.route("/password/forgot").post(RateLimitManager.apiAuth(), forgotPassword);
 router.route("/password/reset/:token").patch(RateLimitManager.apiAuth(), resetPassword);
 

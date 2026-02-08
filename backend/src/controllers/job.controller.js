@@ -24,6 +24,11 @@ const createJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields (title, description, budget, deadline, category) are required");
     }
 
+    // Logic Audit Fix: Input Boundaries
+    if (title.length > 100) throw new ApiError(400, "Title must be less than 100 characters");
+    if (description.length > 5000) throw new ApiError(400, "Description must be less than 5000 characters");
+    if (required_skills && required_skills.length > 20) throw new ApiError(400, "Max 20 skills allowed");
+
     const job = await Job.create({
         title,
         description,
@@ -34,7 +39,6 @@ const createJob = asyncHandler(async (req, res) => {
         poster_id: req.user?._id
     });
 
-    // Use NotificationService to handle broadcast and skill matching
     await NotificationService.notifyNewJob(job);
 
     return res.status(201).json(new ApiResponse(201, job, "Job posted successfully"));
@@ -122,11 +126,6 @@ const getMyJobs = asyncHandler(async (req, res) => {
 const getJobById = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
 
-    // Validate jobId format if needed or trust mongoose to cast, but aggregate needs ObjectId casting usually if passing string
-    // However, findById casts automatically. Aggregate does not.
-    // We need mongoose.Types.ObjectId
-
-    // Validate jobId format
     ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     const job = await Job.aggregate([
@@ -176,12 +175,9 @@ const updateJob = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-    // Ensure only the poster can update
     if (job.poster_id.toString() !== req.user?._id.toString()) {
         throw new ApiError(403, "You are not authorized to update this job");
     }
-
-    // Critical Business Rule: Limits on updating Assigned/Completed jobs
 
     if (job.status === "Completed") {
         throw new ApiError(400, "Job is already Completed. No further updates allowed.");
@@ -191,8 +187,11 @@ const updateJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot revert an Assigned job to Open status.");
     }
 
+    if (status === "Assigned") {
+        throw new ApiError(400, "Cannot manually set status to Assigned. Please accept a bid to assign a freelancer.");
+    }
+
     if (status === "Completed") {
-        // We check if there are any tasks where is_approved is NOT true
         const unapprovedTasks = await Task.countDocuments({
             job_id: jobId,
             is_approved: { $ne: true }
@@ -208,6 +207,11 @@ const updateJob = asyncHandler(async (req, res) => {
 
     job.title = title || job.title;
     job.description = description || job.description;
+
+    // Logic Audit Fix: Input Boundaries for Update
+    if (job.title.length > 100) throw new ApiError(400, "Title must be less than 100 characters");
+    if (job.description.length > 5000) throw new ApiError(400, "Description must be less than 5000 characters");
+
     job.budget = budget || job.budget;
     job.deadline = deadline || job.deadline;
     job.category = category || job.category;
@@ -215,7 +219,6 @@ const updateJob = asyncHandler(async (req, res) => {
 
     await job.save();
 
-    // Use NotificationService
     if (job.status === "Completed" && job.assigned_to) {
         await NotificationService.notifyJobCompleted(job.assigned_to, job);
     }
@@ -234,6 +237,10 @@ const deleteJob = asyncHandler(async (req, res) => {
 
     if (job.poster_id.toString() !== req.user?._id.toString()) {
         throw new ApiError(403, "You are not authorized to delete this job");
+    }
+
+    if (job.status === "Assigned") {
+        throw new ApiError(400, "Cannot delete an assigned job. Please close or cancel it first to notify the freelancer.");
     }
 
     await Job.findByIdAndDelete(jobId);

@@ -16,7 +16,6 @@ app.use(
 );
 
 import { RateLimitManager } from "./middlewares/rateLimiter.middleware.js";
-// Global Rate Limiter: 500 requests per 15 minutes
 app.use("/api", RateLimitManager.apiGlobal());
 
 app.use(express.json({ limit: "24kb" }));

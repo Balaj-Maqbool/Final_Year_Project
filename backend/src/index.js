@@ -7,7 +7,6 @@ connectDB()
     .then(() => {
         const server = http.createServer(app);
 
-        // Initialize Socket.io
         socketManager.initialize(server);
 
         server.on("error", (error) => {

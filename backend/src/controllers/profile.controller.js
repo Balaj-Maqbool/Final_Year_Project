@@ -15,11 +15,15 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email, bio, skills, portfolio } = req.body;
 
-    // Validation
     if (ValidationHelper.isEmpty(fullName)) throw new ApiError(400, "Full Name is required");
     if (ValidationHelper.isEmpty(email)) throw new ApiError(400, "Email is required");
 
-    // Prepare update object
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
+        throw new ApiError(409, "Email is already in use by another account");
+    }
+
     const updateData = {
         fullName,
         email,
@@ -27,13 +31,20 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         portfolio: portfolio || ""
     };
 
-    // If skills are provided (as comma separated string or array), handle them
+    // Logic Audit Fix: Input Boundaries
+    if (updateData.bio.length > 500) throw new ApiError(400, "Bio must be less than 500 characters");
+    if (updateData.portfolio.length > 2000) throw new ApiError(400, "Portfolio URL/Text must be less than 2000 characters");
+
     if (skills) {
+        let skillsArray = [];
         if (Array.isArray(skills)) {
-            updateData.skills = skills;
+            skillsArray = skills;
         } else {
-            updateData.skills = skills.split(",").map((skill) => skill.trim());
+            skillsArray = skills.split(",").map((skill) => skill.trim());
         }
+
+        if (skillsArray.length > 50) throw new ApiError(400, "Max 50 skills allowed");
+        updateData.skills = skillsArray;
     }
 
     const user = await User.findByIdAndUpdate(
@@ -61,6 +72,10 @@ const updateUserProfileImage = asyncHandler(async (req, res) => {
 
     if (!profileImage.secure_url) {
         throw new ApiError(400, "Error while uploading profile image");
+    }
+
+    if (req.user.profileImage) {
+        await CloudinaryHelper.safeDelete(req.user.profileImage);
     }
 
     const user = await User.findByIdAndUpdate(
@@ -92,6 +107,10 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Error while uploading cover image");
     }
 
+    if (req.user.coverImage) {
+        await CloudinaryHelper.safeDelete(req.user.coverImage);
+    }
+
     const user = await User.findByIdAndUpdate(
         req.user._id,
         {
@@ -108,7 +127,6 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 const getUserProfileById = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    // Validate jobId format
     ValidationHelper.validateId(id, "Invalid User ID");
 
     const user = await User.findById(id);
@@ -121,23 +139,16 @@ const getUserProfileById = asyncHandler(async (req, res) => {
 });
 
 const getAllUsers = asyncHandler(async (req, res) => {
-    // If role is specified in query (e.g. ?role=Freelancer), filter by it.
-    // If NOT specified, return ALL users.
     let { role } = req.query;
 
     const query = {};
     if (!ValidationHelper.isEmpty(role)) {
-        // Normalize role: "freelancer" -> "Freelancer"
         role = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 
-        // Enforce role validity if user passes garbage
         const allowedRoles = ["Freelancer", "Client"];
         if (allowedRoles.includes(role)) {
             query.role = role;
         } else {
-            // Optional: throw error or just return empty/all?
-            // "if not specified in url then all" implies loose filtering
-            // but strict role checking is safer. Let's return empty if invalid role.
             query.role = role;
         }
     }
@@ -145,12 +156,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
     const options = {
         page: parseInt(req.query.page) || 1,
         limit: parseInt(req.query.limit) || 10,
-        sort: { createdAt: -1 } // Newest first
+        sort: { createdAt: -1 }
     };
-
-    // Since we don't have aggregate paginate on User model yet, we'll use find + skip/limit
-    // Or just simple find if scale corresponds to FYP
-    // User requested "get all users", normally implies pagination but for now plain find is enough for MVP
 
     const users = await User.find(query);
 
