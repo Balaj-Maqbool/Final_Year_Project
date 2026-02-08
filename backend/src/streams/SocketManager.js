@@ -12,7 +12,7 @@ class SocketManager {
 
     constructor() {
         this.#onlineUsers = new Map();
-        this.socketLimiter = RateLimitManager.socket(); // 20 messages / minute
+        this.socketLimiter = RateLimitManager.socketMessage(); // 20 messages / minute
     }
 
     /**

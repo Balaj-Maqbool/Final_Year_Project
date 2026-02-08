@@ -17,7 +17,7 @@ app.use(
 
 import { RateLimitManager } from "./middlewares/rateLimiter.middleware.js";
 // Global Rate Limiter: 500 requests per 15 minutes
-app.use("/api", RateLimitManager.global());
+app.use("/api", RateLimitManager.apiGlobal());
 
 app.use(express.json({ limit: "24kb" }));
 
@@ -25,7 +25,7 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 import passport from "passport";
-import "./config/passport.js";
+import "./config/passport.config.js";
 app.use(passport.initialize());
 
 import authRouter from "./routes/auth.routes.js";
@@ -60,6 +60,9 @@ app.use("/api/v1/chats", chatRouter);
 
 import mediaRouter from "./routes/media.routes.js";
 app.use("/api/v1/media", mediaRouter);
+
+import aiRouter from "./routes/ai.routes.js";
+app.use("/api/v1/ai", aiRouter);
 
 app.get("/", (req, res) => {
     res.send("API is running...");

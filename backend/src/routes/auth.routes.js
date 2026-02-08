@@ -20,8 +20,8 @@ const router = Router();
 
 // --- PUBLIC AUTH ROUTES ---
 
-router.route("/register").post(RateLimitManager.auth(), registerUser);
-router.route("/login").post(RateLimitManager.auth(), loginUser);
+router.route("/register").post(RateLimitManager.apiAuth(), registerUser);
+router.route("/login").post(RateLimitManager.apiAuth(), loginUser);
 router.route("/refresh-token").post(refreshAccessToken);
 
 // Google Auth
@@ -48,7 +48,7 @@ router.route("/password/change").patch(verifyJWT, changeCurrentPassword);
 router.route("/delete-account").delete(verifyJWT, deleteUser);
 
 // --- FORGOT PASSWORD ROUTES ---
-router.route("/password/forgot").post(RateLimitManager.auth(), forgotPassword);
-router.route("/password/reset/:token").patch(RateLimitManager.auth(), resetPassword);
+router.route("/password/forgot").post(RateLimitManager.apiAuth(), forgotPassword);
+router.route("/password/reset/:token").patch(RateLimitManager.apiAuth(), resetPassword);
 
 export default router;
