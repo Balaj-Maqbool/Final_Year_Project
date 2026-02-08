@@ -23,7 +23,10 @@ class AI_Service {
 
             let text = await this.generateText(jsonPrompt);
 
-            text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+            text = text
+                .replace(/```json/g, "")
+                .replace(/```/g, "")
+                .trim();
 
             const firstOpen = text.indexOf("{");
             const lastClose = text.lastIndexOf("}");

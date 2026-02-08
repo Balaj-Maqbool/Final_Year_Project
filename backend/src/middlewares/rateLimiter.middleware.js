@@ -2,7 +2,6 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 import { ApiError } from "../utils/ApiError.js";
 
 class RateLimitManager {
-
     /**
      * [INTERNAL] Creates a standard HTTP middleware using Token Bucket (Per IP)
      * @param {number} points - Max requests (Bucket Size)
@@ -52,7 +51,6 @@ class RateLimitManager {
         return this.create(10, 60 * 60, "Too many file uploads, please try again after an hour");
     }
 
-
     /**
      * [INTERNAL] Creates a GLOBAL limiter shared by ALL users
      * @param {number} points - Max requests
@@ -82,9 +80,12 @@ class RateLimitManager {
      * Gemini 2.5 Flash Free Tier: 10 RPM (Global Limit)
      */
     static apiAI() {
-        return this.createGlobal(10, 60, "AI Service is currently at capacity (10 requests/min). Please try again shortly.");
+        return this.createGlobal(
+            10,
+            60,
+            "AI Service is currently at capacity (10 requests/min). Please try again shortly."
+        );
     }
-
 
     /**
      * [INTERNAL] Creates a raw limiter (NOT middleware) for use in Sockets/Logic

@@ -44,6 +44,7 @@ A robust backend REST API for a private SaaS freelancing platform. Built with **
     - Aggregated analytics for Clients (Spending, Hires) and Freelancers (Earnings, Success Rate).
 
 - **🔔 Real-time Notifications (SSE)**
+
     - **Instant Alerts**: Users get real-time toasts for new bids, job matches, and task updates.
     - **Email-like History**: All notifications are saved to the database for later viewing.
     - **Smart Filtering**: Notifications are role-aware (e.g., only Freelancers see "New Job" alerts).
