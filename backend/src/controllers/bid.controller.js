@@ -17,13 +17,9 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Freelancers can place bids");
     }
 
-    if (
-        ValidationHelper.isEmpty(bid_amount) ||
-        ValidationHelper.isEmpty(message) ||
-        ValidationHelper.isEmpty(timeline)
-    ) {
-        throw new ApiError(400, "All fields (bid_amount, message, timeline) are required");
-    }
+    ValidationHelper.validateRange(bid_amount, 1, null, "Bid Amount");
+    ValidationHelper.validateLength(message, 10, 2000, "Message/Proposal");
+    ValidationHelper.validateLength(timeline, 2, 100, "Timeline");
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -277,9 +273,13 @@ const updateBid = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot update a bid that has been accepted or rejected");
     }
 
-    if (!ValidationHelper.isEmpty(bid_amount)) bid.bid_amount = bid_amount;
-    if (!ValidationHelper.isEmpty(message)) bid.message = message;
-    if (!ValidationHelper.isEmpty(timeline)) bid.timeline = timeline;
+    if (bid_amount) ValidationHelper.validateRange(bid_amount, 1, null, "Bid Amount");
+    if (message) ValidationHelper.validateLength(message, 10, 2000, "Message/Proposal");
+    if (timeline) ValidationHelper.validateLength(timeline, 2, 100, "Timeline");
+
+    bid.bid_amount = bid_amount;
+    bid.message = message;
+    bid.timeline = timeline;
 
     await bid.save();
 

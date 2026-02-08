@@ -131,6 +131,20 @@ class SocketManager {
                 const { threadId, content, attachments, replyTo } = payload;
                 const userId = socket.user._id;
 
+                if (content && content.length > 5000) {
+                    return socket.emit("error", {
+                        type: "VALIDATION_ERROR",
+                        message: "Message content must be less than 5000 characters"
+                    });
+                }
+
+                if (attachments && attachments.length > 5) {
+                    return socket.emit("error", {
+                        type: "VALIDATION_ERROR",
+                        message: "Maximum 5 attachments allowed"
+                    });
+                }
+
                 const validation = await chatService.validateMessagePermission(threadId, userId);
 
                 if (!validation.canSend) {
@@ -154,6 +168,8 @@ class SocketManager {
                     initialStatus,
                     replyTo
                 );
+
+                this.emitToRoom(threadId, "new_message", message);
 
                 if (this.isUserOnline(recipientId)) {
                     this.emitToRoom(recipientId, "new_message_notification", {

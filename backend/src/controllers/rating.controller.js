@@ -19,13 +19,9 @@ const addRating = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Clients can submit ratings");
     }
 
-    if (ValidationHelper.isEmpty(rating) || ValidationHelper.isEmpty(comment)) {
-        throw new ApiError(400, "Rating (1-5) and comment are required");
-    }
-
-    if (rating < 1 || rating > 5) {
-        throw new ApiError(400, "Rating must be between 1 and 5");
-    }
+    if (ValidationHelper.isEmpty(rating)) throw new ApiError(400, "Rating is required");
+    ValidationHelper.validateRange(rating, 1, 5, "Rating");
+    ValidationHelper.validateLength(comment, 3, 1000, "Comment");
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -172,20 +168,22 @@ const updateRating = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not authorized to update this rating");
     }
 
+    let shouldUpdateStats = false;
+
     if (rating) {
-        if (rating < 1 || rating > 5) {
-            throw new ApiError(400, "Rating must be between 1 and 5");
-        }
+        ValidationHelper.validateRange(rating, 1, 5, "Rating");
         existingRating.rating = rating;
+        shouldUpdateStats = true;
     }
 
-    if (!ValidationHelper.isEmpty(comment)) {
+    if (comment) {
+        ValidationHelper.validateLength(comment, 3, 1000, "Comment");
         existingRating.comment = comment;
     }
 
     await existingRating.save();
 
-    if (rating) {
+    if (shouldUpdateStats) {
         const stats = await Rating.aggregate([
             {
                 $match: {

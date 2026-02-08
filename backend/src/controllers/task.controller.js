@@ -12,13 +12,8 @@ const createTask = asyncHandler(async (req, res) => {
 
     ValidationHelper.validateId(jobId, "Invalid Job ID");
 
-    if (ValidationHelper.isEmpty(title)) {
-        throw new ApiError(400, "Task title is required");
-    }
-
-
-    if (title.length > 100) throw new ApiError(400, "Task Title must be less than 100 characters");
-    if (description && description.length > 1000) throw new ApiError(400, "Task Description must be less than 1000 characters");
+    ValidationHelper.validateLength(title, 3, 100, "Task Title");
+    if (description) ValidationHelper.validateLength(description, 0, 1000, "Task Description");
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -170,11 +165,11 @@ const updateTask = asyncHandler(async (req, res) => {
     }
 
     if (title) {
-        if (title.length > 100) throw new ApiError(400, "Task Title must be less than 100 characters");
+        ValidationHelper.validateLength(title, 3, 100, "Task Title");
         task.title = title;
     }
     if (description) {
-        if (description.length > 1000) throw new ApiError(400, "Task Description must be less than 1000 characters");
+        ValidationHelper.validateLength(description, 0, 1000, "Task Description");
         task.description = description;
     }
 

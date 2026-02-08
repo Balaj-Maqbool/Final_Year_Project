@@ -19,18 +19,11 @@ import { getPasswordResetTemplate, getWelcomeEmailTemplate } from "../utils/emai
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
 
-    if (ValidationHelper.isEmpty(fullName)) {
-        throw new ApiError(400, "Full Name is required");
-    }
-    if (ValidationHelper.isEmpty(email)) {
-        throw new ApiError(400, "Email is required");
-    }
-    if (ValidationHelper.isEmpty(username)) {
-        throw new ApiError(400, "Username is required");
-    }
-    if (ValidationHelper.isEmpty(password)) {
-        throw new ApiError(400, "Password is required");
-    }
+    ValidationHelper.validateLength(fullName, 2, 50, "Full Name");
+    ValidationHelper.validateEmail(email);
+    ValidationHelper.validateLength(username, 3, 30, "Username");
+    ValidationHelper.validateLength(password, 8, 128, "Password");
+    ValidationHelper.validatePasswordStrength(password);
     if (!["Freelancer", "Client"].includes(role)) {
         throw new ApiError(400, "Role must be 'Client' or 'Freelancer'");
     }

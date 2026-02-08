@@ -15,9 +15,11 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email, bio, skills, portfolio } = req.body;
 
-    if (ValidationHelper.isEmpty(fullName)) throw new ApiError(400, "Full Name is required");
-    if (ValidationHelper.isEmpty(email)) throw new ApiError(400, "Email is required");
+    ValidationHelper.validateLength(fullName, 2, 50, "Full Name");
+    ValidationHelper.validateEmail(email);
 
+    ValidationHelper.validateLength(bio, 0, 500, "Bio");
+    ValidationHelper.validateLength(portfolio, 0, 2000, "Portfolio URL/Text");
 
     const existingUser = await User.findOne({ email });
     if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
@@ -30,10 +32,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         bio: bio || "",
         portfolio: portfolio || ""
     };
-
-    // Logic Audit Fix: Input Boundaries
-    if (updateData.bio.length > 500) throw new ApiError(400, "Bio must be less than 500 characters");
-    if (updateData.portfolio.length > 2000) throw new ApiError(400, "Portfolio URL/Text must be less than 2000 characters");
 
     if (skills) {
         let skillsArray = [];

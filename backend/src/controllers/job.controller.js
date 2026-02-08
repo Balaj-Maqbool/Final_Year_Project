@@ -25,9 +25,13 @@ const createJob = asyncHandler(async (req, res) => {
     }
 
     // Logic Audit Fix: Input Boundaries
-    if (title.length > 100) throw new ApiError(400, "Title must be less than 100 characters");
-    if (description.length > 5000) throw new ApiError(400, "Description must be less than 5000 characters");
+    ValidationHelper.validateLength(title, 10, 100, "Title");
+    ValidationHelper.validateLength(description, 50, 5000, "Description");
+    ValidationHelper.validateRange(budget, 1, 1000000, "Budget");
+
+    // Manual check for skills as requested
     if (required_skills && required_skills.length > 20) throw new ApiError(400, "Max 20 skills allowed");
+
 
     const job = await Job.create({
         title,
@@ -205,13 +209,13 @@ const updateJob = asyncHandler(async (req, res) => {
         }
     }
 
+    // Logic Audit Fix: Input Boundaries for Update
+    if (title) ValidationHelper.validateLength(title, 10, 100, "Title");
+    if (description) ValidationHelper.validateLength(description, 50, 5000, "Description");
+    if (budget) ValidationHelper.validateRange(budget, 1, 1000000, "Budget");
+
     job.title = title || job.title;
     job.description = description || job.description;
-
-    // Logic Audit Fix: Input Boundaries for Update
-    if (job.title.length > 100) throw new ApiError(400, "Title must be less than 100 characters");
-    if (job.description.length > 5000) throw new ApiError(400, "Description must be less than 5000 characters");
-
     job.budget = budget || job.budget;
     job.deadline = deadline || job.deadline;
     job.category = category || job.category;

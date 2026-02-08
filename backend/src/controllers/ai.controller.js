@@ -7,6 +7,7 @@ const generateJobDetails = asyncHandler(async (req, res) => {
     const { userPrompt } = req.body;
 
     if (!userPrompt) throw new ApiError(400, "User prompt is required");
+    ValidationHelper.validateLength(userPrompt, 1, 2500, "User Prompt");
 
     // Sanitize input to prevent prompt injection
     const sanitizedPrompt = userPrompt.replace(/"/g, '\\"');
@@ -30,6 +31,9 @@ const generateJobDetails = asyncHandler(async (req, res) => {
 
 const policeUserProfile = asyncHandler(async (req, res) => {
     const { currentBio, currentSkills } = req.body;
+
+    if (currentBio) ValidationHelper.validateLength(currentBio, 0, 5000, "Bio");
+    if (currentSkills) ValidationHelper.validateLength(currentSkills, 0, 5000, "Skills");
 
     // Sanitize inputs
     const safeBio = (currentBio || "N/A").replace(/"/g, '\\"');
