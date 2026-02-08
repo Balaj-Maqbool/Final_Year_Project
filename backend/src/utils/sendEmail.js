@@ -1,5 +1,5 @@
 import { SMTP_EMAIL, SMTP_FROM_NAME } from "../constants.js";
-import transporter from "../config/nodemailer.js";
+import transporter from "../config/nodemailer.config.js";
 
 const sendEmail = async (options) => {
     const message = {

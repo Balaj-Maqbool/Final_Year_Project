@@ -32,11 +32,14 @@ const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "google redirect 
 const SMTP_EMAIL = process.env.SMTP_EMAIL;
 const SMTP_PASSWORD = process.env.SMTP_PASSWORD;
 const SMTP_FROM_NAME = process.env.SMTP_FROM_NAME;
+
 const FRONTEND_URL = process.env.FRONTEND_URL;
 const FRONTEND_LOGIN_PATH = process.env.FRONTEND_LOGIN_PATH || "/login";
 const FRONTEND_OAUTH_SUCCESS_PATH = process.env.FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success";
 const FRONTEND_RESET_PASSWORD_PATH = process.env.FRONTEND_RESET_PASSWORD_PATH || "/reset-password";
 const FRONTEND_DASHBOARD_PATH = process.env.FRONTEND_DASHBOARD_PATH || "/dashboard";
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 export {
     DB_NAME,
@@ -61,5 +64,6 @@ export {
     FRONTEND_LOGIN_PATH,
     FRONTEND_OAUTH_SUCCESS_PATH,
     FRONTEND_RESET_PASSWORD_PATH,
-    FRONTEND_DASHBOARD_PATH
+    FRONTEND_DASHBOARD_PATH,
+    GEMINI_API_KEY
 };

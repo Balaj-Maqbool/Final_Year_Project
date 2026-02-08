@@ -48,6 +48,12 @@ A robust backend REST API for a private SaaS freelancing platform. Built with **
     - **Email-like History**: All notifications are saved to the database for later viewing.
     - **Smart Filtering**: Notifications are role-aware (e.g., only Freelancers see "New Job" alerts).
 
+- **🤖 AI Integration (Gemini)**
+    - **Job Architect**: Helps clients draft professional job descriptions from simple prompts.
+    - **Profile Polisher**: Enhances freelancer bios and suggests relevant skills.
+    - **Proposal Generator**: Writes personalized cover letters based on job requirements.
+    - **Task Breakdown**: Automatically breaks down complex jobs into manageable tasks.
+
 ## 🛠️ Installation & Setup
 
 1.  **Clone the repository**

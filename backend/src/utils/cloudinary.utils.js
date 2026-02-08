@@ -1,4 +1,4 @@
-import { cloudinary } from "../config/cloudinary.js";
+import { cloudinary } from "../config/cloudinary.config.js";
 import fs from "fs";
 import { CLOUDINARY_ROOT_FOLDER } from "../constants.js";
 import { ValidationHelper } from "./validation.utils.js";
