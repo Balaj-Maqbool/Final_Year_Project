@@ -34,7 +34,6 @@ const ratingSchema = new Schema(
     }
 );
 
-// Prevent duplicate ratings for the same job by the same user
 ratingSchema.index({ job_id: 1, rated_by_user_id: 1 }, { unique: true });
 
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";

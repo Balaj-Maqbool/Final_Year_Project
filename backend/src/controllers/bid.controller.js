@@ -18,13 +18,9 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Freelancers can place bids");
     }
 
-    if (
-        ValidationHelper.isEmpty(bid_amount) ||
-        ValidationHelper.isEmpty(message) ||
-        ValidationHelper.isEmpty(timeline)
-    ) {
-        throw new ApiError(400, "All fields (bid_amount, message, timeline) are required");
-    }
+    ValidationHelper.validateRange(bid_amount, 1, null, "Bid Amount");
+    ValidationHelper.validateLength(message, 10, 2000, "Message/Proposal");
+    ValidationHelper.validateLength(timeline, 2, 100, "Timeline");
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -35,7 +31,6 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new ApiError(400, "This job is not open for bidding");
     }
 
-    // Check if user has already bid (excluding rejected bids)
     const existingBid = await Bid.findOne({
         job_id: jobId,
         user_id: req.user?._id,
@@ -46,7 +41,6 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new ApiError(400, "You have already placed a bid on this job");
     }
 
-    // Restrict job poster from bidding on their own job
     if (job.poster_id.toString() === req.user?._id.toString()) {
         throw new ApiError(403, "You cannot bid on your own job");
     }
@@ -61,7 +55,6 @@ const placeBid = asyncHandler(async (req, res) => {
         timeline
     });
 
-    // Use NotificationService to handle alerts
     await NotificationService.notifyNewBid(job, bid);
 
     return res.status(201).json(new ApiResponse(201, bid, "Bid placed successfully"));
@@ -70,7 +63,6 @@ const placeBid = asyncHandler(async (req, res) => {
 const getJobBids = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
 
-    // Validate jobId
     ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     const job = await Job.findById(jobId);
@@ -78,7 +70,6 @@ const getJobBids = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-    // Only the job poster should see all bids
     if (job.poster_id.toString() !== req.user?._id.toString()) {
         throw new ApiError(403, "You are not authorized to view bids for this job");
     }
@@ -132,10 +123,9 @@ const getJobBids = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, bids, "Bids fetched successfully"));
 });
 
-// Update bid status (Accept/Reject)
 const updateBidStatus = asyncHandler(async (req, res) => {
     const { jobId, bidId } = req.params;
-    const { status } = req.body; // "Accepted" or "Rejected"
+    const { status } = req.body;
 
     ValidationHelper.validateId(jobId, "Invalid Job ID");
     ValidationHelper.validateId(bidId, "Invalid Bid ID");
@@ -158,7 +148,6 @@ const updateBidStatus = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Bid not found");
     }
 
-    // If accepting, ensure job is still open
     if (status === "Accepted" && job.status !== "Open") {
         throw new ApiError(400, "Job is already assigned or completed");
     }
@@ -167,15 +156,11 @@ const updateBidStatus = asyncHandler(async (req, res) => {
     await bid.save();
 
     if (status === "Accepted") {
-        // Assign freelancer to job and close job
         job.status = "Assigned";
         job.assigned_to = bid.user_id;
         await job.save();
-
-        // Optional: Reject all other pending bids? For now, we leave them or logic can be added here.
     }
 
-    // Use NotificationService
     await NotificationService.notifyBidStatusUpdate(bid.user_id, job, status);
 
     return res.status(200).json(new ApiResponse(200, bid, `Bid ${status.toLowerCase()} successfully`));
@@ -203,16 +188,13 @@ const withdrawBid = asyncHandler(async (req, res) => {
 
     await Bid.findByIdAndDelete(bidId);
 
-    // Use NotificationService
-    if (bid.job_id) {
-        try {
-            const job = await Job.findById(bid.job_id);
-            if (job) {
-                await NotificationService.notifyBidWithdrawn(job.poster_id, job._id);
-            }
-        } catch (error) {
-            console.error("Error sending withdrawal notification:", error);
+    try {
+        const job = await Job.findById(bid.job_id);
+        if (job) {
+            await NotificationService.notifyBidWithdrawn(job.poster_id, job._id);
         }
+    } catch (error) {
+        console.error("Error sending withdrawal notification:", error);
     }
 
     return res.status(200).json(new ApiResponse(200, {}, "Bid withdrawn successfully"));
@@ -296,9 +278,13 @@ const updateBid = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot update a bid that has been accepted or rejected");
     }
 
-    if (!ValidationHelper.isEmpty(bid_amount)) bid.bid_amount = bid_amount;
-    if (!ValidationHelper.isEmpty(message)) bid.message = message;
-    if (!ValidationHelper.isEmpty(timeline)) bid.timeline = timeline;
+    if (bid_amount) ValidationHelper.validateRange(bid_amount, 1, null, "Bid Amount");
+    if (message) ValidationHelper.validateLength(message, 10, 2000, "Message/Proposal");
+    if (timeline) ValidationHelper.validateLength(timeline, 2, 100, "Timeline");
+
+    bid.bid_amount = bid_amount;
+    bid.message = message;
+    bid.timeline = timeline;
 
     await bid.save();
 
@@ -319,7 +305,6 @@ const getMyBidForJob = asyncHandler(async (req, res) => {
     });
 
     if (!bid) {
-        // Return 200 with null data to signify "no bid exists" without causing a 404 error log
         return res.status(200).json(new ApiResponse(200, null, "No bid found for this job"));
     }
 

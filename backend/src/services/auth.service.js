@@ -5,14 +5,7 @@ import crypto from "crypto";
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "../constants.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 
-/**
- * AuthService handles business and system logic for authentication.
- * Relieves the controller of technical overhead like token signing and cookie config.
- */
 class AuthService {
-    /**
-     * Generates standard cookie options based on environment.
-     */
     static getCookieOptions() {
         return {
             httpOnly: true,
@@ -21,9 +14,6 @@ class AuthService {
         };
     }
 
-    /**
-     * Returns maxAge for cookies in milliseconds.
-     */
     static getCookieMaxAges() {
         return {
             accessTokenMaxAge: parseDuration(ACCESS_TOKEN_EXPIRY),
@@ -31,10 +21,6 @@ class AuthService {
         };
     }
 
-    /**
-     * Generates both Access and Refresh tokens and saves Refresh token to DB.
-     * @param {string} userId
-     */
     static async generateAccessAndRefreshTokens(userId) {
         try {
             const user = await User.findById(userId);
@@ -52,12 +38,6 @@ class AuthService {
         }
     }
 
-    /**
-     * Handles the complex logic of Google OAuth profile reconciliation.
-     * Links existing accounts or creates new ones with randomized credentials.
-     * @param {object} profile - Passport Google Profile
-     * @param {string} requestedRole - Role from state (Client/Freelancer)
-     */
     static async processGoogleAuth(profile, requestedRole) {
         const email = profile.emails?.[0]?.value;
         const googleId = profile.id;

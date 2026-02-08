@@ -7,6 +7,7 @@ import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
+import { Task } from "../models/task.model.js";
 
 const addRating = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -18,13 +19,9 @@ const addRating = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Clients can submit ratings");
     }
 
-    if (ValidationHelper.isEmpty(rating) || ValidationHelper.isEmpty(comment)) {
-        throw new ApiError(400, "Rating (1-5) and comment are required");
-    }
-
-    if (rating < 1 || rating > 5) {
-        throw new ApiError(400, "Rating must be between 1 and 5");
-    }
+    if (ValidationHelper.isEmpty(rating)) throw new ApiError(400, "Rating is required");
+    ValidationHelper.validateRange(rating, 1, 5, "Rating");
+    ValidationHelper.validateLength(comment, 3, 1000, "Comment");
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -44,7 +41,6 @@ const addRating = asyncHandler(async (req, res) => {
         throw new ApiError(400, "No freelancer is assigned to this job");
     }
 
-    // Check if duplicate rating
     const existingRating = await Rating.findOne({
         job_id: jobId,
         rated_by_user_id: req.user._id
@@ -54,7 +50,6 @@ const addRating = asyncHandler(async (req, res) => {
         throw new ApiError(400, "You have already rated the freelancer for this job");
     }
 
-    // Create Rating
     const newRating = await Rating.create({
         job_id: jobId,
         rated_by_user_id: req.user._id,
@@ -80,17 +75,28 @@ const addRating = asyncHandler(async (req, res) => {
 
     if (stats.length > 0) {
         await User.findByIdAndUpdate(freelancerId, {
-            rating: Math.round(stats[0].averageRating * 10) / 10 // Round to 1 decimal
+            rating: Math.round(stats[0].averageRating * 10) / 10
         });
     }
 
-    // Optionally mark job as Completed if not already
     if (job.status !== "Completed") {
+        // Logic Audit Fix: Check for unapproved tasks before auto-completing
+        const unapprovedTasks = await Task.countDocuments({
+            job_id: jobId,
+            is_approved: { $ne: true }
+        });
+
+        if (unapprovedTasks > 0) {
+            throw new ApiError(
+                400,
+                `Cannot submit rating and complete job. There are ${unapprovedTasks} tasks that are not yet approved.`
+            );
+        }
+
         job.status = "Completed";
         await job.save();
     }
 
-    // Use NotificationService
     await NotificationService.notifyNewRating(freelancerId, job, rating);
 
     return res.status(201).json(new ApiResponse(201, newRating, "Rating submitted successfully"));
@@ -162,21 +168,22 @@ const updateRating = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not authorized to update this rating");
     }
 
+    let shouldUpdateStats = false;
+
     if (rating) {
-        if (rating < 1 || rating > 5) {
-            throw new ApiError(400, "Rating must be between 1 and 5");
-        }
+        ValidationHelper.validateRange(rating, 1, 5, "Rating");
         existingRating.rating = rating;
+        shouldUpdateStats = true;
     }
 
-    if (!ValidationHelper.isEmpty(comment)) {
+    if (comment) {
+        ValidationHelper.validateLength(comment, 3, 1000, "Comment");
         existingRating.comment = comment;
     }
 
     await existingRating.save();
 
-    // Recalculate Average if rating changed
-    if (rating) {
+    if (shouldUpdateStats) {
         const stats = await Rating.aggregate([
             {
                 $match: {

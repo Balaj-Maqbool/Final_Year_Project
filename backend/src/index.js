@@ -1,13 +1,12 @@
 import http from "http";
 import { PORT } from "./constants.js";
 import { app } from "./app.js";
-import connectDB from "./config/db.js";
+import connectDB from "./config/db.config.js";
 import { socketManager } from "./streams/SocketManager.js";
 connectDB()
     .then(() => {
         const server = http.createServer(app);
 
-        // Initialize Socket.io
         socketManager.initialize(server);
 
         server.on("error", (error) => {

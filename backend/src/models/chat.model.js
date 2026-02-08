@@ -55,7 +55,6 @@ const chatThreadSchema = new Schema(
     { timestamps: true }
 );
 
-// Add index for fast participant lookup
 chatThreadSchema.index({ participants: 1 });
 chatThreadSchema.plugin(mongooseAggregatePaginate);
 

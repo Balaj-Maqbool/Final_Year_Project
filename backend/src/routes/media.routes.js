@@ -5,9 +5,8 @@ import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
-// Secure this route: Only logged-in users can upload
 router.use(verifyJWT);
 
-router.get("/config", RateLimitManager.media(), generateUploadSignature);
+router.get("/config", RateLimitManager.apiMedia(), generateUploadSignature);
 
 export default router;

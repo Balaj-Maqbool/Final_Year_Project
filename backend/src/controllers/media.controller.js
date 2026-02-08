@@ -14,9 +14,19 @@ const generateUploadSignature = asyncHandler(async (req, res) => {
 
     let folder = `${CLOUDINARY_ROOT_FOLDER}/General`;
 
-    // Dynamic Folder Logic
+    const ALLOWED_FOLDERS = ["chat", "profile", "job", "cover"];
+    if (folderType && !ALLOWED_FOLDERS.includes(folderType)) {
+        throw new ApiError(400, "Invalid folder type");
+    }
+
     if (folderType === "chat" && threadId) {
         folder = `${CLOUDINARY_ROOT_FOLDER}/Chat/${threadId}`;
+    } else if (folderType === "profile") {
+        folder = `${CLOUDINARY_ROOT_FOLDER}/Profiles`;
+    } else if (folderType === "job") {
+        folder = `${CLOUDINARY_ROOT_FOLDER}/Jobs`;
+    } else if (folderType === "cover") {
+        folder = `${CLOUDINARY_ROOT_FOLDER}/Covers`;
     }
 
     const signature = cloudinary.utils.api_sign_request(

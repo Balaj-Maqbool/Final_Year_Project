@@ -28,11 +28,11 @@ const userSchema = new Schema(
             index: true
         },
         profileImage: {
-            type: String, // cloudinary url
+            type: String,
             default: ""
         },
         coverImage: {
-            type: String // cloudinary url
+            type: String
         },
         password: {
             type: String,
@@ -56,9 +56,13 @@ const userSchema = new Schema(
             enum: ["Freelancer", "Client"],
             required: true
         },
-        resetPasswordToken: String,
-        resetPasswordExpire: Date,
-        // Freelancer specific fields
+        resetPasswordToken: {
+            type: String
+        },
+        resetPasswordExpire: {
+            type: Date
+        },
+
         skills: {
             type: [String],
             default: []
@@ -68,7 +72,7 @@ const userSchema = new Schema(
             default: ""
         },
         portfolio: {
-            type: String, // URL to portfolio
+            type: String,
             default: ""
         },
         rating: {
@@ -121,13 +125,10 @@ userSchema.methods.generateRefreshToken = function () {
 };
 
 userSchema.methods.getResetPasswordToken = function () {
-    // Generate token
     const resetToken = crypto.randomBytes(20).toString("hex");
 
-    // Hash and set to resetPasswordToken
     this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
-    // Set token expire time (10 minutes)
     this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
     return resetToken;

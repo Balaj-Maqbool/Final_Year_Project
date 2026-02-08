@@ -85,13 +85,13 @@ socket.emit("send_message", {
 
 ### Profile Picture
 
-**Endpoint**: `PATCH /api/v1/users/update-profile-image`
+**Endpoint**: `PATCH /api/v1/users/profile/image`
 **Method**: `multipart/form-data`
 **Field Name**: `profileImage`
 
 ### Cover Image
 
-**Endpoint**: `PATCH /api/v1/users/update-cover-image`
+**Endpoint**: `PATCH /api/v1/users/profile/cover`
 **Method**: `multipart/form-data`
 **Field Name**: `coverImage`
 

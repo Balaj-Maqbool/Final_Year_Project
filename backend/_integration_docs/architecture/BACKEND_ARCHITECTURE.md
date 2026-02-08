@@ -25,16 +25,24 @@ This is where the "live" stuff happens.
 
 This is where the **Business Rules** reside.
 
-- _Example_: If you want to know "Why can't I send a message?", the logic is here (`chat.service.js`). It checks your bid status and limits.
+- **`ai.service.js`**: Wraps the Google Gemini API to generate content (Job Descriptions, Proposals, etc.).
+- **`chat.service.js`**: Handles chat logic and permissions.
 
-### 4. `src/controllers/` (The Gatekeepers) 🚪
+### 4. `src/middlewares/` (The Guardians) 🛡️
+
+- **`rateLimiter.middleware.js`**: Protects the API from abuse.
+    - **Global API**: 500 reqs / 15 mins.
+    - **Auth**: Strict limits on login/register.
+    - **AI**: Shared global limit of 10 reqs / min (token bucket).
+
+### 5. `src/controllers/` (The Gatekeepers) 🚪
 
 Matches your API routes.
 
 - Handles your HTTP requests (`req`) and sends responses (`res`).
 - If you hit `POST /api/v1/bids`, it goes to `bid.controller.js`.
 
-### 5. `src/utils/` (The Toolkit) 🛠️
+### 6. `src/utils/` (The Toolkit) 🛠️
 
 Small, generic helpers like `parseDuration` or custom Error/Response wrappers.
 

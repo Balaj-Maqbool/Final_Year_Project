@@ -61,7 +61,6 @@ const getClientDashboard = asyncHandler(async (req, res) => {
         }
     ]);
 
-    // Separate aggregation for Bids received across all jobs
     const bidStats = await Bid.aggregate([
         {
             $lookup: {
@@ -180,7 +179,6 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
             }
         },
         {
-            // Unwind safely (though assigned jobs SHOULD have an accepted bid, hypothetically)
             $unwind: { path: "$acceptedBid", preserveNullAndEmptyArrays: true }
         },
         {
@@ -189,7 +187,6 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                     {
                         $group: {
                             _id: null,
-                            // Use the bid amount if available, otherwise fallback to budget (safety net), or 0
                             totalEarnings: {
                                 $sum: {
                                     $cond: [
@@ -225,10 +222,10 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                     {
                         $project: {
                             title: 1,
-                            budget: 1, // Still show est budget or maybe show accepted bid? lets keep budget for listing
+                            budget: 1,
                             deadline: 1,
                             "client.fullName": 1,
-                            finalPrice: { $ifNull: ["$acceptedBid.bid_amount", "$budget"] } // Helpful to see
+                            finalPrice: { $ifNull: ["$acceptedBid.bid_amount", "$budget"] }
                         }
                     }
                 ]

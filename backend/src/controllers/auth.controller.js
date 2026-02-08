@@ -11,6 +11,7 @@ import {
 } from "../constants.js";
 import { AuthService } from "../services/auth.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
+import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
 import { getPasswordResetTemplate, getWelcomeEmailTemplate } from "../utils/emailTemplates.js";
@@ -18,18 +19,11 @@ import { getPasswordResetTemplate, getWelcomeEmailTemplate } from "../utils/emai
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
 
-    if (ValidationHelper.isEmpty(fullName)) {
-        throw new ApiError(400, "Full Name is required");
-    }
-    if (ValidationHelper.isEmpty(email)) {
-        throw new ApiError(400, "Email is required");
-    }
-    if (ValidationHelper.isEmpty(username)) {
-        throw new ApiError(400, "Username is required");
-    }
-    if (ValidationHelper.isEmpty(password)) {
-        throw new ApiError(400, "Password is required");
-    }
+    ValidationHelper.validateLength(fullName, 2, 50, "Full Name");
+    ValidationHelper.validateEmail(email);
+    ValidationHelper.validateLength(username, 3, 30, "Username");
+    ValidationHelper.validateLength(password, 8, 128, "Password");
+    ValidationHelper.validatePasswordStrength(password);
     if (!["Freelancer", "Client"].includes(role)) {
         throw new ApiError(400, "Role must be 'Client' or 'Freelancer'");
     }
@@ -56,7 +50,6 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Something went wrong while registering the user");
     }
 
-    // Send Welcome Email (Non-blocking: we don't await because we don't want to fail registration if email fails)
     try {
         await sendEmail({
             email: createdUser.email,
@@ -68,7 +61,6 @@ const registerUser = asyncHandler(async (req, res) => {
         });
     } catch (error) {
         console.error("Error sending welcome email:", error);
-        // We do NOT throw an error here, creating the user is more important
     }
 
     return res.status(201).json(new ApiResponse(200, createdUser, "User registered Successfully"));
@@ -180,6 +172,14 @@ const deleteUser = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Authentication failed. Account deletion denied.");
     }
 
+
+    if (user.profileImage) {
+        await CloudinaryHelper.safeDelete(user.profileImage);
+    }
+    if (user.coverImage) {
+        await CloudinaryHelper.safeDelete(user.coverImage);
+    }
+
     await User.findByIdAndDelete(req.user._id);
     const options = AuthService.getCookieOptions();
 
@@ -223,7 +223,6 @@ const forgotPassword = asyncHandler(async (req, res) => {
     const resetUrl = `${frontendUrl}${FRONTEND_RESET_PASSWORD_PATH || "/reset-password"}/${resetToken}`;
 
     const message = getPasswordResetTemplate(resetUrl);
-    // console.log(resetToken);
 
     try {
         await sendEmail({

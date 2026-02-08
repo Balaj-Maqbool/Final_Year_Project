@@ -2,14 +2,7 @@ import { sseManager } from "../streams/SSEManager.js";
 import { User } from "../models/user.model.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 
-/**
- * NotificationService centralizes all domain-specific real-time alerts.
- * Relieves controllers of searching for users and managing SSE payloads.
- */
 class NotificationService {
-    /**
-     * Notify job poster about a new bid.
-     */
     static async notifyNewBid(job, bid) {
         await sseManager.sendToUser(job.poster_id, "DASHBOARD_UPDATE", {
             type: "NEW_BID",
@@ -19,9 +12,6 @@ class NotificationService {
         });
     }
 
-    /**
-     * Notify freelancer about bid status (Accepted/Rejected).
-     */
     static async notifyBidStatusUpdate(freelancerId, job, status) {
         await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
             type: "BID_STATUS_UPDATE",
@@ -30,9 +20,6 @@ class NotificationService {
         });
     }
 
-    /**
-     * Notify job poster that a freelancer withdrew their bid.
-     */
     static async notifyBidWithdrawn(jobPosterId, jobId) {
         await sseManager.sendToUser(jobPosterId, "DASHBOARD_UPDATE", {
             type: "BID_WITHDRAWN",
@@ -41,10 +28,6 @@ class NotificationService {
         });
     }
 
-    /**
-     * Broadcast new job to all relevant freelancers.
-     * If the job has required skills, it only notifies matching freelancers.
-     */
     static async notifyNewJob(job) {
         sseManager.broadcast(
             "NEW_JOB_AVAILABLE",
@@ -75,9 +58,6 @@ class NotificationService {
         }
     }
 
-    /**
-     * Notify freelancer that a job has been marked as completed.
-     */
     static async notifyJobCompleted(freelancerId, job) {
         await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
             type: "JOB_COMPLETED",
@@ -86,9 +66,6 @@ class NotificationService {
         });
     }
 
-    /**
-     * Notify freelancer about a new task assignment.
-     */
     static async notifyNewTask(freelancerId, task) {
         await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
             type: "NEW_TASK",
@@ -97,9 +74,6 @@ class NotificationService {
         });
     }
 
-    /**
-     * Notify job poster about a task status update.
-     */
     static async notifyTaskStatusUpdate(jobPosterId, task, status) {
         await sseManager.sendToUser(jobPosterId, "DASHBOARD_UPDATE", {
             type: "TASK_STATUS_UPDATE",
@@ -108,9 +82,6 @@ class NotificationService {
         });
     }
 
-    /**
-     * Notify freelancer that their task has been approved.
-     */
     static async notifyTaskApproved(freelancerId, task) {
         await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
             type: "TASK_APPROVED",
@@ -119,9 +90,6 @@ class NotificationService {
         });
     }
 
-    /**
-     * Notify freelancer that they received a new rating.
-     */
     static async notifyNewRating(freelancerId, job, rating) {
         await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
             type: "NEW_RATING",
@@ -129,9 +97,6 @@ class NotificationService {
             jobId: job._id
         });
     }
-    /**
-     * Notify user that a chat has been initiated.
-     */
     static async notifyChatInitiated(recipientId, requester) {
         await sseManager.sendToUser(recipientId, "DASHBOARD_UPDATE", {
             type: "CHAT_INITIATED",

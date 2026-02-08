@@ -148,3 +148,17 @@
 | Method  | Endpoint   | Description               | Request Body / Params                                                        |
 | :------ | :--------- | :------------------------ | :--------------------------------------------------------------------------- |
 | **GET** | `/connect` | Subscribe to Event Stream | **Header**: `Accept: text/event-stream` <br>**Note**: Keep-alive connection. |
+
+---
+
+## 11. AI Features (`/ai`) 🤖
+
+> [!NOTE]
+> All AI routes are rate-limited to **10 requests per minute** globally to respect API quotas.
+
+| Method   | Endpoint              | Description                                      | Request Body                                                                                                                        |
+| :------- | :-------------------- | :----------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| **POST** | `/job-architect`      | Generate a Job Description from a rough idea     | **JSON**: <br>`{ "userPrompt": "I need a website for my bakery" }`                                                                  |
+| **POST** | `/profile-polisher`   | Polish Bio & Suggest Skills                      | **JSON**: <br>`{ "currentBio": "I like coding", "currentSkills": "js, html" }`                                                      |
+| **POST** | `/proposal-generator` | Write a cover letter for a job                   | **JSON**: <br>`{ "jobDescription": "Build a React app...", "freelancerProfile": { "skills": ["React"], "experience": "5 years" } }` |
+| **POST** | `/task-breakdown`     | Break a job into actionable tasks (Kanban items) | **JSON**: <br>`{ "jobDescription": "Full stack e-commerce site needed" }`                                                           |
