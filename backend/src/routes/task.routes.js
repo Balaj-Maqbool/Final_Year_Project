@@ -1,5 +1,12 @@
 import { Router } from "express";
-import { createTask, getJobTasks, updateTaskStatus, approveTask, updateTask, deleteTask } from "../controllers/task.controller.js";
+import {
+    createTask,
+    getJobTasks,
+    updateTaskStatus,
+    approveTask,
+    updateTask,
+    deleteTask
+} from "../controllers/task.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();

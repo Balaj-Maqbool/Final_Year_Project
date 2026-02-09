@@ -32,8 +32,7 @@ const placeBid = asyncHandler(async (req, res) => {
 
     const existingBid = await Bid.findOne({
         job_id: jobId,
-        user_id: req.user?._id,
-        status: { $ne: "Rejected" }
+        user_id: req.user?._id
     });
 
     if (existingBid) {
@@ -153,9 +152,41 @@ const updateBidStatus = asyncHandler(async (req, res) => {
     await bid.save();
 
     if (status === "Accepted") {
+        const updatedJob = await Job.findOneAndUpdate(
+            { _id: jobId, status: "Open" },
+            {
+                $set: {
+                    status: "Assigned",
+                    assigned_to: bid.user_id
+                }
+            },
+            { new: true }
+        );
+
+        if (!updatedJob) {
+            throw new ApiError(400, "Job is not Open (it may have been assigned to someone else just now)");
+        }
+
         job.status = "Assigned";
         job.assigned_to = bid.user_id;
-        await job.save();
+
+        const otherBids = await Bid.find({
+            job_id: jobId,
+            _id: { $ne: bidId },
+            status: "Pending"
+        });
+
+        if (otherBids.length > 0) {
+            await Bid.updateMany({ _id: { $in: otherBids.map((b) => b._id) } }, { $set: { status: "Rejected" } });
+
+            otherBids.forEach(async (otherBid) => {
+                try {
+                    await NotificationService.notifyBidStatusUpdate(otherBid.user_id, job, "Rejected");
+                } catch (err) {
+                    console.error(`Failed to notify freelancer ${otherBid.user_id} of rejection`, err);
+                }
+            });
+        }
     }
 
     await NotificationService.notifyBidStatusUpdate(bid.user_id, job, status);
@@ -198,9 +229,6 @@ const withdrawBid = asyncHandler(async (req, res) => {
 });
 
 const getMyBids = asyncHandler(async (req, res) => {
-    if (!req.user) {
-        throw new ApiError(401, "Unauthorized");
-    }
     if (req.user.role !== "Freelancer") {
         throw new ApiError(403, "Unauthorized to view bids");
     }
@@ -289,10 +317,6 @@ const getMyBidForJob = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
 
     ValidationHelper.validateId(jobId, "Invalid Job ID");
-
-    if (!req.user) {
-        throw new ApiError(401, "Unauthorized");
-    }
 
     const bid = await Bid.findOne({
         job_id: jobId,

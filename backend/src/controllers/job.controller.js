@@ -5,6 +5,8 @@ import { Job } from "../models/job.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 import mongoose from "mongoose";
+import { Bid } from "../models/bid.model.js";
+import { ChatThread } from "../models/chat.model.js";
 import { Task } from "../models/task.model.js";
 
 const createJob = asyncHandler(async (req, res) => {
@@ -24,6 +26,10 @@ const createJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields (title, description, budget, deadline, category) are required");
     }
 
+    if (new Date(deadline) < new Date()) {
+        throw new ApiError(400, "Deadline must be in the future");
+    }
+
     // Logic Audit Fix: Input Boundaries
     ValidationHelper.validateLength(title, 10, 100, "Title");
     ValidationHelper.validateLength(description, 50, 5000, "Description");
@@ -31,7 +37,6 @@ const createJob = asyncHandler(async (req, res) => {
 
     // Manual check for skills as requested
     if (required_skills && required_skills.length > 20) throw new ApiError(400, "Max 20 skills allowed");
-
 
     const job = await Job.create({
         title,
@@ -236,7 +241,7 @@ const deleteJob = asyncHandler(async (req, res) => {
     const job = await Job.findById(jobId);
 
     if (!job) {
-        throw new ApiError(404, "Job not found");
+        throw new ApiError(404, "Job not found or does not exist anymore");
     }
 
     if (job.poster_id.toString() !== req.user?._id.toString()) {
@@ -244,8 +249,21 @@ const deleteJob = asyncHandler(async (req, res) => {
     }
 
     if (job.status === "Assigned") {
-        throw new ApiError(400, "Cannot delete an assigned job. Please close or cancel it first to notify the freelancer.");
+        throw new ApiError(
+            400,
+            "Cannot delete an assigned job. Please close or cancel it first to notify the freelancer."
+        );
     }
+
+    if (job.status === "Completed") {
+        throw new ApiError(400, "Cannot delete a completed job. It is part of the work history.");
+    }
+
+    // 1. Delete all Bids on this job
+    await Bid.deleteMany({ job_id: jobId });
+
+    // 2. Delete all Chat Threads related to this job
+    await ChatThread.deleteMany({ jobId: jobId });
 
     await Job.findByIdAndDelete(jobId);
 

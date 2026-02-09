@@ -15,6 +15,9 @@ import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
 import { getPasswordResetTemplate, getWelcomeEmailTemplate } from "../utils/emailTemplates.js";
+import { Job } from "../models/job.model.js";
+import { Bid } from "../models/bid.model.js";
+import { ChatThread } from "../models/chat.model.js";
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
@@ -172,6 +175,48 @@ const deleteUser = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Authentication failed. Account deletion denied.");
     }
 
+    if (user.role === "Client") {
+        const activeJobsCount = await Job.countDocuments({
+            poster_id: user._id,
+            status: { $in: ["Assigned"] }
+        });
+        if (activeJobsCount > 0) {
+            throw new ApiError(
+                400,
+                `Cannot delete account. You have ${activeJobsCount} active job(s) in progress. Please complete or close them first.`
+            );
+        }
+
+        const openJobs = await Job.find({ poster_id: user._id, status: "Open" }).select("_id");
+        const openJobIds = openJobs.map((job) => job._id);
+
+        if (openJobIds.length > 0) {
+            // Delete Bids on these jobs
+            await Bid.deleteMany({ job_id: { $in: openJobIds } });
+
+            // Delete Chat Threads for these jobs
+            await ChatThread.deleteMany({ jobId: { $in: openJobIds } });
+
+            // Finally, delete the jobs
+            await Job.deleteMany({ _id: { $in: openJobIds } });
+        }
+    }
+
+    if (user.role === "Freelancer") {
+        const activeWorkCount = await Job.countDocuments({
+            assigned_to: user._id,
+            status: "Assigned"
+        });
+        if (activeWorkCount > 0) {
+            throw new ApiError(
+                400,
+                `Cannot delete account. You are currently assigned to ${activeWorkCount} active job(s). Please complete them first.`
+            );
+        }
+
+        // Delete all bids placed by this freelancer
+        await Bid.deleteMany({ user_id: user._id });
+    }
 
     if (user.profileImage) {
         await CloudinaryHelper.safeDelete(user.profileImage);

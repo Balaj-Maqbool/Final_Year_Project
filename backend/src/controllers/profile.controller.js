@@ -21,9 +21,11 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     ValidationHelper.validateLength(bio, 0, 500, "Bio");
     ValidationHelper.validateLength(portfolio, 0, 2000, "Portfolio URL/Text");
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
-        throw new ApiError(409, "Email is already in use by another account");
+    if (email !== req.user.email) {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            throw new ApiError(409, "Email is already in use by another account");
+        }
     }
 
     const updateData = {
@@ -127,7 +129,9 @@ const getUserProfileById = asyncHandler(async (req, res) => {
 
     ValidationHelper.validateId(id, "Invalid User ID");
 
-    const user = await User.findById(id);
+    const user = await User.findById(id).select(
+        "-email -refreshToken -password -googleId -resetPasswordToken -resetPasswordExpire"
+    );
 
     if (!user) {
         throw new ApiError(404, "User not found");
@@ -141,23 +145,14 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
     const query = {};
     if (!ValidationHelper.isEmpty(role)) {
-        role = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
-
-        const allowedRoles = ["Freelancer", "Client"];
-        if (allowedRoles.includes(role)) {
-            query.role = role;
-        } else {
-            query.role = role;
-        }
+        query.role = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
     }
 
-    const options = {
-        page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 10,
-        sort: { createdAt: -1 }
-    };
 
-    const users = await User.find(query);
+
+    const users = await User.find(query).select(
+        "-email -refreshToken -password -googleId -resetPasswordToken -resetPasswordExpire"
+    );
 
     return res.status(200).json(new ApiResponse(200, users, "Users fetched successfully"));
 });
