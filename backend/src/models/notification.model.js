@@ -5,7 +5,8 @@ const notificationSchema = new Schema(
         recipient: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            required: true
+            required: true,
+            index: true
         },
         type: {
             type: String,
@@ -36,7 +37,8 @@ const notificationSchema = new Schema(
         },
         isRead: {
             type: Boolean,
-            default: false
+            default: false,
+            index: true
         }
     },
     {

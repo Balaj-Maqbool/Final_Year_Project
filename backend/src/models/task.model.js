@@ -5,7 +5,8 @@ const taskSchema = new Schema(
         job_id: {
             type: Schema.Types.ObjectId,
             ref: "Job",
-            required: true
+            required: true,
+            index: true
         },
         title: {
             type: String,
@@ -19,12 +20,14 @@ const taskSchema = new Schema(
         status: {
             type: String,
             enum: ["To Do", "In Progress", "Done"],
-            default: "To Do"
+            default: "To Do",
+            index: true
         },
         assigned_user_id: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            required: true
+            required: true,
+            index: true
         },
         is_approved: {
             type: Boolean,
