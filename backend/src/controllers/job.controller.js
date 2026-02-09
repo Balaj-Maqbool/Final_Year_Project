@@ -200,6 +200,7 @@ const updateJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot manually set status to Assigned. Please accept a bid to assign a freelancer.");
     }
 
+
     if (status === "Completed") {
         const unapprovedTasks = await Task.countDocuments({
             job_id: jobId,
@@ -212,6 +213,11 @@ const updateJob = asyncHandler(async (req, res) => {
                 `Cannot complete job. There are ${unapprovedTasks} tasks that are not yet approved by you.`
             );
         }
+    }
+
+    // Logic Audit Fix: Prevent changing budget after assignment (Contract Integrity)
+    if (["Assigned", "Completed"].includes(job.status) && budget && budget !== job.budget) {
+        throw new ApiError(400, "Cannot modify budget for an assigned or completed job. The contract price is fixed.");
     }
 
     // Logic Audit Fix: Input Boundaries for Update

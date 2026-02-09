@@ -5,12 +5,14 @@ const bidSchema = new Schema(
         job_id: {
             type: Schema.Types.ObjectId,
             ref: "Job",
-            required: true
+            required: true,
+            index: true
         },
         user_id: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            required: true
+            required: true,
+            index: true
         },
         bid_amount: {
             type: Number,

@@ -37,7 +37,11 @@ const getClientDashboard = asyncHandler(async (req, res) => {
                             },
                             totalBudgetSpent: {
                                 $sum: {
-                                    $cond: [{ $in: ["$status", ["Assigned", "Completed"]] }, "$budget", 0]
+                                    $cond: [
+                                        { $in: ["$status", ["Assigned", "Completed"]] },
+                                        { $cond: [{ $gt: ["$agreed_price", 0] }, "$agreed_price", "$budget"] },
+                                        0
+                                    ]
                                 }
                             }
                         }
@@ -52,6 +56,8 @@ const getClientDashboard = asyncHandler(async (req, res) => {
                             title: 1,
                             status: 1,
                             budget: 1,
+                            agreed_price: 1,
+                            contract_status: 1,
                             deadline: 1,
                             createdAt: 1
                         }
@@ -190,7 +196,12 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                                 $sum: {
                                     $cond: [
                                         { $eq: ["$status", "Completed"] },
-                                        { $ifNull: ["$acceptedBid.bid_amount", "$budget"] },
+                                        {
+                                            $ifNull: [
+                                                { $cond: [{ $gt: ["$agreed_price", 0] }, "$agreed_price", null] },
+                                                { $ifNull: ["$acceptedBid.bid_amount", "$budget"] }
+                                            ]
+                                        },
                                         0
                                     ]
                                 }
@@ -224,7 +235,12 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                             budget: 1,
                             deadline: 1,
                             "client.fullName": 1,
-                            finalPrice: { $ifNull: ["$acceptedBid.bid_amount", "$budget"] }
+                            finalPrice: {
+                                $ifNull: [
+                                    { $cond: [{ $gt: ["$agreed_price", 0] }, "$agreed_price", null] },
+                                    { $ifNull: ["$acceptedBid.bid_amount", "$budget"] }
+                                ]
+                            }
                         }
                     }
                 ]

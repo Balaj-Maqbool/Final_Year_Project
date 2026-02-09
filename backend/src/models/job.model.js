@@ -38,12 +38,23 @@ const jobSchema = new Schema(
         poster_id: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            required: true
+            required: true,
+            index: true
         },
         assigned_to: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            default: null
+            default: null,
+            index: true
+        },
+        agreed_price: {
+            type: Number,
+            default: 0
+        },
+        contract_status: {
+            type: String,
+            enum: ["Pending", "Active", "Fulfilled"],
+            default: "Pending"
         }
     },
     {

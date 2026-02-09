@@ -157,7 +157,9 @@ const updateBidStatus = asyncHandler(async (req, res) => {
             {
                 $set: {
                     status: "Assigned",
-                    assigned_to: bid.user_id
+                    assigned_to: bid.user_id,
+                    agreed_price: bid.bid_amount,
+                    contract_status: "Active"
                 }
             },
             { new: true }
@@ -252,8 +254,11 @@ const getMyBids = asyncHandler(async (req, res) => {
                         $project: {
                             title: 1,
                             status: 1,
+                            status: 1,
                             poster_id: 1,
                             budget: 1,
+                            agreed_price: 1,
+                            contract_status: 1,
                             deadline: 1
                         }
                     }
