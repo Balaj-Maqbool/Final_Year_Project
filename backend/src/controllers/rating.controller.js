@@ -132,7 +132,10 @@ const getFreelancerRatings = asyncHandler(async (req, res) => {
             }
         },
         {
-            $unwind: "$reviewer"
+            $unwind: {
+                path: "$reviewer",
+                preserveNullAndEmptyArrays: true
+            }
         },
         {
             $sort: { createdAt: -1 }

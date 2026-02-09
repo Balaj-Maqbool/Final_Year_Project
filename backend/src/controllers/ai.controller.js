@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { aiService } from "../services/ai.service.js";
 import { ApiError } from "../utils/ApiError.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const generateJobDetails = asyncHandler(async (req, res) => {
     const { userPrompt } = req.body;

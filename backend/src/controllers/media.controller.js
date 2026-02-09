@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import { ApiError } from "../utils/ApiError.js";
 import {
     CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET,
