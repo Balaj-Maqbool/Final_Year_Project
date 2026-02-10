@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
 
 import {
     getCurrentUser,
@@ -15,25 +16,30 @@ import {
 
 const router = Router();
 
-// All Profile routes require authentication
 router.use(verifyJWT);
 
-// --- PROFILE ROUTES ---
-
 router.route("/me").get(getCurrentUser);
-router.route("/").get(getAllUsers); // List users
+router.route("/").get(getAllUsers);
 
-// Profile Updates
 router.route("/profile").patch(updateAccountDetails);
 router.route("/profile/:id").get(getUserProfileById);
 
-// Image Handling
-router.route("/profile/image")
-    .patch(upload.single("profileImage"), updateUserProfileImage)
+router
+    .route("/profile/image")
+    .patch(
+        RateLimitManager.apiMedia(),
+        upload.single("profileImage"),
+        updateUserProfileImage
+    )
     .delete(deleteUserProfileImage);
 
-router.route("/profile/cover")
-    .patch(upload.single("coverImage"), updateUserCoverImage)
+router
+    .route("/profile/cover")
+    .patch(
+        RateLimitManager.apiMedia(),
+        upload.single("coverImage"),
+        updateUserCoverImage
+    )
     .delete(deleteUserCoverImage);
 
 export default router;

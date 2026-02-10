@@ -2,25 +2,35 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
-import { User } from "../models/user.model.js";
+import { NotificationService } from "../services/notification.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
-
+import { Bid } from "../models/bid.model.js";
+import { ChatThread } from "../models/chat.model.js";
 import { Task } from "../models/task.model.js";
 
 const createJob = asyncHandler(async (req, res) => {
+<<<<<<< HEAD
     const { title, description, budget, deadline, category, required_skills } = req.body;
     
     console.log("createJob - User:", req.user?._id, "Role:", req.user?.role); // DEBUG LOG
+=======
+    const { title, description, budget, deadline, category, required_skills } =
+        req.body;
+>>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
 
     if (req.user.role !== "Client") {
         throw new ApiError(403, `Only Clients can post jobs. You are: ${req.user.role}`);
     }
 
-    if (!title || !description || !budget || !deadline || !category) {
-        throw new ApiError(400, "All fields (title, description, budget, deadline, category) are required");
+    if (
+        ValidationHelper.isEmpty(deadline) ||
+        ValidationHelper.isEmpty(category)
+    ) {
+        throw new ApiError(400, "All fields (deadline, category) are required");
     }
 
+<<<<<<< HEAD
     try {
         const job = await Job.create({
             title,
@@ -31,12 +41,32 @@ const createJob = asyncHandler(async (req, res) => {
             required_skills: required_skills || [],
             poster_id: req.user?._id
         });
+=======
+    if (new Date(deadline) < new Date()) {
+        throw new ApiError(400, "Deadline must be in the future");
+    }
 
-    sseManager.broadcast("NEW_JOB_AVAILABLE", {
-        message: "New Job Posted",
-        job
-    }, "Freelancer");
+    ValidationHelper.validateLength(title, 10, 100, "Title");
+    ValidationHelper.validateLength(description, 50, 5000, "Description");
+    ValidationHelper.validateRange(budget, 1, 1000000, "Budget");
 
+    if (required_skills && required_skills.length > 20)
+        throw new ApiError(400, "Max 20 skills allowed");
+
+    const job = await Job.create({
+        title,
+        description,
+        budget,
+        deadline,
+        category,
+        required_skills: required_skills || [],
+        poster_id: req.user?._id
+    });
+>>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
+
+    await NotificationService.notifyNewJob(job);
+
+<<<<<<< HEAD
     if (required_skills && required_skills.length > 0) {
         try {
             const matchedFreelancers = await User.find({
@@ -63,30 +93,45 @@ const createJob = asyncHandler(async (req, res) => {
         console.error("Error creating job:", error);
         throw new ApiError(500, "Internal Server Error while creating job: " + error.message);
     }
+=======
+    return res
+        .status(201)
+        .json(new ApiResponse(201, job, "Job posted successfully"));
+>>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
 });
 
 const getAllJobs = asyncHandler(async (req, res) => {
-    const { search, category, minBudget, maxBudget } = req.query;
+    const {
+        search,
+        category,
+        minBudget,
+        maxBudget,
+        page = 1,
+        limit = 10
+    } = req.query;
 
     const matchStage = {
         status: "Open"
     };
 
-    if (search) {
+    if (!ValidationHelper.isEmpty(search)) {
         matchStage.title = { $regex: search, $options: "i" };
     }
 
-    if (category) {
+    if (!ValidationHelper.isEmpty(category)) {
         matchStage.category = category;
     }
 
-    if (minBudget || maxBudget) {
+    if (
+        !ValidationHelper.isEmpty(minBudget) ||
+        !ValidationHelper.isEmpty(maxBudget)
+    ) {
         matchStage.budget = {};
         if (minBudget) matchStage.budget.$gte = parseInt(minBudget);
         if (maxBudget) matchStage.budget.$lte = parseInt(maxBudget);
     }
 
-    const jobs = await Job.aggregate([
+    const aggregate = Job.aggregate([
         {
             $match: matchStage
         },
@@ -119,31 +164,42 @@ const getAllJobs = asyncHandler(async (req, res) => {
         }
     ]);
 
-    return res.status(200).json(
-        new ApiResponse(200, jobs, "Jobs fetched successfully")
-    );
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const jobs = await Job.aggregatePaginate(aggregate, options);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, jobs, "Jobs fetched successfully"));
 });
 
 const getMyJobs = asyncHandler(async (req, res) => {
-    const jobs = await Job.find({ poster_id: req.user?._id })
-        .sort({ createdAt: -1 });
+    const { page = 1, limit = 10 } = req.query;
 
-    return res.status(200).json(
-        new ApiResponse(200, jobs, "My jobs fetched successfully")
-    );
+    const aggregate = Job.aggregate([
+        { $match: { poster_id: req.user._id } },
+        { $sort: { createdAt: -1 } }
+    ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const jobs = await Job.aggregatePaginate(aggregate, options);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, jobs, "My jobs fetched successfully"));
 });
 
 const getJobById = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
 
-    // Validate jobId format if needed or trust mongoose to cast, but aggregate needs ObjectId casting usually if passing string
-    // However, findById casts automatically. Aggregate does not.
-    // We need mongoose.Types.ObjectId
-
-    // Check if valid ObjectId
-    if (!mongoose.isValidObjectId(jobId)) {
-        throw new ApiError(400, "Invalid Job ID");
-    }
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     const job = await Job.aggregate([
         {
@@ -179,9 +235,9 @@ const getJobById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, job[0], "Job fetched successfully")
-    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, job[0], "Job fetched successfully"));
 });
 
 const updateJob = asyncHandler(async (req, res) => {
@@ -194,57 +250,96 @@ const updateJob = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-    // Ensure only the poster can update
     if (job.poster_id.toString() !== req.user?._id.toString()) {
         throw new ApiError(403, "You are not authorized to update this job");
     }
 
-    // Critical Business Rule: Limits on updating Assigned/Completed jobs
-
-    // 1. If currently Completed, it's final. Partition logic: Status cannot change from Completed.
     if (job.status === "Completed") {
-        throw new ApiError(400, "Job is already Completed. No further updates allowed.");
+        throw new ApiError(
+            400,
+            "Job is already Completed. No further updates allowed."
+        );
     }
 
-    // 2. If currently Assigned, allow move to Completed, but BLOCK revert to Open.
     if (job.status === "Assigned" && status === "Open") {
-        throw new ApiError(400, "Cannot revert an Assigned job to Open status.");
+        throw new ApiError(
+            400,
+            "Cannot revert an Assigned job to Open status."
+        );
     }
 
-    // 3. New Rule: ALL tasks must be APPROVED by Client before marking job as Completed
+    if (status === "Assigned") {
+        throw new ApiError(
+            400,
+            "Cannot manually set status to Assigned. Please accept a bid to assign a freelancer."
+        );
+    }
+
     if (status === "Completed") {
-        // We check if there are any tasks where is_approved is NOT true
         const unapprovedTasks = await Task.countDocuments({
             job_id: jobId,
             is_approved: { $ne: true }
         });
 
         if (unapprovedTasks > 0) {
-            throw new ApiError(400, `Cannot complete job. There are ${unapprovedTasks} tasks that are not yet approved by you.`);
+            throw new ApiError(
+                400,
+                `Cannot complete job. There are ${unapprovedTasks} tasks that are not yet approved by you.`
+            );
         }
     }
 
-    job.title = title || job.title;
-    job.description = description || job.description;
-    job.budget = budget || job.budget;
-    job.deadline = deadline || job.deadline;
-    job.category = category || job.category;
-    if (status) job.status = status;
+    if (
+        ["Assigned", "Completed"].includes(job.status) &&
+        budget &&
+        budget !== job.budget
+    ) {
+        throw new ApiError(
+            400,
+            "Cannot modify budget for an assigned or completed job. The contract price is fixed."
+        );
+    }
+
+    if (title !== undefined) {
+        ValidationHelper.validateLength(title, 10, 100, "Title");
+        job.title = title;
+    }
+    if (description !== undefined) {
+        ValidationHelper.validateLength(description, 50, 5000, "Description");
+        job.description = description;
+    }
+    if (budget !== undefined) {
+        ValidationHelper.validateRange(budget, 1, 1000000, "Budget");
+        job.budget = budget;
+    }
+    if (deadline !== undefined) {
+        if (ValidationHelper.isEmpty(deadline))
+            throw new ApiError(400, "Deadline is required");
+        if (new Date(deadline) < new Date())
+            throw new ApiError(400, "Deadline must be in the future");
+        job.deadline = deadline;
+    }
+    if (category !== undefined) {
+        if (ValidationHelper.isEmpty(category))
+            throw new ApiError(400, "Category is required");
+        job.category = category;
+    }
+    if (status !== undefined) {
+        if (!["Open", "Assigned", "Completed"].includes(status)) {
+            throw new ApiError(400, "Invalid status");
+        }
+        job.status = status;
+    }
 
     await job.save();
 
-    // SSE: Notify Freelancer if job is completed
     if (job.status === "Completed" && job.assigned_to) {
-        sseManager.sendToUser(job.assigned_to, "DASHBOARD_UPDATE", {
-            type: "JOB_COMPLETED",
-            message: `Job '${job.title}' has been marked as Completed`,
-            jobId: job._id
-        });
+        await NotificationService.notifyJobCompleted(job.assigned_to, job);
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, job, "Job updated successfully")
-    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, job, "Job updated successfully"));
 });
 
 const deleteJob = asyncHandler(async (req, res) => {
@@ -253,18 +348,34 @@ const deleteJob = asyncHandler(async (req, res) => {
     const job = await Job.findById(jobId);
 
     if (!job) {
-        throw new ApiError(404, "Job not found");
+        throw new ApiError(404, "Job not found or does not exist anymore");
     }
 
     if (job.poster_id.toString() !== req.user?._id.toString()) {
         throw new ApiError(403, "You are not authorized to delete this job");
     }
 
+    if (job.status === "Assigned") {
+        throw new ApiError(
+            400,
+            "Cannot delete an assigned job. Please close or cancel it first to notify the freelancer."
+        );
+    }
+
+    if (job.status === "Completed") {
+        throw new ApiError(
+            400,
+            "Cannot delete a completed job. It is part of the work history."
+        );
+    }
+
+    await Bid.deleteMany({ job_id: jobId });
+    await ChatThread.deleteMany({ jobId: jobId });
     await Job.findByIdAndDelete(jobId);
 
-    return res.status(200).json(
-        new ApiResponse(200, {}, "Job deleted successfully")
-    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Job deleted successfully"));
 });
 
 export {
@@ -273,5 +384,5 @@ export {
     getMyJobs,
     getJobById,
     updateJob,
-    deleteJob
+    deleteJob // exported
 };

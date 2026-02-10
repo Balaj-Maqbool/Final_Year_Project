@@ -3,30 +3,32 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Task } from "../models/task.model.js";
 import { Job } from "../models/job.model.js";
-import mongoose from "mongoose";
-import { sseManager } from "../utils/SSEManager.js";
+import { NotificationService } from "../services/notification.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const createTask = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
     const { title, description } = req.body;
 
-    if (!title) {
-        throw new ApiError(400, "Task title is required");
-    }
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
+
+    ValidationHelper.validateLength(title, 3, 100, "Task Title");
+    ValidationHelper.validateLength(description, 0, 1000, "Task Description");
 
     const job = await Job.findById(jobId);
     if (!job) {
         throw new ApiError(404, "Job not found");
     }
 
-    // Only Client (Job Poster) can create tasks
     if (job.poster_id.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "Only the job poster can create tasks");
     }
 
-    // Ensure job is assigned so we know who the task is for
     if (job.status !== "Assigned" || !job.assigned_to) {
-        throw new ApiError(400, "Job must be assigned to a freelancer before creating tasks");
+        throw new ApiError(
+            400,
+            "Job must be assigned to a freelancer before creating tasks"
+        );
     }
 
     const task = await Task.create({
@@ -36,44 +38,58 @@ const createTask = asyncHandler(async (req, res) => {
         assigned_user_id: job.assigned_to
     });
 
-    sseManager.sendToUser(job.assigned_to, "DASHBOARD_UPDATE", {
-        type: "NEW_TASK",
-        message: "New task assigned to you",
-        taskId: task._id
-    });
+    await NotificationService.notifyNewTask(job.assigned_to, task);
 
-    return res.status(201).json(
-        new ApiResponse(201, task, "Task created successfully")
-    );
+    return res
+        .status(201)
+        .json(new ApiResponse(201, task, "Task created successfully"));
 });
 
 const getJobTasks = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
 
-    // Validate Job exists
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
+
     const job = await Job.findById(jobId);
     if (!job) {
         throw new ApiError(404, "Job not found");
     }
 
-    // Auth check: User must be either the Poster or the Assigned Freelancer
     const isPoster = job.poster_id.toString() === req.user._id.toString();
-    const isFreelancer = job.assigned_to?.toString() === req.user._id.toString();
+    const isFreelancer =
+        job.assigned_to?.toString() === req.user._id.toString();
 
     if (!isPoster && !isFreelancer) {
-        throw new ApiError(403, "You are not authorized to view tasks for this job");
+        throw new ApiError(
+            403,
+            "You are not authorized to view tasks for this job"
+        );
     }
 
-    const tasks = await Task.find({ job_id: jobId }).sort({ createdAt: 1 });
+    const { page = 1, limit = 10 } = req.query;
 
-    return res.status(200).json(
-        new ApiResponse(200, tasks, "Tasks fetched successfully")
-    );
+    const aggregate = Task.aggregate([
+        { $match: { job_id: new mongoose.Types.ObjectId(jobId) } },
+        { $sort: { createdAt: 1 } }
+    ]);
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    };
+
+    const tasks = await Task.aggregatePaginate(aggregate, options);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, tasks, "Tasks fetched successfully"));
 });
 
 const updateTaskStatus = asyncHandler(async (req, res) => {
     const { taskId } = req.params;
     const { status } = req.body;
+
+    ValidationHelper.validateId(taskId, "Invalid Task ID");
 
     if (!["To Do", "In Progress", "Done"].includes(status)) {
         throw new ApiError(400, "Invalid status");
@@ -84,6 +100,7 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Task not found");
     }
 
+<<<<<<< HEAD
     // Auth check: User must be either Assigned Freelancer OR Job Poster (Client)
     const job = await Job.findById(task.job_id);
     if (!job) {
@@ -104,9 +121,15 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     // Optional: Prevent Client from marking as "Done" directly? (Let freelancer do it)
     if (isPoster && status === "Done") {
          // Maybe allow it or leave strict? Let's allow flexibility for now.
+=======
+    if (task.assigned_user_id.toString() !== req.user._id.toString()) {
+        throw new ApiError(
+            403,
+            "Only the assigned freelancer can update task status"
+        );
+>>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
     }
 
-    // If task is already approved, status shouldn't change? (Optional business rule)
     if (task.is_approved) {
         throw new ApiError(400, "Cannot change status of an approved task");
     }
@@ -114,6 +137,7 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     task.status = status;
     await task.save();
 
+<<<<<<< HEAD
     // SSE: Notify proper recipient
     const recipientId = isPoster ? task.assigned_user_id : job.poster_id;
 
@@ -123,54 +147,142 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
             message: `Task '${task.title}' updated to ${status}`,
             taskId: task._id
         });
+=======
+    const job = await Job.findById(task.job_id);
+
+    if (job) {
+        await NotificationService.notifyTaskStatusUpdate(
+            job.poster_id,
+            task,
+            status
+        );
+>>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, task, "Task status updated successfully")
-    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, task, "Task status updated successfully"));
 });
 
 const approveTask = asyncHandler(async (req, res) => {
     const { taskId } = req.params;
+
+    ValidationHelper.validateId(taskId, "Invalid Task ID");
 
     const task = await Task.findById(taskId);
     if (!task) {
         throw new ApiError(404, "Task not found");
     }
 
-    // Must search for job to verify ownership
     const job = await Job.findById(task.job_id);
     if (!job) {
         throw new ApiError(404, "Associated Job not found");
     }
 
-    // Only Client (Poster) can approve
     if (job.poster_id.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "Only the job poster can approve tasks");
     }
 
     if (task.status !== "Done") {
-        throw new ApiError(400, "Task must be marked as Done by freelancer before approval");
+        throw new ApiError(
+            400,
+            "Task must be marked as Done by freelancer before approval"
+        );
     }
 
     task.is_approved = true;
     await task.save();
 
-    // SSE: Notify Freelancer of approval
-    sseManager.sendToUser(task.assigned_user_id, "DASHBOARD_UPDATE", {
-        type: "TASK_APPROVED",
-        message: `Your task '${task.title}' was approved`,
-        taskId: task._id
-    });
+    await NotificationService.notifyTaskApproved(task.assigned_user_id, task);
 
-    return res.status(200).json(
-        new ApiResponse(200, task, "Task approved successfully")
-    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, task, "Task approved successfully"));
+});
+
+const updateTask = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+    const { title, description } = req.body;
+
+    ValidationHelper.validateId(taskId, "Invalid Task ID");
+
+    const task = await Task.findById(taskId);
+    if (!task) {
+        throw new ApiError(404, "Task not found");
+    }
+
+    const job = await Job.findById(task.job_id);
+    if (!job) {
+        throw new ApiError(404, "Associated Job not found");
+    }
+
+    if (job.poster_id.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Only the job poster can update tasks");
+    }
+
+    if (task.is_approved) {
+        throw new ApiError(400, "Cannot update an approved task");
+    }
+
+    if (title !== undefined) {
+        ValidationHelper.validateLength(title, 3, 100, "Task Title");
+        task.title = title;
+    }
+    if (description !== undefined) {
+        ValidationHelper.validateLength(
+            description,
+            0,
+            1000,
+            "Task Description"
+        );
+        task.description = description;
+    }
+
+    await task.save();
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, task, "Task details updated successfully"));
+});
+
+const deleteTask = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+
+    ValidationHelper.validateId(taskId, "Invalid Task ID");
+
+    const task = await Task.findById(taskId);
+    if (!task) {
+        throw new ApiError(404, "Task not found");
+    }
+
+    const job = await Job.findById(task.job_id);
+    if (!job) {
+        throw new ApiError(404, "Associated Job not found");
+    }
+
+    if (job.poster_id.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Only the job poster can delete tasks");
+    }
+
+    if (task.is_approved) {
+        throw new ApiError(
+            400,
+            "Cannot delete an approved task. Please unapprove it first if necessary."
+        );
+    }
+
+    await Task.findByIdAndDelete(taskId);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Task deleted successfully"));
 });
 
 export {
     createTask,
     getJobTasks,
     updateTaskStatus,
-    approveTask
+    approveTask,
+    updateTask,
+    deleteTask // exported
 };

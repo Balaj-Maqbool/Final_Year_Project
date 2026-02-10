@@ -5,12 +5,14 @@ const bidSchema = new Schema(
         job_id: {
             type: Schema.Types.ObjectId,
             ref: "Job",
-            required: true
+            required: true,
+            index: true
         },
         user_id: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            required: true
+            required: true,
+            index: true
         },
         bid_amount: {
             type: Number,
@@ -21,14 +23,8 @@ const bidSchema = new Schema(
             required: true
         },
         timeline: {
-            start_date: {
-                type: Date,
-                required: true
-            },
-            end_date: {
-                type: Date,
-                required: true
-            }
+            type: String,
+            required: true
         },
         status: {
             type: String,
@@ -40,5 +36,9 @@ const bidSchema = new Schema(
         timestamps: true
     }
 );
+
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
+bidSchema.plugin(mongooseAggregatePaginate);
 
 export const Bid = mongoose.model("Bid", bidSchema);

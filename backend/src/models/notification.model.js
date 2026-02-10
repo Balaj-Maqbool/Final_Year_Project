@@ -5,13 +5,16 @@ const notificationSchema = new Schema(
         recipient: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            required: true
+            required: true,
+            index: true
         },
         type: {
             type: String,
-            enum: ["NEW_JOB",
+            enum: [
+                "NEW_JOB",
                 "NEW_JOB_AVAILABLE",
-                "JOB_MATCH", "NEW_BID",
+                "JOB_MATCH",
+                "NEW_BID",
                 "BID_WITHDRAWN",
                 "BID_STATUS_UPDATE",
                 "NEW_TASK",
@@ -19,7 +22,11 @@ const notificationSchema = new Schema(
                 "TASK_APPROVED",
                 "JOB_COMPLETED",
                 "NEW_RATING",
-                "SYSTEM"],
+                "CHAT",
+                "NEW_CHAT_MESSAGE",
+                "SYSTEM",
+                "CHAT_INITIATED"
+            ],
             required: true
         },
         message: {
@@ -27,18 +34,21 @@ const notificationSchema = new Schema(
             required: true
         },
         relatedId: {
-            type: Schema.Types.ObjectId,
-            // Dynamic ref could be complex, keeping it simple as ID.
-            // Or we can add relatedModel if needed.
+            type: Schema.Types.ObjectId
         },
         isRead: {
             type: Boolean,
-            default: false
+            default: false,
+            index: true
         }
     },
     {
         timestamps: true
     }
 );
+
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
+notificationSchema.plugin(mongooseAggregatePaginate);
 
 export const Notification = mongoose.model("Notification", notificationSchema);

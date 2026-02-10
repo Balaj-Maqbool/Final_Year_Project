@@ -2,44 +2,51 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Notification } from "../models/notification.model.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
 
 const getUserNotifications = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, type } = req.query;
+<<<<<<< HEAD
     
     console.log(`FETCHING NOTIFICATIONS for User: ${req.user._id} (${req.user.role})`); // DEBUG
+=======
+>>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
 
-    const filter = { recipient: req.user._id };
-    if (type) {
-        filter.type = type;
+    const matchStage = { recipient: req.user._id };
+    if (!ValidationHelper.isEmpty(type)) {
+        matchStage.type = type;
     }
 
+    const aggregate = Notification.aggregate([
+        { $match: matchStage },
+        { $sort: { createdAt: -1 } }
+    ]);
+
     const options = {
-        page: parseInt(page) || 1,
-        limit: parseInt(limit) || 10,
-        sort: { createdAt: -1 }
+        page: parseInt(page),
+        limit: parseInt(limit)
     };
 
-    const skip = (options.page - 1) * options.limit;
-
-    const notifications = await Notification.find(filter)
-        .sort(options.sort)
-        .skip(skip)
-        .limit(options.limit);
-
-    const total = await Notification.countDocuments(filter);
-
-    return res.status(200).json(
-        new ApiResponse(200, {
-            notifications,
-            currentPage: options.page,
-            totalPages: Math.ceil(total / options.limit),
-            totalNotifications: total
-        }, "Notifications fetched successfully")
+    const notifications = await Notification.aggregatePaginate(
+        aggregate,
+        options
     );
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                notifications,
+                "Notifications fetched successfully"
+            )
+        );
 });
 
 const markNotificationAsRead = asyncHandler(async (req, res) => {
     const { notificationId } = req.params;
+
+    ValidationHelper.validateId(notificationId, "Invalid Notification ID");
 
     const notification = await Notification.findById(notificationId);
 
@@ -54,9 +61,11 @@ const markNotificationAsRead = asyncHandler(async (req, res) => {
     notification.isRead = true;
     await notification.save();
 
-    return res.status(200).json(
-        new ApiResponse(200, notification, "Notification marked as read")
-    );
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, notification, "Notification marked as read")
+        );
 });
 
 const markAllAsRead = asyncHandler(async (req, res) => {
@@ -65,13 +74,15 @@ const markAllAsRead = asyncHandler(async (req, res) => {
         { $set: { isRead: true } }
     );
 
-    return res.status(200).json(
-        new ApiResponse(200, {}, "All notifications marked as read")
-    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "All notifications marked as read"));
 });
 
 const deleteNotification = asyncHandler(async (req, res) => {
     const { notificationId } = req.params;
+
+    ValidationHelper.validateId(notificationId, "Invalid Notification ID");
 
     const notification = await Notification.findById(notificationId);
 
@@ -85,14 +96,14 @@ const deleteNotification = asyncHandler(async (req, res) => {
 
     await Notification.findByIdAndDelete(notificationId);
 
-    return res.status(200).json(
-        new ApiResponse(200, {}, "Notification deleted successfully")
-    );
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Notification deleted successfully"));
 });
 
 export {
     getUserNotifications,
     markNotificationAsRead,
     markAllAsRead,
-    deleteNotification
+    deleteNotification // exported
 };

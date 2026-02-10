@@ -4,7 +4,7 @@ import cors from "cors";
 import { CORS_ORIGIN } from "./constants.js";
 import { ApiError } from "./utils/ApiError.js";
 import { ApiResponse } from "./utils/ApiResponse.js";
-import 'dotenv/config'
+import "dotenv/config";
 const app = express();
 
 app.use(
@@ -15,16 +15,18 @@ app.use(
     })
 );
 
+import { RateLimitManager } from "./middlewares/rateLimiter.middleware.js";
+app.use("/api", RateLimitManager.apiGlobal());
+
 app.use(express.json({ limit: "24kb" }));
 
 app.use(express.static("public"));
 app.use(cookieParser());
 
 import passport from "passport";
-import "./passport/passport.config.js";
+import "./config/passport.config.js";
 app.use(passport.initialize());
 
-// router imports
 import authRouter from "./routes/auth.routes.js";
 import profileRouter from "./routes/profile.routes.js";
 
@@ -40,7 +42,6 @@ app.use("/api/v1/bids", bidRouter);
 import ratingRouter from "./routes/rating.routes.js";
 app.use("/api/v1/ratings", ratingRouter);
 
-
 import taskRouter from "./routes/task.routes.js";
 app.use("/api/v1/tasks", taskRouter);
 
@@ -53,30 +54,36 @@ app.use("/api/v1/notifications", notificationRouter);
 import streamRouter from "./routes/stream.routes.js";
 app.use("/api/v1/stream", streamRouter);
 
+import chatRouter from "./routes/chat.routes.js";
+app.use("/api/v1/chats", chatRouter);
+
+import mediaRouter from "./routes/media.routes.js";
+app.use("/api/v1/media", mediaRouter);
+
+import aiRouter from "./routes/ai.routes.js";
+app.use("/api/v1/ai", aiRouter);
 
 app.get("/", (req, res) => {
     res.send("API is running...");
 });
 
-// Global Error Handler
 app.use((err, req, res, next) => {
     console.error("Global Error Handler Catch:", err);
     if (err instanceof ApiError) {
-        return res.status(err.statusCode).json(
-            new ApiResponse(err.statusCode, null, err.message)
-        );
-    }
-    // Mongoose Validation Error
-    if (err.name === 'ValidationError') {
-        return res.status(400).json(
-            new ApiResponse(400, null, err.message)
-        );
+        return res
+            .status(err.statusCode)
+            .json(new ApiResponse(err.statusCode, null, err.message));
     }
 
-    // Default 500
-    return res.status(500).json(
-        new ApiResponse(500, null, "Internal Server Error: " + err.message)
-    );
+    if (err.name === "ValidationError") {
+        return res.status(400).json(new ApiResponse(400, null, err.message));
+    }
+
+    return res
+        .status(500)
+        .json(
+            new ApiResponse(500, null, "Internal Server Error: " + err.message)
+        );
 });
 
 export { app };

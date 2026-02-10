@@ -3,8 +3,17 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import { REFRESH_TOKEN_SECRET } from "../constants.js";
+import {
+    REFRESH_TOKEN_SECRET,
+    FRONTEND_URL,
+    FRONTEND_RESET_PASSWORD_PATH,
+    FRONTEND_OAUTH_SUCCESS_PATH
+} from "../constants.js";
+import { AuthService } from "../services/auth.service.js";
+import { ValidationHelper } from "../utils/validation.utils.js";
+import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import crypto from "crypto";
+<<<<<<< HEAD
 
 const cookieOptions = {
     httpOnly: true,
@@ -26,30 +35,36 @@ const generateAccessAndRefreshTokens = async (userId) => {
         throw new ApiError(500, "Something went wrong while generating referesh and access token");
     }
 };
+=======
+import sendEmail from "../utils/sendEmail.js";
+import {
+    getPasswordResetTemplate,
+    getWelcomeEmailTemplate
+} from "../utils/emailTemplates.js";
+import { Job } from "../models/job.model.js";
+import { Bid } from "../models/bid.model.js";
+import { ChatThread } from "../models/chat.model.js";
+>>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
-    if (!fullName?.trim()) throw new ApiError(400, "Full Name is required");
-    if (!email?.trim()) throw new ApiError(400, "Email is required");
-    if (!username?.trim()) throw new ApiError(400, "Username is required");
-    if (!password?.trim()) throw new ApiError(400, "Password is required");
 
-    if (!role) {
-        throw new ApiError(400, "Role is required (Client or Freelancer)");
+    ValidationHelper.validateLength(fullName, 2, 50, "Full Name");
+    ValidationHelper.validateEmail(email);
+    ValidationHelper.validateLength(username, 3, 30, "Username");
+    ValidationHelper.validateLength(password, 8, 128, "Password");
+    ValidationHelper.validatePasswordStrength(password);
+    if (!["Freelancer", "Client"].includes(role)) {
+        throw new ApiError(400, "Role must be 'Client' or 'Freelancer'");
     }
 
-    const allowedRoles = ["Freelancer", "Client"];
-    if (!allowedRoles.includes(role)) throw new ApiError(400, "Invalid Role. Allowed: Freelancer, Client");
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail)
+        throw new ApiError(409, "User with this email already exists");
 
-    const existedUser = await User.findOne({
-        $or: [{ username }, { email }]
-    });
-
-    if (existedUser) {
-        throw new ApiError(409, "User with email or username already exists");
-    }
-
-
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername)
+        throw new ApiError(409, "User with this username already exists");
 
     const user = await User.create({
         fullName,
@@ -61,86 +76,106 @@ const registerUser = asyncHandler(async (req, res) => {
         coverImage: ""
     });
 
-    const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-    );
+    const createdUser = await User.findById(user._id);
 
     if (!createdUser) {
-        throw new ApiError(500, "Something went wrong while registering the user");
+        throw new ApiError(
+            500,
+            "Something went wrong while registering the user"
+        );
     }
 
-    return res.status(201).json(
-        new ApiResponse(200, createdUser, "User registered Successfully")
-    );
+    try {
+        await sendEmail({
+            email: createdUser.email,
+            subject: "Welcome to Freelance Market! 🚀",
+            html: getWelcomeEmailTemplate({
+                name: createdUser.fullName || createdUser.username,
+                role: createdUser.role
+            })
+        });
+    } catch (error) {
+        console.error("Error sending welcome email:", error);
+    }
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(200, createdUser, "User registered Successfully")
+        );
 });
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, username, password, role } = req.body;
 
-    if (!username && !email) throw new ApiError(400, "username or email is required");
-    if (!role) throw new ApiError(400, "Role is required to login");
+    if (ValidationHelper.isEmpty(username) && ValidationHelper.isEmpty(email)) {
+        throw new ApiError(400, "Username or Email is required");
+    }
+    if (ValidationHelper.isEmpty(role))
+        throw new ApiError(400, "Role is required to login");
 
-    const user = await User.findOne({
-        $or: [{ username }, { email }]
-    });
-
-    if (!user) {
-        throw new ApiError(404, "User does not exist");
+    let user;
+    if (!ValidationHelper.isEmpty(email)) {
+        user = await User.findOne({ email });
+        if (!user)
+            throw new ApiError(404, "User with this email does not exist");
+    }
+    if (!ValidationHelper.isEmpty(username)) {
+        user = await User.findOne({ username });
+        if (!user)
+            throw new ApiError(404, "User with this username does not exist");
     }
 
-    // Check if the user is trying to login with the correct role
     if (user.role !== role) {
-        throw new ApiError(401, `Access Denied: You are registered as a ${user.role}, not a ${role}`);
+        throw new ApiError(
+            401,
+            `Access Denied: You are registered as a ${user.role}, not a ${role}`
+        );
     }
 
     const isPasswordValid = await user.isPasswordCorrect(password);
-
     if (!isPasswordValid) {
-        throw new ApiError(401, "Invalid user credentials");
+        throw new ApiError(401, "Invalid Password");
     }
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
-
-
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+    const { accessToken, refreshToken } =
+        await AuthService.generateAccessAndRefreshTokens(user._id);
+    const { accessTokenMaxAge, refreshTokenMaxAge } =
+        AuthService.getCookieMaxAges();
+    const options = AuthService.getCookieOptions();
 
     return res
         .status(200)
-        .cookie("accessToken", accessToken, cookieOptions)
-        .cookie("refreshToken", refreshToken, cookieOptions)
-        .json(
-            new ApiResponse(
-                200,
-                {
-                    user: loggedInUser
-                },
-                "User logged In Successfully"
-            )
-        );
+        .cookie("accessToken", accessToken, {
+            ...options,
+            maxAge: accessTokenMaxAge
+        })
+        .cookie("refreshToken", refreshToken, {
+            ...options,
+            maxAge: refreshTokenMaxAge
+        })
+        .json(new ApiResponse(200, { user }, "User logged In Successfully"));
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
-        {
-            $unset: {
-                refreshToken: 1
-            }
-        },
-        {
-            new: true
-        }
+        { $unset: { refreshToken: 1 } },
+        { new: true }
     );
+
+    const options = AuthService.getCookieOptions();
 
     return res
         .status(200)
-        .clearCookie("accessToken", cookieOptions)
-        .clearCookie("refreshToken", cookieOptions)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
         .json(new ApiResponse(200, {}, "User logged Out"));
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    const incomingRefreshToken =
+        req.cookies.refreshToken || req.body.refreshToken;
 
     if (!incomingRefreshToken) {
         throw new ApiError(401, "unauthorized request");
@@ -151,28 +186,29 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             incomingRefreshToken,
             REFRESH_TOKEN_SECRET
         );
-
         const user = await User.findById(decodedToken?._id);
 
-        if (!user) {
-            throw new ApiError(401, "Invalid refresh token");
+        if (!user || incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError(401, "Invalid or expired refresh token");
         }
 
-        if (incomingRefreshToken !== user?.refreshToken) {
-            throw new ApiError(401, "Refresh token is expired or used");
-        }
-
-        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshTokens(user._id);
+        const { accessToken, refreshToken: newRefreshToken } =
+            await AuthService.generateAccessAndRefreshTokens(user._id);
+        const { accessTokenMaxAge, refreshTokenMaxAge } =
+            AuthService.getCookieMaxAges();
+        const options = AuthService.getCookieOptions();
 
         return res
             .status(200)
-            .cookie("accessToken", accessToken, cookieOptions)
-            .cookie("refreshToken", newRefreshToken, cookieOptions)
-            .json(new ApiResponse(
-                200,
-                {},
-                "Access token refreshed"
-            ));
+            .cookie("accessToken", accessToken, {
+                ...options,
+                maxAge: accessTokenMaxAge
+            })
+            .cookie("refreshToken", newRefreshToken, {
+                ...options,
+                maxAge: refreshTokenMaxAge
+            })
+            .json(new ApiResponse(200, {}, "Access token refreshed"));
     } catch (error) {
         throw new ApiError(401, error?.message || "Invalid refresh token");
     }
@@ -180,14 +216,15 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
-
-    if (!oldPassword || !newPassword) throw new ApiError(400, "Old and New password are required");
-    if (oldPassword === newPassword) throw new ApiError(400, "Old and New password cannot be same");
+    if (
+        ValidationHelper.isEmpty(oldPassword) ||
+        ValidationHelper.isEmpty(newPassword)
+    ) {
+        throw new ApiError(400, "Old and New password are required");
+    }
 
     const user = await User.findById(req.user._id);
-    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
-
-    if (!isPasswordCorrect) {
+    if (!(await user.isPasswordCorrect(oldPassword))) {
         throw new ApiError(400, "Invalid old password");
     }
 
@@ -201,41 +238,71 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 const deleteUser = asyncHandler(async (req, res) => {
     const { email, password, role } = req.body;
-
-    // 1. Validation
-    if (!email?.trim()) throw new ApiError(400, "Email is required to confirm deletion");
-    if (!password?.trim()) throw new ApiError(400, "Password is required to confirm deletion");
-    if (!role) throw new ApiError(400, "Role is required to confirm deletion");
-
     const user = await User.findById(req.user._id);
 
-    if (!user) {
-        throw new ApiError(404, "User not found");
+    if (
+        !user ||
+        user.email !== email ||
+        user.role !== role ||
+        !(await user.isPasswordCorrect(password))
+    ) {
+        throw new ApiError(
+            401,
+            "Authentication failed. Account deletion denied."
+        );
     }
 
-    // 2. Security Checks
-    if (user.email !== email) {
-        throw new ApiError(400, "Email does not match your account");
+    if (user.role === "Client") {
+        const activeJobsCount = await Job.countDocuments({
+            poster_id: user._id,
+            status: { $in: ["Assigned"] }
+        });
+        if (activeJobsCount > 0) {
+            throw new ApiError(
+                400,
+                `Cannot delete account. You have ${activeJobsCount} active job(s) in progress. Please complete or close them first.`
+            );
+        }
+
+        const openJobs = await Job.find({
+            poster_id: user._id,
+            status: "Open"
+        }).select("_id");
+        const openJobIds = openJobs.map((job) => job._id);
+
+        if (openJobIds.length > 0) {
+            await Bid.deleteMany({ job_id: { $in: openJobIds } });
+
+            await ChatThread.deleteMany({ jobId: { $in: openJobIds } });
+
+            await Job.deleteMany({ _id: { $in: openJobIds } });
+        }
     }
 
-    if (user.role !== role) {
-        throw new ApiError(400, "Role does not match your account");
+    if (user.role === "Freelancer") {
+        const activeWorkCount = await Job.countDocuments({
+            assigned_to: user._id,
+            status: "Assigned"
+        });
+        if (activeWorkCount > 0) {
+            throw new ApiError(
+                400,
+                `Cannot delete account. You are currently assigned to ${activeWorkCount} active job(s). Please complete them first.`
+            );
+        }
+
+        await Bid.deleteMany({ user_id: user._id });
     }
 
-    const isPasswordValid = await user.isPasswordCorrect(password);
-    if (!isPasswordValid) {
-        throw new ApiError(401, "Invalid password. Account deletion failed.");
+    if (user.profileImage) {
+        await CloudinaryHelper.safeDelete(user.profileImage);
     }
-
-    // 3. User is Verified -> Delete
-    // Perform cleanup or cascading deletes here if needed in future (e.g. jobs, messages)
+    if (user.coverImage) {
+        await CloudinaryHelper.safeDelete(user.coverImage);
+    }
 
     await User.findByIdAndDelete(req.user._id);
-
-    const options = {
-        httpOnly: true,
-        secure: true,
-    };
+    const options = AuthService.getCookieOptions();
 
     return res
         .status(200)
@@ -245,20 +312,16 @@ const deleteUser = asyncHandler(async (req, res) => {
 });
 
 const handleGoogleCallback = asyncHandler(async (req, res) => {
-    // req.user is the profile returned from Passport Strategy
     const profile = req.user;
-    const role = req.query.state || "Client"; // Get role from state, default to Client
+    const requestedRole = req.query.state || "Client";
 
-    if (!profile) {
-        throw new ApiError(400, "Google Authentication Failed");
-    }
-    console.log(profile);
+    if (!profile) throw new ApiError(400, "Google Authentication Failed");
 
-    const email = profile.emails?.[0]?.value;
-    const googleId = profile.id;
-    const fullName = profile.displayName;
-    const profileImage = profile.photos?.[0]?.value;
+    const user = await AuthService.processGoogleAuth(profile, requestedRole);
+    const { accessToken, refreshToken } =
+        await AuthService.generateAccessAndRefreshTokens(user._id);
 
+<<<<<<< HEAD
     if (!email) {
         throw new ApiError(400, "Email not found in Google Profile");
     }
@@ -328,6 +391,94 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
         .redirect(redirectUrl); // Pass role for routing
+=======
+    const { accessTokenMaxAge, refreshTokenMaxAge } =
+        AuthService.getCookieMaxAges();
+    const options = AuthService.getCookieOptions();
+    const frontendUrl = FRONTEND_URL || "http://localhost:5173";
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, {
+            ...options,
+            maxAge: accessTokenMaxAge
+        })
+        .cookie("refreshToken", refreshToken, {
+            ...options,
+            maxAge: refreshTokenMaxAge
+        })
+        .redirect(
+            `${frontendUrl}${FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success"}`
+        );
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    ValidationHelper.validateEmail(email);
+
+    const user = await User.findOne({ email });
+    if (!user) throw new ApiError(404, "User not found");
+
+    const resetToken = user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+    const frontendUrl = FRONTEND_URL || "http://localhost:5173";
+    const resetUrl = `${frontendUrl}${FRONTEND_RESET_PASSWORD_PATH || "/reset-password"}/${resetToken}`;
+
+    const message = getPasswordResetTemplate(resetUrl);
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: "Password Reset Request",
+            message: `You requested a password reset. Please go to this link: ${resetUrl}`,
+            html: message
+        });
+
+        res.status(200).json(new ApiResponse(200, {}, "Email sent"));
+    } catch (error) {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save({ validateBeforeSave: false });
+
+        throw new ApiError(500, "Email could not be sent");
+    }
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+    const resetPasswordToken = crypto
+        .createHash("sha256")
+        .update(req.params.token)
+        .digest("hex");
+
+    const user = await User.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) throw new ApiError(400, "Invalid Reset Token");
+
+    const { password: newPassword } = req.body;
+    ValidationHelper.validateLength(newPassword, 8, 128, "Password");
+    ValidationHelper.validatePasswordStrength(newPassword);
+
+    const isSamePassword = await user.isPasswordCorrect(newPassword);
+    if (isSamePassword) {
+        throw new ApiError(
+            400,
+            "New password cannot be the same as the old password"
+        );
+    }
+
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    res.status(200).json(
+        new ApiResponse(200, {}, "Password Reset Successfully")
+    );
+>>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
@@ -348,5 +499,7 @@ export {
     changeCurrentPassword,
     getCurrentUser,
     deleteUser,
-    handleGoogleCallback
+    handleGoogleCallback,
+    forgotPassword,
+    resetPassword // exported
 };

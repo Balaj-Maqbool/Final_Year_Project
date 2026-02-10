@@ -1,42 +1,57 @@
 # Project Roadmap
 
-- [x] **Implement Notification System** <!-- id: 1 -->
-- [x] **Refactoring & Cleanup** <!-- id: 2 -->
-    - [x] Remove verbose comments from controllers <!-- id: 3 -->
-    - [x] Split `user.routes.js` into `auth` and `profile` routes <!-- id: 4 -->
-    - [x] Optimize imports and folder structure <!-- id: 5 -->
-- [x] **Security Hardening** <!-- id: 6 -->
-    - [x] Implement Global Error Handler in `app.js` <!-- id: 7 -->
-    - [x] Enforce "Cookie-Only" token policy (Remove tokens from JSON body) <!-- id: 8 -->
-    - [x] Fix JWT expiration handling (Returns 401 instead of 500) <!-- id: 9 -->
-    - [x] Fix Refresh Token logic bugs <!-- id: 10 -->
+## ✅ Completed Features
 
-- [x] **Real-Time Architecture (SSE)** <!-- id: 13 -->
-    - [x] Create `stream.controller.js` (Connection Logic) <!-- id: 14 -->
-    - [x] Create `stream.routes.js` <!-- id: 15 -->
-    - [x] Mount routes in `app.js` <!-- id: 16 -->
-    - [x] Cleanup (Remove legacy SSE code) <!-- id: 17 -->
+- [x] **Authentication & User Management**
 
-## Future Features (Pending)
+    - Login, Register, Logout
+    - Google OAuth
+    - Forgot/Reset Password (Email Module)
+    - Role-based Access (Client/Freelancer)
+    - Refresh Token Rotation
+    - Security Hardening (Cookie-Only policy, Global Error Handler)
 
-- [ ] **Forgot Password Flow** <!-- id: 11 -->
-    - [ ] Reset Link via Email + Token Validation
+- [x] **Core Functionality**
 
-- [ ] **AI Integration (Smart Marketplace)** <!-- id: 12 -->
-    - **Goal**: Integrate LLM (OpenAI/Gemini) to assist users.
+    - Job Posting & Management
+    - Bidding System
+    - Task Management (Kanban)
+    - Ratings & Reviews
 
-    - [ ] **1. Client: "The Job Architect"**
-        - Input: Client describes problem in natural language (e.g., "I need a flower shop website").
-        - AI Output: Suggests professional Job Title, Description, Required Skills, and Budget Range.
-        - Tech: Prompt Engineering to structured JSON.
+- [x] **Real-Time Features**
 
-    - [ ] **2. Freelancer: "The Profile Polisher"**
-        - Input: Freelancer provides raw skills/details.
-        - AI Output: Generates a professional Bio and extracts optimal Skill Tags.
-    
-    - [ ] **3. Platform Assistant (Chatbot)**
-        - Input: User asks about platform rules/features.
-        - AI Output: RAG (Retrieval Augmented Generation) or Context-aware answers about Admins, Fees, and Policies.
+    - Notification System (SSE)
+    - Chat System (WebSockets/Socket.io)
+    - Media Management (Cloudinary)
 
-- [ ] **API Security** <!-- id: 18 -->
-    - [ ] **Rate Limiting** (prevent abuse)
+- [x] **Infrastructure & Code Quality**
+    - Folder Structure Optimization
+    - Standardized Validation (`ValidationHelper`)
+    - API Rate Limiting (`rate-limiter-flexible`)
+        - Global Limit (500 req/15min)
+        - Auth/Media Specific Limits
+        - AI Quota Protection (10 req/min)
+    - Code Formatting (Prettier)
+
+---
+
+## 🚀 Remaining Major Goals
+
+### 1. Payment Integration
+
+- [ ] **Method**: Stripe or PayPal (TBD)
+- [ ] **Escrow Logic**: Hold funds until job completion.
+- [ ] **Payouts**: Release funds to freelancers.
+
+### 2. AI Integration (Smart Assistant) ✅
+
+- [x] **Client Features**:
+    - "The Job Architect": AI helps write job descriptions.
+    - "Task Breakdown": Automatically create tasks from job description.
+- [x] **Freelancer Features**:
+    - "The Profile Polisher": AI enhances bios and skills.
+    - "Proposal Generator": AI writes cover letters.
+- [ ] **Platform Chatbot**:
+    - RAG-based assistant for site policies and help.
+
+---

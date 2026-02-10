@@ -13,34 +13,47 @@ A robust backend REST API for a private SaaS freelancing platform. Built with **
 ## ✨ Key Features
 
 - **🔐 Authentication & User Management**
-  - Role-based access (Client vs. Freelancer).
-  - Google OAuth integration.
-  - Profile & Cover image management.
+
+    - Role-based access (Client vs. Freelancer).
+    - Google OAuth integration.
+    - Profile & Cover image management.
 
 - **💼 Job Management**
-  - Create, Update, Delete jobs.
-  - **Advanced Search**: Filter by regex title, category, and budget range.
+
+    - Create, Update, Delete jobs.
+    - **Advanced Search**: Filter by regex title, category, and budget range.
 
 - **🙋‍♂️ Bidding System**
-  - Freelancers can bid on open jobs.
-  - Clients can **Accept/Reject** bids.
-  - Automatic job status updates upon assignment.
+
+    - Freelancers can bid on open jobs.
+    - Clients can **Accept/Reject** bids.
+    - Automatic job status updates upon assignment.
 
 - **✅ Task Tracking**
-  - Kanban-style status (To Do, In Progress, Done).
-  - Client approval workflow for completed tasks.
+
+    - Kanban-style status (To Do, In Progress, Done).
+    - Client approval workflow for completed tasks.
 
 - **⭐ Ratings & Reviews**
-  - Clients rate Freelancers upon job completion.
-  - Automatic average rating calculation.
+
+    - Clients rate Freelancers upon job completion.
+    - Automatic average rating calculation.
 
 - **📊 Dashboards**
-  - Aggregated analytics for Clients (Spending, Hires) and Freelancers (Earnings, Success Rate).
+
+    - Aggregated analytics for Clients (Spending, Hires) and Freelancers (Earnings, Success Rate).
 
 - **🔔 Real-time Notifications (SSE)**
-  - **Instant Alerts**: Users get real-time toasts for new bids, job matches, and task updates.
-  - **Email-like History**: All notifications are saved to the database for later viewing.
-  - **Smart Filtering**: Notifications are role-aware (e.g., only Freelancers see "New Job" alerts).
+
+    - **Instant Alerts**: Users get real-time toasts for new bids, job matches, and task updates.
+    - **Email-like History**: All notifications are saved to the database for later viewing.
+    - **Smart Filtering**: Notifications are role-aware (e.g., only Freelancers see "New Job" alerts).
+
+- **🤖 AI Integration (Gemini)**
+    - **Job Architect**: Helps clients draft professional job descriptions from simple prompts.
+    - **Profile Polisher**: Enhances freelancer bios and suggests relevant skills.
+    - **Proposal Generator**: Writes personalized cover letters based on job requirements.
+    - **Task Breakdown**: Automatically breaks down complex jobs into manageable tasks.
 
 ## 🛠️ Installation & Setup
 
@@ -75,4 +88,3 @@ A robust backend REST API for a private SaaS freelancing platform. Built with **
 Detailed endpoint specifications are available in [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
 
 ---
-

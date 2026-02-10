@@ -11,16 +11,12 @@ const router = Router();
 
 router.use(verifyJWT);
 
-router.route("/")
-    .get(getUserNotifications);
+router.route("/").get(getUserNotifications);
 
-router.route("/read-all")
-    .patch(markAllAsRead);
+router.route("/read-all").patch(markAllAsRead);
 
-router.route("/read/:notificationId")
-    .patch(markNotificationAsRead);
+router.route("/read/:notificationId").patch(markNotificationAsRead);
 
-router.route("/delete/:notificationId")
-    .delete(deleteNotification);
+router.route("/delete/:notificationId").delete(deleteNotification);
 
 export default router;
