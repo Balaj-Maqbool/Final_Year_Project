@@ -312,5 +312,5 @@ export {
     deleteThread,
     blockThread,
     unblockThread,
-    markMessagesAsRead
+    markMessagesAsRead // exported
 };

@@ -27,19 +27,29 @@ const getClientDashboard = asyncHandler(async (req, res) => {
                             _id: null,
                             totalJobs: { $sum: 1 },
                             openJobs: {
-                                $sum: { $cond: [{ $eq: ["$status", "Open"] }, 1, 0] }
+                                $sum: {
+                                    $cond: [{ $eq: ["$status", "Open"] }, 1, 0]
+                                }
                             },
                             assignedJobs: {
-                                $sum: { $cond: [{ $eq: ["$status", "Assigned"] }, 1, 0] }
+                                $sum: {
+                                    $cond: [{ $eq: ["$status", "Assigned"] }, 1, 0]
+                                }
                             },
                             completedJobs: {
-                                $sum: { $cond: [{ $eq: ["$status", "Completed"] }, 1, 0] }
+                                $sum: {
+                                    $cond: [{ $eq: ["$status", "Completed"] }, 1, 0]
+                                }
                             },
                             totalBudgetSpent: {
                                 $sum: {
                                     $cond: [
-                                        { $in: ["$status", ["Assigned", "Completed"]] },
-                                        { $cond: [{ $gt: ["$agreed_price", 0] }, "$agreed_price", "$budget"] },
+                                        {
+                                            $in: ["$status", ["Assigned", "Completed"]]
+                                        },
+                                        {
+                                            $cond: [{ $gt: ["$agreed_price", 0] }, "$agreed_price", "$budget"]
+                                        },
                                         0
                                     ]
                                 }
@@ -141,13 +151,19 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                             _id: null,
                             totalBids: { $sum: 1 },
                             pendingBids: {
-                                $sum: { $cond: [{ $eq: ["$status", "Pending"] }, 1, 0] }
+                                $sum: {
+                                    $cond: [{ $eq: ["$status", "Pending"] }, 1, 0]
+                                }
                             },
                             acceptedBids: {
-                                $sum: { $cond: [{ $eq: ["$status", "Accepted"] }, 1, 0] }
+                                $sum: {
+                                    $cond: [{ $eq: ["$status", "Accepted"] }, 1, 0]
+                                }
                             },
                             rejectedBids: {
-                                $sum: { $cond: [{ $eq: ["$status", "Rejected"] }, 1, 0] }
+                                $sum: {
+                                    $cond: [{ $eq: ["$status", "Rejected"] }, 1, 0]
+                                }
                             }
                         }
                     }
@@ -198,8 +214,18 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                                         { $eq: ["$status", "Completed"] },
                                         {
                                             $ifNull: [
-                                                { $cond: [{ $gt: ["$agreed_price", 0] }, "$agreed_price", null] },
-                                                { $ifNull: ["$acceptedBid.bid_amount", "$budget"] }
+                                                {
+                                                    $cond: [
+                                                        {
+                                                            $gt: ["$agreed_price", 0]
+                                                        },
+                                                        "$agreed_price",
+                                                        null
+                                                    ]
+                                                },
+                                                {
+                                                    $ifNull: ["$acceptedBid.bid_amount", "$budget"]
+                                                }
                                             ]
                                         },
                                         0
@@ -207,10 +233,14 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                                 }
                             },
                             completedJobsCount: {
-                                $sum: { $cond: [{ $eq: ["$status", "Completed"] }, 1, 0] }
+                                $sum: {
+                                    $cond: [{ $eq: ["$status", "Completed"] }, 1, 0]
+                                }
                             },
                             activeJobsCount: {
-                                $sum: { $cond: [{ $eq: ["$status", "Assigned"] }, 1, 0] }
+                                $sum: {
+                                    $cond: [{ $eq: ["$status", "Assigned"] }, 1, 0]
+                                }
                             }
                         }
                     }
@@ -237,8 +267,12 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
                             "client.fullName": 1,
                             finalPrice: {
                                 $ifNull: [
-                                    { $cond: [{ $gt: ["$agreed_price", 0] }, "$agreed_price", null] },
-                                    { $ifNull: ["$acceptedBid.bid_amount", "$budget"] }
+                                    {
+                                        $cond: [{ $gt: ["$agreed_price", 0] }, "$agreed_price", null]
+                                    },
+                                    {
+                                        $ifNull: ["$acceptedBid.bid_amount", "$budget"]
+                                    }
                                 ]
                             }
                         }
@@ -276,8 +310,17 @@ const getFreelancerDashboard = asyncHandler(async (req, res) => {
         }
     ]);
 
-    const bStats = bidStats[0].stats[0] || { totalBids: 0, pendingBids: 0, acceptedBids: 0, rejectedBids: 0 };
-    const jStats = jobStats[0].earnings[0] || { totalEarnings: 0, completedJobsCount: 0, activeJobsCount: 0 };
+    const bStats = bidStats[0].stats[0] || {
+        totalBids: 0,
+        pendingBids: 0,
+        acceptedBids: 0,
+        rejectedBids: 0
+    };
+    const jStats = jobStats[0].earnings[0] || {
+        totalEarnings: 0,
+        completedJobsCount: 0,
+        activeJobsCount: 0
+    };
 
     return res.status(200).json(
         new ApiResponse(

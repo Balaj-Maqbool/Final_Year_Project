@@ -14,7 +14,10 @@ class ChatService {
         }
 
         if (!thread.participants.includes(userId)) {
-            return { canSend: false, error: "You are not a participant in this chat" };
+            return {
+                canSend: false,
+                error: "You are not a participant in this chat"
+            };
         }
 
         if (thread.status === "blocked") {
@@ -27,7 +30,10 @@ class ChatService {
         }
 
         if (["Rejected", "Withdrawn"].includes(bid.status)) {
-            return { canSend: false, error: `Cannot send message. Bid is ${bid.status}.` };
+            return {
+                canSend: false,
+                error: `Cannot send message. Bid is ${bid.status}.`
+            };
         }
 
         return { canSend: true, thread };

@@ -24,7 +24,8 @@ const notificationSchema = new Schema(
                 "NEW_RATING",
                 "CHAT",
                 "NEW_CHAT_MESSAGE",
-                "SYSTEM"
+                "SYSTEM",
+                "CHAT_INITIATED"
             ],
             required: true
         },

@@ -15,32 +15,43 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email, bio, skills, portfolio } = req.body;
 
-    ValidationHelper.validateLength(fullName, 2, 50, "Full Name");
-    ValidationHelper.validateEmail(email);
+    const updateData = {};
 
-    ValidationHelper.validateLength(bio, 0, 500, "Bio");
-    ValidationHelper.validateLength(portfolio, 0, 2000, "Portfolio URL/Text");
-
-    if (email !== req.user.email) {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            throw new ApiError(409, "Email is already in use by another account");
-        }
+    if (fullName !== undefined) {
+        ValidationHelper.validateLength(fullName, 2, 50, "Full Name");
+        updateData.fullName = fullName;
     }
 
-    const updateData = {
-        fullName,
-        email,
-        bio: bio || "",
-        portfolio: portfolio || ""
-    };
+    if (email !== undefined) {
+        ValidationHelper.validateEmail(email);
+        if (email !== req.user.email) {
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                throw new ApiError(409, "Email is already in use by another account");
+            }
+        }
+        updateData.email = email;
+    }
 
-    if (skills) {
+    if (bio !== undefined) {
+        ValidationHelper.validateLength(bio, 0, 500, "Bio");
+        updateData.bio = bio;
+    }
+
+    if (portfolio !== undefined) {
+        ValidationHelper.validateLength(portfolio, 0, 2000, "Portfolio URL/Text");
+        updateData.portfolio = portfolio;
+    }
+
+    if (skills !== undefined) {
         let skillsArray = [];
         if (Array.isArray(skills)) {
             skillsArray = skills;
-        } else {
-            skillsArray = skills.split(",").map((skill) => skill.trim());
+        } else if (typeof skills === "string") {
+            skillsArray = skills
+                .split(",")
+                .map((skill) => skill.trim())
+                .filter((s) => s !== "");
         }
 
         if (skillsArray.length > 50) throw new ApiError(400, "Max 50 skills allowed");
@@ -148,8 +159,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
         query.role = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
     }
 
-
-
     const users = await User.find(query).select(
         "-email -refreshToken -password -googleId -resetPasswordToken -resetPasswordExpire"
     );
@@ -189,5 +198,5 @@ export {
     getAllUsers,
     getUserProfileById,
     deleteUserProfileImage,
-    deleteUserCoverImage
+    deleteUserCoverImage // exported
 };

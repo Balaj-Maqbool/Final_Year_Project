@@ -16,26 +16,18 @@ const createJob = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Clients can post jobs");
     }
 
-    if (
-        ValidationHelper.isEmpty(title) ||
-        ValidationHelper.isEmpty(description) ||
-        ValidationHelper.isEmpty(budget) ||
-        ValidationHelper.isEmpty(deadline) ||
-        ValidationHelper.isEmpty(category)
-    ) {
-        throw new ApiError(400, "All fields (title, description, budget, deadline, category) are required");
+    if (ValidationHelper.isEmpty(deadline) || ValidationHelper.isEmpty(category)) {
+        throw new ApiError(400, "All fields (deadline, category) are required");
     }
 
     if (new Date(deadline) < new Date()) {
         throw new ApiError(400, "Deadline must be in the future");
     }
 
-    // Logic Audit Fix: Input Boundaries
     ValidationHelper.validateLength(title, 10, 100, "Title");
     ValidationHelper.validateLength(description, 50, 5000, "Description");
     ValidationHelper.validateRange(budget, 1, 1000000, "Budget");
 
-    // Manual check for skills as requested
     if (required_skills && required_skills.length > 20) throw new ApiError(400, "Max 20 skills allowed");
 
     const job = await Job.create({
@@ -200,7 +192,6 @@ const updateJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot manually set status to Assigned. Please accept a bid to assign a freelancer.");
     }
 
-
     if (status === "Completed") {
         const unapprovedTasks = await Task.countDocuments({
             job_id: jobId,
@@ -215,22 +206,37 @@ const updateJob = asyncHandler(async (req, res) => {
         }
     }
 
-    // Logic Audit Fix: Prevent changing budget after assignment (Contract Integrity)
     if (["Assigned", "Completed"].includes(job.status) && budget && budget !== job.budget) {
         throw new ApiError(400, "Cannot modify budget for an assigned or completed job. The contract price is fixed.");
     }
 
-    // Logic Audit Fix: Input Boundaries for Update
-    if (title) ValidationHelper.validateLength(title, 10, 100, "Title");
-    if (description) ValidationHelper.validateLength(description, 50, 5000, "Description");
-    if (budget) ValidationHelper.validateRange(budget, 1, 1000000, "Budget");
-
-    job.title = title || job.title;
-    job.description = description || job.description;
-    job.budget = budget || job.budget;
-    job.deadline = deadline || job.deadline;
-    job.category = category || job.category;
-    if (status) job.status = status;
+    if (title !== undefined) {
+        ValidationHelper.validateLength(title, 10, 100, "Title");
+        job.title = title;
+    }
+    if (description !== undefined) {
+        ValidationHelper.validateLength(description, 50, 5000, "Description");
+        job.description = description;
+    }
+    if (budget !== undefined) {
+        ValidationHelper.validateRange(budget, 1, 1000000, "Budget");
+        job.budget = budget;
+    }
+    if (deadline !== undefined) {
+        if (ValidationHelper.isEmpty(deadline)) throw new ApiError(400, "Deadline is required");
+        if (new Date(deadline) < new Date()) throw new ApiError(400, "Deadline must be in the future");
+        job.deadline = deadline;
+    }
+    if (category !== undefined) {
+        if (ValidationHelper.isEmpty(category)) throw new ApiError(400, "Category is required");
+        job.category = category;
+    }
+    if (status !== undefined) {
+        if (!["Open", "Assigned", "Completed"].includes(status)) {
+            throw new ApiError(400, "Invalid status");
+        }
+        job.status = status;
+    }
 
     await job.save();
 
@@ -265,15 +271,18 @@ const deleteJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot delete a completed job. It is part of the work history.");
     }
 
-    // 1. Delete all Bids on this job
     await Bid.deleteMany({ job_id: jobId });
-
-    // 2. Delete all Chat Threads related to this job
     await ChatThread.deleteMany({ jobId: jobId });
-
     await Job.findByIdAndDelete(jobId);
 
     return res.status(200).json(new ApiResponse(200, {}, "Job deleted successfully"));
 });
 
-export { createJob, getAllJobs, getMyJobs, getJobById, updateJob, deleteJob };
+export {
+    createJob,
+    getAllJobs,
+    getMyJobs,
+    getJobById,
+    updateJob,
+    deleteJob // exported
+};

@@ -306,9 +306,9 @@ const updateBid = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot update a bid that has been accepted or rejected");
     }
 
-    if (bid_amount) ValidationHelper.validateRange(bid_amount, 1, null, "Bid Amount");
-    if (message) ValidationHelper.validateLength(message, 10, 2000, "Message/Proposal");
-    if (timeline) ValidationHelper.validateLength(timeline, 2, 100, "Timeline");
+    if (bid_amount !== undefined) ValidationHelper.validateRange(bid_amount, 1, null, "Bid Amount");
+    if (message !== undefined) ValidationHelper.validateLength(message, 10, 2000, "Message/Proposal");
+    if (timeline !== undefined) ValidationHelper.validateLength(timeline, 2, 100, "Timeline");
 
     bid.bid_amount = bid_amount;
     bid.message = message;
@@ -335,4 +335,12 @@ const getMyBidForJob = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, bid, "Bid fetched successfully"));
 });
 
-export { placeBid, getJobBids, updateBidStatus, withdrawBid, getMyBids, updateBid, getMyBidForJob };
+export {
+    placeBid,
+    getJobBids,
+    updateBidStatus,
+    withdrawBid,
+    getMyBids,
+    updateBid,
+    getMyBidForJob // exported
+};

@@ -181,7 +181,10 @@ class SocketManager {
                 }
             } catch (error) {
                 console.error("Send Message Error:", error);
-                socket.emit("error", { type: "SERVER_ERROR", message: "Failed to send message" });
+                socket.emit("error", {
+                    type: "SERVER_ERROR",
+                    message: "Failed to send message"
+                });
             }
         });
 

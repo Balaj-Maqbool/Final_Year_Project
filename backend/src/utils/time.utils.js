@@ -1,9 +1,3 @@
-/**
- * Parses a duration string into milliseconds.
- * Supports format: "1y", "1w", "1d", "10d", "1h", "20m", "30s"
- * @param {string} durationStr
- * @returns {number | undefined} milliseconds
- */
 import { ValidationHelper } from "./validation.utils.js";
 
 const parseDuration = (durationStr) => {

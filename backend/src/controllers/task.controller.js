@@ -13,7 +13,7 @@ const createTask = asyncHandler(async (req, res) => {
     ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     ValidationHelper.validateLength(title, 3, 100, "Task Title");
-    if (description) ValidationHelper.validateLength(description, 0, 1000, "Task Description");
+    ValidationHelper.validateLength(description, 0, 1000, "Task Description");
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -164,11 +164,11 @@ const updateTask = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cannot update an approved task");
     }
 
-    if (title) {
+    if (title !== undefined) {
         ValidationHelper.validateLength(title, 3, 100, "Task Title");
         task.title = title;
     }
-    if (description) {
+    if (description !== undefined) {
         ValidationHelper.validateLength(description, 0, 1000, "Task Description");
         task.description = description;
     }
@@ -206,4 +206,11 @@ const deleteTask = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, {}, "Task deleted successfully"));
 });
 
-export { createTask, getJobTasks, updateTaskStatus, approveTask, updateTask, deleteTask };
+export {
+    createTask,
+    getJobTasks,
+    updateTaskStatus,
+    approveTask,
+    updateTask,
+    deleteTask // exported
+};

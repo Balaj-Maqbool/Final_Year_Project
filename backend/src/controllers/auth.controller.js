@@ -102,8 +102,14 @@ const loginUser = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenMaxAge })
-        .cookie("refreshToken", refreshToken, { ...options, maxAge: refreshTokenMaxAge })
+        .cookie("accessToken", accessToken, {
+            ...options,
+            maxAge: accessTokenMaxAge
+        })
+        .cookie("refreshToken", refreshToken, {
+            ...options,
+            maxAge: refreshTokenMaxAge
+        })
         .json(new ApiResponse(200, { user }, "User logged In Successfully"));
 });
 
@@ -142,8 +148,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
         return res
             .status(200)
-            .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenMaxAge })
-            .cookie("refreshToken", newRefreshToken, { ...options, maxAge: refreshTokenMaxAge })
+            .cookie("accessToken", accessToken, {
+                ...options,
+                maxAge: accessTokenMaxAge
+            })
+            .cookie("refreshToken", newRefreshToken, {
+                ...options,
+                maxAge: refreshTokenMaxAge
+            })
             .json(new ApiResponse(200, {}, "Access token refreshed"));
     } catch (error) {
         throw new ApiError(401, error?.message || "Invalid refresh token");
@@ -187,17 +199,17 @@ const deleteUser = asyncHandler(async (req, res) => {
             );
         }
 
-        const openJobs = await Job.find({ poster_id: user._id, status: "Open" }).select("_id");
+        const openJobs = await Job.find({
+            poster_id: user._id,
+            status: "Open"
+        }).select("_id");
         const openJobIds = openJobs.map((job) => job._id);
 
         if (openJobIds.length > 0) {
-            // Delete Bids on these jobs
             await Bid.deleteMany({ job_id: { $in: openJobIds } });
 
-            // Delete Chat Threads for these jobs
             await ChatThread.deleteMany({ jobId: { $in: openJobIds } });
 
-            // Finally, delete the jobs
             await Job.deleteMany({ _id: { $in: openJobIds } });
         }
     }
@@ -214,7 +226,6 @@ const deleteUser = asyncHandler(async (req, res) => {
             );
         }
 
-        // Delete all bids placed by this freelancer
         await Bid.deleteMany({ user_id: user._id });
     }
 
@@ -250,14 +261,20 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .cookie("accessToken", accessToken, { ...options, maxAge: accessTokenMaxAge })
-        .cookie("refreshToken", refreshToken, { ...options, maxAge: refreshTokenMaxAge })
+        .cookie("accessToken", accessToken, {
+            ...options,
+            maxAge: accessTokenMaxAge
+        })
+        .cookie("refreshToken", refreshToken, {
+            ...options,
+            maxAge: refreshTokenMaxAge
+        })
         .redirect(`${frontendUrl}${FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success"}`);
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
     const { email } = req.body;
-    if (ValidationHelper.isEmpty(email)) throw new ApiError(400, "Email is required");
+    ValidationHelper.validateEmail(email);
 
     const user = await User.findOne({ email });
     if (!user) throw new ApiError(404, "User not found");
@@ -298,7 +315,8 @@ const resetPassword = asyncHandler(async (req, res) => {
     if (!user) throw new ApiError(400, "Invalid Reset Token");
 
     const { password: newPassword } = req.body;
-    if (ValidationHelper.isEmpty(newPassword)) throw new ApiError(400, "Password is required");
+    ValidationHelper.validateLength(newPassword, 8, 128, "Password");
+    ValidationHelper.validatePasswordStrength(newPassword);
 
     const isSamePassword = await user.isPasswordCorrect(newPassword);
     if (isSamePassword) {
@@ -323,5 +341,5 @@ export {
     deleteUser,
     handleGoogleCallback,
     forgotPassword,
-    resetPassword
+    resetPassword // exported
 };

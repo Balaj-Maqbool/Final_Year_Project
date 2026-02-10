@@ -19,7 +19,6 @@ const addRating = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Clients can submit ratings");
     }
 
-    if (ValidationHelper.isEmpty(rating)) throw new ApiError(400, "Rating is required");
     ValidationHelper.validateRange(rating, 1, 5, "Rating");
     ValidationHelper.validateLength(comment, 3, 1000, "Comment");
 
@@ -173,13 +172,13 @@ const updateRating = asyncHandler(async (req, res) => {
 
     let shouldUpdateStats = false;
 
-    if (rating) {
+    if (rating !== undefined) {
         ValidationHelper.validateRange(rating, 1, 5, "Rating");
         existingRating.rating = rating;
         shouldUpdateStats = true;
     }
 
-    if (comment) {
+    if (comment !== undefined) {
         ValidationHelper.validateLength(comment, 3, 1000, "Comment");
         existingRating.comment = comment;
     }
@@ -212,4 +211,8 @@ const updateRating = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, existingRating, "Rating updated successfully"));
 });
 
-export { addRating, getFreelancerRatings, updateRating };
+export {
+    addRating,
+    getFreelancerRatings,
+    updateRating // exported
+};
