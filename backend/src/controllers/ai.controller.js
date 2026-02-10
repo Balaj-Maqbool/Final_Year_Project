@@ -6,11 +6,8 @@ import { ValidationHelper } from "../utils/validation.utils.js";
 
 const generateJobDetails = asyncHandler(async (req, res) => {
     const { userPrompt } = req.body;
+    ValidationHelper.validateLength(userPrompt, 10, 2500, "User Prompt");
 
-    if (!userPrompt) throw new ApiError(400, "User prompt is required");
-    ValidationHelper.validateLength(userPrompt, 1, 2500, "User Prompt");
-
-    // Sanitize input to prevent prompt injection
     const sanitizedPrompt = userPrompt.replace(/"/g, '\\"');
 
     const systemPrompt = `
@@ -27,16 +24,19 @@ const generateJobDetails = asyncHandler(async (req, res) => {
 
     const jobData = await aiService.generateJSON(systemPrompt);
 
-    return res.status(200).json(new ApiResponse(200, jobData, "Job details generated successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, jobData, "Job details generated successfully")
+        );
 });
 
 const policeUserProfile = asyncHandler(async (req, res) => {
     const { currentBio, currentSkills } = req.body;
 
-    if (currentBio) ValidationHelper.validateLength(currentBio, 0, 5000, "Bio");
-    if (currentSkills) ValidationHelper.validateLength(currentSkills, 0, 5000, "Skills");
+    ValidationHelper.validateLength(currentBio, 0, 5000, "Bio");
+    ValidationHelper.validateLength(currentSkills, 0, 5000, "Skills");
 
-    // Sanitize inputs
     const safeBio = (currentBio || "N/A").replace(/"/g, '\\"');
     const safeSkills = (currentSkills || "N/A").replace(/"/g, '\\"');
 
@@ -53,15 +53,27 @@ const policeUserProfile = asyncHandler(async (req, res) => {
 
     const profileData = await aiService.generateJSON(systemPrompt);
 
-    return res.status(200).json(new ApiResponse(200, profileData, "Profile polished successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, profileData, "Profile polished successfully")
+        );
 });
 
 const generateProposal = asyncHandler(async (req, res) => {
     const { jobDescription, freelancerProfile } = req.body;
 
-    if (!jobDescription) throw new ApiError(400, "Job Description is required");
+    ValidationHelper.validateLength(
+        jobDescription,
+        50,
+        5000,
+        "Job Description"
+    );
 
-    // Sanitize inputs. For objects like freelancerProfile, stringify first then escape.
+    if (ValidationHelper.isEmpty(freelancerProfile)) {
+        throw new ApiError(400, "Freelancer Profile is required");
+    }
+
     const safeJobDesc = jobDescription.replace(/"/g, '\\"');
     const safeProfile = JSON.stringify(freelancerProfile).replace(/"/g, '\\"');
 
@@ -77,13 +89,26 @@ const generateProposal = asyncHandler(async (req, res) => {
 
     const proposalData = await aiService.generateJSON(systemPrompt);
 
-    return res.status(200).json(new ApiResponse(200, proposalData, "Proposal generated successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                proposalData,
+                "Proposal generated successfully"
+            )
+        );
 });
 
 const generateTaskBreakdown = asyncHandler(async (req, res) => {
     const { jobDescription } = req.body;
 
-    if (!jobDescription) throw new ApiError(400, "Job Description is required");
+    ValidationHelper.validateLength(
+        jobDescription,
+        50,
+        5000,
+        "Job Description"
+    );
 
     const safeJobDesc = jobDescription.replace(/"/g, '\\"');
 
@@ -100,7 +125,20 @@ const generateTaskBreakdown = asyncHandler(async (req, res) => {
 
     const taskData = await aiService.generateJSON(systemPrompt);
 
-    return res.status(200).json(new ApiResponse(200, taskData, "Task breakdown generated successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                taskData,
+                "Task breakdown generated successfully"
+            )
+        );
 });
 
-export { generateJobDetails, policeUserProfile, generateProposal, generateTaskBreakdown };
+export {
+    generateJobDetails,
+    policeUserProfile,
+    generateProposal,
+    generateTaskBreakdown // exported
+};

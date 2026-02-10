@@ -112,9 +112,12 @@ socket.on("user_typing", ({ userId, isTyping }) => {
 Listen for this **Globally** (even when not in a chat page).
 
 ```javascript
-socket.on("new_message_notification", ({ title, message, threadId, senderId }) => {
-    toast.info(`${title}: ${message}`);
-});
+socket.on(
+    "new_message_notification",
+    ({ title, message, threadId, senderId }) => {
+        toast.info(`${title}: ${message}`);
+    }
+);
 ```
 
 ---

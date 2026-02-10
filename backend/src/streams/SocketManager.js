@@ -31,7 +31,9 @@ class SocketManager {
 
                 if (handshake.headers.cookie) {
                     const parsedCookies = Object.fromEntries(
-                        handshake.headers.cookie.split(";").map((c) => c.trim().split("="))
+                        handshake.headers.cookie
+                            .split(";")
+                            .map((c) => c.trim().split("="))
                     );
                     if (parsedCookies.accessToken) {
                         token = parsedCookies.accessToken;
@@ -50,17 +52,25 @@ class SocketManager {
                 }
 
                 if (ValidationHelper.isEmpty(token)) {
-                    return next(new Error("Authentication error: Token missing"));
+                    return next(
+                        new Error("Authentication error: Token missing")
+                    );
                 }
 
                 const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
                 if (!decoded?._id) {
-                    return next(new Error("Authentication error: Invalid token"));
+                    return next(
+                        new Error("Authentication error: Invalid token")
+                    );
                 }
 
-                const user = await User.findById(decoded._id).select("-password -refreshToken");
+                const user = await User.findById(decoded._id).select(
+                    "-password -refreshToken"
+                );
                 if (!user) {
-                    return next(new Error("Authentication error: User not found"));
+                    return next(
+                        new Error("Authentication error: User not found")
+                    );
                 }
 
                 socket.user = user;
@@ -112,10 +122,13 @@ class SocketManager {
             try {
                 await this.socketLimiter.consume(socket.user._id.toString());
             } catch (rateLimitError) {
-                console.warn(`Rate Limit Exceeded for user ${socket.user.username}`);
+                console.warn(
+                    `Rate Limit Exceeded for user ${socket.user.username}`
+                );
                 return socket.emit("error", {
                     type: "RATE_LIMIT",
-                    message: "You are sending messages too fast. Please slow down."
+                    message:
+                        "You are sending messages too fast. Please slow down."
                 });
             }
 
@@ -134,7 +147,8 @@ class SocketManager {
                 if (content && content.length > 5000) {
                     return socket.emit("error", {
                         type: "VALIDATION_ERROR",
-                        message: "Message content must be less than 5000 characters"
+                        message:
+                            "Message content must be less than 5000 characters"
                     });
                 }
 
@@ -145,7 +159,10 @@ class SocketManager {
                     });
                 }
 
-                const validation = await chatService.validateMessagePermission(threadId, userId);
+                const validation = await chatService.validateMessagePermission(
+                    threadId,
+                    userId
+                );
 
                 if (!validation.canSend) {
                     return socket.emit("error", {
@@ -155,7 +172,9 @@ class SocketManager {
                 }
 
                 const thread = validation.thread;
-                const recipientId = thread.participants.find((p) => p.toString() !== userId.toString()).toString();
+                const recipientId = thread.participants
+                    .find((p) => p.toString() !== userId.toString())
+                    .toString();
 
                 const isRecipientOnline = this.isUserOnline(recipientId);
                 const initialStatus = isRecipientOnline ? "delivered" : "sent";
@@ -181,12 +200,18 @@ class SocketManager {
                 }
             } catch (error) {
                 console.error("Send Message Error:", error);
-                socket.emit("error", { type: "SERVER_ERROR", message: "Failed to send message" });
+                socket.emit("error", {
+                    type: "SERVER_ERROR",
+                    message: "Failed to send message"
+                });
             }
         });
 
         socket.on("mark_read", async (threadId) => {
-            const success = await chatService.markMessagesAsRead(threadId, socket.user._id);
+            const success = await chatService.markMessagesAsRead(
+                threadId,
+                socket.user._id
+            );
             if (success) {
                 this.#io.to(threadId).emit("messages_read", {
                     threadId,

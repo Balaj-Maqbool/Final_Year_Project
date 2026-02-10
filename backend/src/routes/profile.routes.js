@@ -26,12 +26,20 @@ router.route("/profile/:id").get(getUserProfileById);
 
 router
     .route("/profile/image")
-    .patch(RateLimitManager.apiMedia(), upload.single("profileImage"), updateUserProfileImage)
+    .patch(
+        RateLimitManager.apiMedia(),
+        upload.single("profileImage"),
+        updateUserProfileImage
+    )
     .delete(deleteUserProfileImage);
 
 router
     .route("/profile/cover")
-    .patch(RateLimitManager.apiMedia(), upload.single("coverImage"), updateUserCoverImage)
+    .patch(
+        RateLimitManager.apiMedia(),
+        upload.single("coverImage"),
+        updateUserCoverImage
+    )
     .delete(deleteUserCoverImage);
 
 export default router;

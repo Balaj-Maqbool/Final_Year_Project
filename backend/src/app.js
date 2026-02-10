@@ -70,14 +70,20 @@ app.get("/", (req, res) => {
 app.use((err, req, res, next) => {
     console.error("Global Error Handler Catch:", err);
     if (err instanceof ApiError) {
-        return res.status(err.statusCode).json(new ApiResponse(err.statusCode, null, err.message));
+        return res
+            .status(err.statusCode)
+            .json(new ApiResponse(err.statusCode, null, err.message));
     }
 
     if (err.name === "ValidationError") {
         return res.status(400).json(new ApiResponse(400, null, err.message));
     }
 
-    return res.status(500).json(new ApiResponse(500, null, "Internal Server Error: " + err.message));
+    return res
+        .status(500)
+        .json(
+            new ApiResponse(500, null, "Internal Server Error: " + err.message)
+        );
 });
 
 export { app };

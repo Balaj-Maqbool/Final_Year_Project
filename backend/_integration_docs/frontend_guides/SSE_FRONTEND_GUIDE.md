@@ -62,7 +62,8 @@ export const useSSE = () => {
                 description: `New Job: ${data.job.title}`,
                 action: {
                     label: "View",
-                    onClick: () => (window.location.href = `/jobs/${data.job._id}`)
+                    onClick: () =>
+                        (window.location.href = `/jobs/${data.job._id}`)
                 }
             });
         });

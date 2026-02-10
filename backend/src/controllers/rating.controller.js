@@ -19,7 +19,6 @@ const addRating = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only Clients can submit ratings");
     }
 
-    if (ValidationHelper.isEmpty(rating)) throw new ApiError(400, "Rating is required");
     ValidationHelper.validateRange(rating, 1, 5, "Rating");
     ValidationHelper.validateLength(comment, 3, 1000, "Comment");
 
@@ -29,11 +28,17 @@ const addRating = asyncHandler(async (req, res) => {
     }
 
     if (job.poster_id.toString() !== req.user._id.toString()) {
-        throw new ApiError(403, "You can only rate freelancers for your own jobs");
+        throw new ApiError(
+            403,
+            "You can only rate freelancers for your own jobs"
+        );
     }
 
     if (job.status === "Open") {
-        throw new ApiError(400, "Cannot rate a freelancer on an Open job. Job must be Assigned or Completed.");
+        throw new ApiError(
+            400,
+            "Cannot rate a freelancer on an Open job. Job must be Assigned or Completed."
+        );
     }
 
     const freelancerId = job.assigned_to;
@@ -47,7 +52,10 @@ const addRating = asyncHandler(async (req, res) => {
     });
 
     if (existingRating) {
-        throw new ApiError(400, "You have already rated the freelancer for this job");
+        throw new ApiError(
+            400,
+            "You have already rated the freelancer for this job"
+        );
     }
 
     const newRating = await Rating.create({
@@ -99,7 +107,9 @@ const addRating = asyncHandler(async (req, res) => {
 
     await NotificationService.notifyNewRating(freelancerId, job, rating);
 
-    return res.status(201).json(new ApiResponse(201, newRating, "Rating submitted successfully"));
+    return res
+        .status(201)
+        .json(new ApiResponse(201, newRating, "Rating submitted successfully"));
 });
 
 const getFreelancerRatings = asyncHandler(async (req, res) => {
@@ -149,7 +159,9 @@ const getFreelancerRatings = asyncHandler(async (req, res) => {
 
     const ratings = await Rating.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(new ApiResponse(200, ratings, "Ratings fetched successfully"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, ratings, "Ratings fetched successfully"));
 });
 
 const updateRating = asyncHandler(async (req, res) => {
@@ -167,19 +179,21 @@ const updateRating = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Rating not found");
     }
 
-    if (existingRating.rated_by_user_id.toString() !== req.user?._id.toString()) {
+    if (
+        existingRating.rated_by_user_id.toString() !== req.user?._id.toString()
+    ) {
         throw new ApiError(403, "You are not authorized to update this rating");
     }
 
     let shouldUpdateStats = false;
 
-    if (rating) {
+    if (rating !== undefined) {
         ValidationHelper.validateRange(rating, 1, 5, "Rating");
         existingRating.rating = rating;
         shouldUpdateStats = true;
     }
 
-    if (comment) {
+    if (comment !== undefined) {
         ValidationHelper.validateLength(comment, 3, 1000, "Comment");
         existingRating.comment = comment;
     }
@@ -209,7 +223,15 @@ const updateRating = asyncHandler(async (req, res) => {
         }
     }
 
-    return res.status(200).json(new ApiResponse(200, existingRating, "Rating updated successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, existingRating, "Rating updated successfully")
+        );
 });
 
-export { addRating, getFreelancerRatings, updateRating };
+export {
+    addRating,
+    getFreelancerRatings,
+    updateRating // exported
+};

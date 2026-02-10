@@ -14,7 +14,10 @@ class ChatService {
         }
 
         if (!thread.participants.includes(userId)) {
-            return { canSend: false, error: "You are not a participant in this chat" };
+            return {
+                canSend: false,
+                error: "You are not a participant in this chat"
+            };
         }
 
         if (thread.status === "blocked") {
@@ -27,24 +30,44 @@ class ChatService {
         }
 
         if (["Rejected", "Withdrawn"].includes(bid.status)) {
-            return { canSend: false, error: `Cannot send message. Bid is ${bid.status}.` };
+            return {
+                canSend: false,
+                error: `Cannot send message. Bid is ${bid.status}.`
+            };
         }
 
         return { canSend: true, thread };
     }
 
-    async saveMessage(threadId, senderId, content, attachments = [], status = "sent", replyTo = null) {
+    async saveMessage(
+        threadId,
+        senderId,
+        content,
+        attachments = [],
+        status = "sent",
+        replyTo = null
+    ) {
         const thread = await ChatThread.findById(threadId);
         if (!thread) throw new Error("Thread not found");
 
         const participantIds = thread.participants.map((p) => p.toString());
-        const recipientId = participantIds.find((id) => id !== senderId.toString());
+        const recipientId = participantIds.find(
+            (id) => id !== senderId.toString()
+        );
 
-        if (ValidationHelper.isEmpty(content) && ValidationHelper.isEmpty(attachments)) {
-            throw new Error("Message cannot be empty. Post text or an attachment.");
+        if (
+            ValidationHelper.isEmpty(content) &&
+            ValidationHelper.isEmpty(attachments)
+        ) {
+            throw new Error(
+                "Message cannot be empty. Post text or an attachment."
+            );
         }
 
-        if (ValidationHelper.isEmpty(content) && !ValidationHelper.isEmpty(attachments)) {
+        if (
+            ValidationHelper.isEmpty(content) &&
+            !ValidationHelper.isEmpty(attachments)
+        ) {
             content = "Sent an attachment";
         }
 
@@ -67,13 +90,17 @@ class ChatService {
         thread.unreadCounts.set(recipientId, currentUnread + 1);
 
         thread.lastMessage = {
-            content: content || (attachments.length ? "📎 Attachment" : "New Message"),
+            content:
+                content ||
+                (attachments.length ? "📎 Attachment" : "New Message"),
             from: senderId,
             timestamp: new Date()
         };
 
         if (thread.hiddenFor.includes(recipientId)) {
-            thread.hiddenFor = thread.hiddenFor.filter((id) => id.toString() !== recipientId);
+            thread.hiddenFor = thread.hiddenFor.filter(
+                (id) => id.toString() !== recipientId
+            );
         }
 
         await thread.save();
