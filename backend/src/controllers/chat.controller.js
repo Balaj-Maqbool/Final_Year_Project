@@ -29,7 +29,15 @@ const initializeChat = asyncHandler(async (req, res) => {
             await existingThread.save();
         }
 
-        return res.status(200).json(new ApiResponse(200, existingThread, "Chat thread retrieved successfully"));
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    existingThread,
+                    "Chat thread retrieved successfully"
+                )
+            );
     }
 
     // 2. Fetch Bid details
@@ -46,7 +54,10 @@ const initializeChat = asyncHandler(async (req, res) => {
     }
 
     if (req.user.role !== "Client") {
-        throw new ApiError(403, "Only the Client can initiate a new conversation.");
+        throw new ApiError(
+            403,
+            "Only the Client can initiate a new conversation."
+        );
     }
 
     const participants = [job.poster_id, bid.user_id];
@@ -63,10 +74,14 @@ const initializeChat = asyncHandler(async (req, res) => {
     });
 
     // 4. Notify (DB Notification for this important event)
-    const recipientId = participants.find((p) => p.toString() !== req.user._id.toString());
+    const recipientId = participants.find(
+        (p) => p.toString() !== req.user._id.toString()
+    );
     await NotificationService.notifyChatInitiated(recipientId, req.user);
 
-    return res.status(201).json(new ApiResponse(201, newThread, "Chat initiated successfully"));
+    return res
+        .status(201)
+        .json(new ApiResponse(201, newThread, "Chat initiated successfully"));
 });
 
 /**
@@ -111,7 +126,9 @@ const getMyThreads = asyncHandler(async (req, res) => {
 
     const threads = await ChatThread.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(new ApiResponse(200, threads, "Chats retrieved successfully"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, threads, "Chats retrieved successfully"));
 });
 
 /**
@@ -163,7 +180,11 @@ const getThreadMessages = asyncHandler(async (req, res) => {
 
     const messages = await Message.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(new ApiResponse(200, messages, "Messages retrieved successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, messages, "Messages retrieved successfully")
+        );
 });
 
 /**
@@ -187,7 +208,10 @@ const deleteMessage = asyncHandler(async (req, res) => {
     if (!ValidationHelper.isEmpty(message.attachments)) {
         const deletePromises = message.attachments.map(async (att) => {
             if (att.publicId) {
-                await CloudinaryHelper.delete(att.publicId, att.resourceType || "image");
+                await CloudinaryHelper.delete(
+                    att.publicId,
+                    att.resourceType || "image"
+                );
             }
         });
         await Promise.all(deletePromises);
@@ -204,7 +228,9 @@ const deleteMessage = asyncHandler(async (req, res) => {
         threadId: message.threadId
     });
 
-    return res.status(200).json(new ApiResponse(200, message, "Message deleted successfully"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, message, "Message deleted successfully"));
 });
 
 /**
@@ -228,7 +254,9 @@ const deleteThread = asyncHandler(async (req, res) => {
         await thread.save();
     }
 
-    return res.status(200).json(new ApiResponse(200, {}, "Chat thread deleted from your view"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Chat thread deleted from your view"));
 });
 
 const blockThread = asyncHandler(async (req, res) => {
@@ -265,8 +293,14 @@ const unblockThread = asyncHandler(async (req, res) => {
     const thread = await ChatThread.findById(threadId);
     if (!thread) throw new ApiError(404, "Thread not found");
 
-    if (thread.blockedBy && thread.blockedBy.toString() !== req.user._id.toString()) {
-        throw new ApiError(403, "Only the user who blocked this thread can unblock it");
+    if (
+        thread.blockedBy &&
+        thread.blockedBy.toString() !== req.user._id.toString()
+    ) {
+        throw new ApiError(
+            403,
+            "Only the user who blocked this thread can unblock it"
+        );
     }
 
     if (thread.status === "active") {
@@ -283,7 +317,9 @@ const unblockThread = asyncHandler(async (req, res) => {
         unblockedBy: req.user._id
     });
 
-    return res.status(200).json(new ApiResponse(200, thread, "Thread unblocked"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, thread, "Thread unblocked"));
 });
 
 const markMessagesAsRead = asyncHandler(async (req, res) => {
@@ -291,7 +327,10 @@ const markMessagesAsRead = asyncHandler(async (req, res) => {
     ValidationHelper.validateId(threadId, "Invalid Thread ID");
 
     // Delegate to Service
-    const success = await chatService.markMessagesAsRead(threadId, req.user._id);
+    const success = await chatService.markMessagesAsRead(
+        threadId,
+        req.user._id
+    );
 
     if (success) {
         // Broadcast Read Receipt
@@ -301,7 +340,9 @@ const markMessagesAsRead = asyncHandler(async (req, res) => {
         });
     }
 
-    return res.status(200).json(new ApiResponse(200, {}, "Messages marked as read"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Messages marked as read"));
 });
 
 export {

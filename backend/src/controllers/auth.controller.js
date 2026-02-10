@@ -14,7 +14,10 @@ import { ValidationHelper } from "../utils/validation.utils.js";
 import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
-import { getPasswordResetTemplate, getWelcomeEmailTemplate } from "../utils/emailTemplates.js";
+import {
+    getPasswordResetTemplate,
+    getWelcomeEmailTemplate
+} from "../utils/emailTemplates.js";
 import { Job } from "../models/job.model.js";
 import { Bid } from "../models/bid.model.js";
 import { ChatThread } from "../models/chat.model.js";
@@ -32,10 +35,12 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const existingEmail = await User.findOne({ email });
-    if (existingEmail) throw new ApiError(409, "User with this email already exists");
+    if (existingEmail)
+        throw new ApiError(409, "User with this email already exists");
 
     const existingUsername = await User.findOne({ username });
-    if (existingUsername) throw new ApiError(409, "User with this username already exists");
+    if (existingUsername)
+        throw new ApiError(409, "User with this username already exists");
 
     const user = await User.create({
         fullName,
@@ -50,7 +55,10 @@ const registerUser = asyncHandler(async (req, res) => {
     const createdUser = await User.findById(user._id);
 
     if (!createdUser) {
-        throw new ApiError(500, "Something went wrong while registering the user");
+        throw new ApiError(
+            500,
+            "Something went wrong while registering the user"
+        );
     }
 
     try {
@@ -66,7 +74,11 @@ const registerUser = asyncHandler(async (req, res) => {
         console.error("Error sending welcome email:", error);
     }
 
-    return res.status(201).json(new ApiResponse(200, createdUser, "User registered Successfully"));
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(200, createdUser, "User registered Successfully")
+        );
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -75,20 +87,26 @@ const loginUser = asyncHandler(async (req, res) => {
     if (ValidationHelper.isEmpty(username) && ValidationHelper.isEmpty(email)) {
         throw new ApiError(400, "Username or Email is required");
     }
-    if (ValidationHelper.isEmpty(role)) throw new ApiError(400, "Role is required to login");
+    if (ValidationHelper.isEmpty(role))
+        throw new ApiError(400, "Role is required to login");
 
     let user;
     if (!ValidationHelper.isEmpty(email)) {
         user = await User.findOne({ email });
-        if (!user) throw new ApiError(404, "User with this email does not exist");
+        if (!user)
+            throw new ApiError(404, "User with this email does not exist");
     }
     if (!ValidationHelper.isEmpty(username)) {
         user = await User.findOne({ username });
-        if (!user) throw new ApiError(404, "User with this username does not exist");
+        if (!user)
+            throw new ApiError(404, "User with this username does not exist");
     }
 
     if (user.role !== role) {
-        throw new ApiError(401, `Access Denied: You are registered as a ${user.role}, not a ${role}`);
+        throw new ApiError(
+            401,
+            `Access Denied: You are registered as a ${user.role}, not a ${role}`
+        );
     }
 
     const isPasswordValid = await user.isPasswordCorrect(password);
@@ -96,8 +114,10 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Invalid Password");
     }
 
-    const { accessToken, refreshToken } = await AuthService.generateAccessAndRefreshTokens(user._id);
-    const { accessTokenMaxAge, refreshTokenMaxAge } = AuthService.getCookieMaxAges();
+    const { accessToken, refreshToken } =
+        await AuthService.generateAccessAndRefreshTokens(user._id);
+    const { accessTokenMaxAge, refreshTokenMaxAge } =
+        AuthService.getCookieMaxAges();
     const options = AuthService.getCookieOptions();
 
     return res
@@ -114,7 +134,11 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-    await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } }, { new: true });
+    await User.findByIdAndUpdate(
+        req.user._id,
+        { $unset: { refreshToken: 1 } },
+        { new: true }
+    );
 
     const options = AuthService.getCookieOptions();
 
@@ -126,24 +150,28 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    const incomingRefreshToken =
+        req.cookies.refreshToken || req.body.refreshToken;
 
     if (!incomingRefreshToken) {
         throw new ApiError(401, "unauthorized request");
     }
 
     try {
-        const decodedToken = jwt.verify(incomingRefreshToken, REFRESH_TOKEN_SECRET);
+        const decodedToken = jwt.verify(
+            incomingRefreshToken,
+            REFRESH_TOKEN_SECRET
+        );
         const user = await User.findById(decodedToken?._id);
 
         if (!user || incomingRefreshToken !== user?.refreshToken) {
             throw new ApiError(401, "Invalid or expired refresh token");
         }
 
-        const { accessToken, refreshToken: newRefreshToken } = await AuthService.generateAccessAndRefreshTokens(
-            user._id
-        );
-        const { accessTokenMaxAge, refreshTokenMaxAge } = AuthService.getCookieMaxAges();
+        const { accessToken, refreshToken: newRefreshToken } =
+            await AuthService.generateAccessAndRefreshTokens(user._id);
+        const { accessTokenMaxAge, refreshTokenMaxAge } =
+            AuthService.getCookieMaxAges();
         const options = AuthService.getCookieOptions();
 
         return res
@@ -164,7 +192,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
-    if (ValidationHelper.isEmpty(oldPassword) || ValidationHelper.isEmpty(newPassword)) {
+    if (
+        ValidationHelper.isEmpty(oldPassword) ||
+        ValidationHelper.isEmpty(newPassword)
+    ) {
         throw new ApiError(400, "Old and New password are required");
     }
 
@@ -176,15 +207,25 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     user.password = newPassword;
     await user.save({ validateBeforeSave: false });
 
-    return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Password changed successfully"));
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
     const { email, password, role } = req.body;
     const user = await User.findById(req.user._id);
 
-    if (!user || user.email !== email || user.role !== role || !(await user.isPasswordCorrect(password))) {
-        throw new ApiError(401, "Authentication failed. Account deletion denied.");
+    if (
+        !user ||
+        user.email !== email ||
+        user.role !== role ||
+        !(await user.isPasswordCorrect(password))
+    ) {
+        throw new ApiError(
+            401,
+            "Authentication failed. Account deletion denied."
+        );
     }
 
     if (user.role === "Client") {
@@ -253,9 +294,11 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
     if (!profile) throw new ApiError(400, "Google Authentication Failed");
 
     const user = await AuthService.processGoogleAuth(profile, requestedRole);
-    const { accessToken, refreshToken } = await AuthService.generateAccessAndRefreshTokens(user._id);
+    const { accessToken, refreshToken } =
+        await AuthService.generateAccessAndRefreshTokens(user._id);
 
-    const { accessTokenMaxAge, refreshTokenMaxAge } = AuthService.getCookieMaxAges();
+    const { accessTokenMaxAge, refreshTokenMaxAge } =
+        AuthService.getCookieMaxAges();
     const options = AuthService.getCookieOptions();
     const frontendUrl = FRONTEND_URL || "http://localhost:5173";
 
@@ -269,7 +312,9 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
             ...options,
             maxAge: refreshTokenMaxAge
         })
-        .redirect(`${frontendUrl}${FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success"}`);
+        .redirect(
+            `${frontendUrl}${FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success"}`
+        );
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
@@ -305,7 +350,10 @@ const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 const resetPassword = asyncHandler(async (req, res) => {
-    const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
+    const resetPasswordToken = crypto
+        .createHash("sha256")
+        .update(req.params.token)
+        .digest("hex");
 
     const user = await User.findOne({
         resetPasswordToken,
@@ -320,7 +368,10 @@ const resetPassword = asyncHandler(async (req, res) => {
 
     const isSamePassword = await user.isPasswordCorrect(newPassword);
     if (isSamePassword) {
-        throw new ApiError(400, "New password cannot be the same as the old password");
+        throw new ApiError(
+            400,
+            "New password cannot be the same as the old password"
+        );
     }
 
     user.password = newPassword;
@@ -329,7 +380,9 @@ const resetPassword = asyncHandler(async (req, res) => {
 
     await user.save();
 
-    res.status(200).json(new ApiResponse(200, {}, "Password Reset Successfully"));
+    res.status(200).json(
+        new ApiResponse(200, {}, "Password Reset Successfully")
+    );
 });
 
 export {

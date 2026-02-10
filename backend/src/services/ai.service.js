@@ -13,7 +13,10 @@ class AI_Service {
             return response.text();
         } catch (error) {
             console.error("AI Service Error:", error);
-            throw new ApiError(500, "Failed to generate content from AI service");
+            throw new ApiError(
+                500,
+                "Failed to generate content from AI service"
+            );
         }
     }
 

@@ -19,7 +19,11 @@ class CloudinaryHelper {
             return response;
         } catch (error) {
             fs.unlink(localFilePath, (err) => {
-                if (err) console.error("Error deleting temp file on upload failure:", err);
+                if (err)
+                    console.error(
+                        "Error deleting temp file on upload failure:",
+                        err
+                    );
             });
 
             return null;
@@ -28,7 +32,8 @@ class CloudinaryHelper {
 
     static async delete(publicId, type) {
         try {
-            if (ValidationHelper.isEmpty(publicId)) return "public id not found to delete the file from cloudinary";
+            if (ValidationHelper.isEmpty(publicId))
+                return "public id not found to delete the file from cloudinary";
 
             const response = await cloudinary.uploader.destroy(publicId, {
                 resource_type: type,
@@ -53,7 +58,10 @@ class CloudinaryHelper {
 
             return null;
         } catch (error) {
-            console.error("Error extracting Public ID from Cloudinary URL:", error);
+            console.error(
+                "Error extracting Public ID from Cloudinary URL:",
+                error
+            );
             return null;
         }
     }

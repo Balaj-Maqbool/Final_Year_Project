@@ -42,7 +42,11 @@ router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/password/change").patch(verifyJWT, changeCurrentPassword);
 router.route("/delete-account").delete(verifyJWT, deleteUser);
 
-router.route("/password/forgot").post(RateLimitManager.apiAuth(), forgotPassword);
-router.route("/password/reset/:token").patch(RateLimitManager.apiAuth(), resetPassword);
+router
+    .route("/password/forgot")
+    .post(RateLimitManager.apiAuth(), forgotPassword);
+router
+    .route("/password/reset/:token")
+    .patch(RateLimitManager.apiAuth(), resetPassword);
 
 export default router;

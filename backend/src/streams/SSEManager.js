@@ -71,7 +71,8 @@ class SSEManager {
 
         if (saveToDb) {
             try {
-                const relatedId = data.jobId || data.taskId || data.relatedId || null;
+                const relatedId =
+                    data.jobId || data.taskId || data.relatedId || null;
                 await Notification.create({
                     recipient: userId,
                     type: data.type || "SYSTEM",

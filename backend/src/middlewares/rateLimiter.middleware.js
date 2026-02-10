@@ -21,18 +21,34 @@ class RateLimitManager {
     }
 
     static apiGlobal() {
-        return this.create(500, 15 * 60, "Too many requests from this IP, please try again later");
+        return this.create(
+            500,
+            15 * 60,
+            "Too many requests from this IP, please try again later"
+        );
     }
 
     static apiAuth() {
-        return this.create(15, 60 * 60, "Too many login attempts, please try again after an hour");
+        return this.create(
+            15,
+            60 * 60,
+            "Too many login attempts, please try again after an hour"
+        );
     }
 
     static apiMedia() {
-        return this.create(10, 60 * 60, "Too many file uploads, please try again after an hour");
+        return this.create(
+            10,
+            60 * 60,
+            "Too many file uploads, please try again after an hour"
+        );
     }
 
-    static createGlobal(points = 10, duration = 1, message = "Service busy, please try again") {
+    static createGlobal(
+        points = 10,
+        duration = 1,
+        message = "Service busy, please try again"
+    ) {
         const rateLimiter = new RateLimiterMemory({
             points: points,
             duration: duration

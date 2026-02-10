@@ -29,10 +29,16 @@ class ValidationHelper {
         }
 
         if (min && value.length < min) {
-            throw new ApiError(400, `${fieldName} must be at least ${min} characters`);
+            throw new ApiError(
+                400,
+                `${fieldName} must be at least ${min} characters`
+            );
         }
         if (max && value.length > max) {
-            throw new ApiError(400, `${fieldName} must be less than ${max} characters`);
+            throw new ApiError(
+                400,
+                `${fieldName} must be less than ${max} characters`
+            );
         }
     }
 
@@ -65,16 +71,28 @@ class ValidationHelper {
 
     static validatePasswordStrength(password) {
         if (!/[A-Z]/.test(password)) {
-            throw new ApiError(400, "Password must contain at least one uppercase letter (A-Z)");
+            throw new ApiError(
+                400,
+                "Password must contain at least one uppercase letter (A-Z)"
+            );
         }
         if (!/[a-z]/.test(password)) {
-            throw new ApiError(400, "Password must contain at least one lowercase letter (a-z)");
+            throw new ApiError(
+                400,
+                "Password must contain at least one lowercase letter (a-z)"
+            );
         }
         if (!/\d/.test(password)) {
-            throw new ApiError(400, "Password must contain at least one number (0-9)");
+            throw new ApiError(
+                400,
+                "Password must contain at least one number (0-9)"
+            );
         }
         if (!/[@$!%*?&#]/.test(password)) {
-            throw new ApiError(400, "Password must contain at least one special character (@$!%*?&#)");
+            throw new ApiError(
+                400,
+                "Password must contain at least one special character (@$!%*?&#)"
+            );
         }
     }
 }

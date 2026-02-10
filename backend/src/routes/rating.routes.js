@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { addRating, getFreelancerRatings, updateRating } from "../controllers/rating.controller.js";
+import {
+    addRating,
+    getFreelancerRatings,
+    updateRating
+} from "../controllers/rating.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();

@@ -2,7 +2,12 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY } from "../constants.js";
+import {
+    ACCESS_TOKEN_SECRET,
+    ACCESS_TOKEN_EXPIRY,
+    REFRESH_TOKEN_SECRET,
+    REFRESH_TOKEN_EXPIRY
+} from "../constants.js";
 
 const userSchema = new Schema(
     {
@@ -127,7 +132,10 @@ userSchema.methods.generateRefreshToken = function () {
 userSchema.methods.getResetPasswordToken = function () {
     const resetToken = crypto.randomBytes(20).toString("hex");
 
-    this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    this.resetPasswordToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
 
     this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 

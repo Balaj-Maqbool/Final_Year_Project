@@ -10,13 +10,17 @@ import { ChatThread } from "../models/chat.model.js";
 import { Task } from "../models/task.model.js";
 
 const createJob = asyncHandler(async (req, res) => {
-    const { title, description, budget, deadline, category, required_skills } = req.body;
+    const { title, description, budget, deadline, category, required_skills } =
+        req.body;
 
     if (req.user.role !== "Client") {
         throw new ApiError(403, "Only Clients can post jobs");
     }
 
-    if (ValidationHelper.isEmpty(deadline) || ValidationHelper.isEmpty(category)) {
+    if (
+        ValidationHelper.isEmpty(deadline) ||
+        ValidationHelper.isEmpty(category)
+    ) {
         throw new ApiError(400, "All fields (deadline, category) are required");
     }
 
@@ -28,7 +32,8 @@ const createJob = asyncHandler(async (req, res) => {
     ValidationHelper.validateLength(description, 50, 5000, "Description");
     ValidationHelper.validateRange(budget, 1, 1000000, "Budget");
 
-    if (required_skills && required_skills.length > 20) throw new ApiError(400, "Max 20 skills allowed");
+    if (required_skills && required_skills.length > 20)
+        throw new ApiError(400, "Max 20 skills allowed");
 
     const job = await Job.create({
         title,
@@ -42,11 +47,20 @@ const createJob = asyncHandler(async (req, res) => {
 
     await NotificationService.notifyNewJob(job);
 
-    return res.status(201).json(new ApiResponse(201, job, "Job posted successfully"));
+    return res
+        .status(201)
+        .json(new ApiResponse(201, job, "Job posted successfully"));
 });
 
 const getAllJobs = asyncHandler(async (req, res) => {
-    const { search, category, minBudget, maxBudget, page = 1, limit = 10 } = req.query;
+    const {
+        search,
+        category,
+        minBudget,
+        maxBudget,
+        page = 1,
+        limit = 10
+    } = req.query;
 
     const matchStage = {
         status: "Open"
@@ -60,7 +74,10 @@ const getAllJobs = asyncHandler(async (req, res) => {
         matchStage.category = category;
     }
 
-    if (!ValidationHelper.isEmpty(minBudget) || !ValidationHelper.isEmpty(maxBudget)) {
+    if (
+        !ValidationHelper.isEmpty(minBudget) ||
+        !ValidationHelper.isEmpty(maxBudget)
+    ) {
         matchStage.budget = {};
         if (minBudget) matchStage.budget.$gte = parseInt(minBudget);
         if (maxBudget) matchStage.budget.$lte = parseInt(maxBudget);
@@ -106,13 +123,18 @@ const getAllJobs = asyncHandler(async (req, res) => {
 
     const jobs = await Job.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(new ApiResponse(200, jobs, "Jobs fetched successfully"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, jobs, "Jobs fetched successfully"));
 });
 
 const getMyJobs = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
 
-    const aggregate = Job.aggregate([{ $match: { poster_id: req.user._id } }, { $sort: { createdAt: -1 } }]);
+    const aggregate = Job.aggregate([
+        { $match: { poster_id: req.user._id } },
+        { $sort: { createdAt: -1 } }
+    ]);
 
     const options = {
         page: parseInt(page),
@@ -121,7 +143,9 @@ const getMyJobs = asyncHandler(async (req, res) => {
 
     const jobs = await Job.aggregatePaginate(aggregate, options);
 
-    return res.status(200).json(new ApiResponse(200, jobs, "My jobs fetched successfully"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, jobs, "My jobs fetched successfully"));
 });
 
 const getJobById = asyncHandler(async (req, res) => {
@@ -163,7 +187,9 @@ const getJobById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-    return res.status(200).json(new ApiResponse(200, job[0], "Job fetched successfully"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, job[0], "Job fetched successfully"));
 });
 
 const updateJob = asyncHandler(async (req, res) => {
@@ -181,15 +207,24 @@ const updateJob = asyncHandler(async (req, res) => {
     }
 
     if (job.status === "Completed") {
-        throw new ApiError(400, "Job is already Completed. No further updates allowed.");
+        throw new ApiError(
+            400,
+            "Job is already Completed. No further updates allowed."
+        );
     }
 
     if (job.status === "Assigned" && status === "Open") {
-        throw new ApiError(400, "Cannot revert an Assigned job to Open status.");
+        throw new ApiError(
+            400,
+            "Cannot revert an Assigned job to Open status."
+        );
     }
 
     if (status === "Assigned") {
-        throw new ApiError(400, "Cannot manually set status to Assigned. Please accept a bid to assign a freelancer.");
+        throw new ApiError(
+            400,
+            "Cannot manually set status to Assigned. Please accept a bid to assign a freelancer."
+        );
     }
 
     if (status === "Completed") {
@@ -206,8 +241,15 @@ const updateJob = asyncHandler(async (req, res) => {
         }
     }
 
-    if (["Assigned", "Completed"].includes(job.status) && budget && budget !== job.budget) {
-        throw new ApiError(400, "Cannot modify budget for an assigned or completed job. The contract price is fixed.");
+    if (
+        ["Assigned", "Completed"].includes(job.status) &&
+        budget &&
+        budget !== job.budget
+    ) {
+        throw new ApiError(
+            400,
+            "Cannot modify budget for an assigned or completed job. The contract price is fixed."
+        );
     }
 
     if (title !== undefined) {
@@ -223,12 +265,15 @@ const updateJob = asyncHandler(async (req, res) => {
         job.budget = budget;
     }
     if (deadline !== undefined) {
-        if (ValidationHelper.isEmpty(deadline)) throw new ApiError(400, "Deadline is required");
-        if (new Date(deadline) < new Date()) throw new ApiError(400, "Deadline must be in the future");
+        if (ValidationHelper.isEmpty(deadline))
+            throw new ApiError(400, "Deadline is required");
+        if (new Date(deadline) < new Date())
+            throw new ApiError(400, "Deadline must be in the future");
         job.deadline = deadline;
     }
     if (category !== undefined) {
-        if (ValidationHelper.isEmpty(category)) throw new ApiError(400, "Category is required");
+        if (ValidationHelper.isEmpty(category))
+            throw new ApiError(400, "Category is required");
         job.category = category;
     }
     if (status !== undefined) {
@@ -244,7 +289,9 @@ const updateJob = asyncHandler(async (req, res) => {
         await NotificationService.notifyJobCompleted(job.assigned_to, job);
     }
 
-    return res.status(200).json(new ApiResponse(200, job, "Job updated successfully"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, job, "Job updated successfully"));
 });
 
 const deleteJob = asyncHandler(async (req, res) => {
@@ -268,14 +315,19 @@ const deleteJob = asyncHandler(async (req, res) => {
     }
 
     if (job.status === "Completed") {
-        throw new ApiError(400, "Cannot delete a completed job. It is part of the work history.");
+        throw new ApiError(
+            400,
+            "Cannot delete a completed job. It is part of the work history."
+        );
     }
 
     await Bid.deleteMany({ job_id: jobId });
     await ChatThread.deleteMany({ jobId: jobId });
     await Job.findByIdAndDelete(jobId);
 
-    return res.status(200).json(new ApiResponse(200, {}, "Job deleted successfully"));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Job deleted successfully"));
 });
 
 export {

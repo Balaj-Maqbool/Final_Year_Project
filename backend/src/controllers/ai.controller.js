@@ -24,7 +24,11 @@ const generateJobDetails = asyncHandler(async (req, res) => {
 
     const jobData = await aiService.generateJSON(systemPrompt);
 
-    return res.status(200).json(new ApiResponse(200, jobData, "Job details generated successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, jobData, "Job details generated successfully")
+        );
 });
 
 const policeUserProfile = asyncHandler(async (req, res) => {
@@ -49,13 +53,22 @@ const policeUserProfile = asyncHandler(async (req, res) => {
 
     const profileData = await aiService.generateJSON(systemPrompt);
 
-    return res.status(200).json(new ApiResponse(200, profileData, "Profile polished successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, profileData, "Profile polished successfully")
+        );
 });
 
 const generateProposal = asyncHandler(async (req, res) => {
     const { jobDescription, freelancerProfile } = req.body;
 
-    ValidationHelper.validateLength(jobDescription, 50, 5000, "Job Description");
+    ValidationHelper.validateLength(
+        jobDescription,
+        50,
+        5000,
+        "Job Description"
+    );
 
     if (ValidationHelper.isEmpty(freelancerProfile)) {
         throw new ApiError(400, "Freelancer Profile is required");
@@ -76,13 +89,26 @@ const generateProposal = asyncHandler(async (req, res) => {
 
     const proposalData = await aiService.generateJSON(systemPrompt);
 
-    return res.status(200).json(new ApiResponse(200, proposalData, "Proposal generated successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                proposalData,
+                "Proposal generated successfully"
+            )
+        );
 });
 
 const generateTaskBreakdown = asyncHandler(async (req, res) => {
     const { jobDescription } = req.body;
 
-    ValidationHelper.validateLength(jobDescription, 50, 5000, "Job Description");
+    ValidationHelper.validateLength(
+        jobDescription,
+        50,
+        5000,
+        "Job Description"
+    );
 
     const safeJobDesc = jobDescription.replace(/"/g, '\\"');
 
@@ -99,7 +125,15 @@ const generateTaskBreakdown = asyncHandler(async (req, res) => {
 
     const taskData = await aiService.generateJSON(systemPrompt);
 
-    return res.status(200).json(new ApiResponse(200, taskData, "Task breakdown generated successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                taskData,
+                "Task breakdown generated successfully"
+            )
+        );
 });
 
 export {
