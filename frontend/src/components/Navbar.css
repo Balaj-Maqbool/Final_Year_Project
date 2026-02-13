@@ -29,7 +29,8 @@
 }
 
 .nav-brand span {
-  background: var(--accent-gradient);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -69,16 +70,16 @@
 }
 
 .nav-btn-secondary:hover {
-  background-color: var(--bg-light);
+  background-color: var(--bg-color);
 }
 
 .nav-btn-primary {
-  background: var(--primary);
+  background: var(--primary-color);
   color: white;
   box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);
 }
 
 .nav-btn-primary:hover {
-  background: var(--primary-hover);
+  filter: brightness(1.1);
   transform: translateY(-1px);
 }

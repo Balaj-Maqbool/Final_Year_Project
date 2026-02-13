@@ -1,0 +1,79 @@
+:root {
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+  --card-bg: #ffffff;
+  --border-color: #dee2e6;
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+  --navbar-bg: #ffffff;
+  --navbar-text: #212529;
+}
+
+[data-theme='dark'] {
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --card-bg: #1e1e1e;
+  --border-color: #333333;
+  --primary-color: #3b82f6; /* Lighter blue for dark mode */
+  --secondary-color: #a0a0a0;
+  --navbar-bg: #1e1e1e;
+  --navbar-text: #e0e0e0;
+}
+
+body {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card, .navbar, .modal-content {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .card, 
+[data-theme='dark'] .navbar, 
+[data-theme='dark'] .modal-content,
+[data-theme='dark'] .dashboard-card,
+[data-theme='dark'] .table-card,
+[data-theme='dark'] .action-card {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+  border-color: #333333 !important;
+}
+
+.form-control {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+.form-control:focus {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* Ensure inputs in dark mode have light text */
+[data-theme='dark'] .form-control {
+    color: #e0e0e0 !important;
+}
+
+[data-theme='dark'] .form-control::placeholder {
+    color: #a0a0a0;
+}
+
+a {
+  color: var(--primary-color);
+}
+
+/* Navbar specific overrides if needed */
+.custom-navbar {
+    background-color: var(--navbar-bg) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-link {
+    color: var(--navbar-text) !important;
+}

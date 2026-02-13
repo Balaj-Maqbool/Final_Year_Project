@@ -1,18 +1,7 @@
 import { useEffect, useState } from "react";
 import { Container, Stack, Row, Card, Badge, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { jobHandler } from "./services/jobHandler";
-
-
-export interface Job {
-  _id: string;
-  title: string;
-  status: string;
-  description: string;
-  budget: number;
-  deadline: string;
-  category: string;
-}
+import { jobHandler, type Job } from "./services/jobHandler";
 
 
 
@@ -26,7 +15,7 @@ const AllJobs = () => {
     const fetchJobs = async () => {
       try {
         const data = await jobHandler.getAllMyJobs();
-        setJobs(data);
+        setJobs(data.docs);
       } catch (error) {
         console.error("Error fetching jobs:", error);
       } finally {
@@ -72,13 +61,13 @@ const AllJobs = () => {
                 </p>
 
 
-                <Button style={{marginRight: "10px"}} onClick={() => navigate(`/client/view-bids/${job._id}`)} variant="secondary" size="sm">
+                <Button style={{ marginRight: "10px" }} onClick={() => navigate(`/client/view-bids/${job._id}`)} variant="secondary" size="sm">
                   View Bids
                 </Button>
 
                 <Button disabled={job.status !== "Assigned"} onClick={() => navigate(`/client/tasks/${job._id}`)} variant="tertiary" size="sm">
                   View Tasks
-                </Button> 
+                </Button>
 
                 {/* <Button onClick={()=>console.log(job)}  className="m-2" variant="secondary" size="sm">
                   Details

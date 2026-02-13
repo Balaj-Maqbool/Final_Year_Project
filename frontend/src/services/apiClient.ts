@@ -33,6 +33,7 @@ export const apiRequest = async <T>(
 
   // Handle Token Expiry (401)
   if (response.status === 401) {
+    console.log(`[apiClient] 401 received for ${url}. Attempting refresh...`);
     try {
       // Attempt to refresh token
       // We don't use apiRequest here to avoid infinite loops
@@ -42,14 +43,17 @@ export const apiRequest = async <T>(
       });
 
       if (refreshResponse.ok) {
+        console.log("[apiClient] Token refresh successful. Retrying original request.");
         // Refresh successful! Retry original request
         response = await fetch(url, config);
       } else {
+        console.error(`[apiClient] Token refresh failed with status: ${refreshResponse.status}`);
         // Refresh failed (token truly expired or invalid)
         // Optionally redirect to login here: window.location.href = "/login";
         throw new Error("Session expired. Please login again.");
       }
     } catch (error) {
+       console.error("[apiClient] Error during token refresh:", error);
        // If refresh fetch failed entirely (network error etc)
        throw error;
     }

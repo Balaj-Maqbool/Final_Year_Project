@@ -1,21 +1,13 @@
 import { useEffect, useState } from "react";
 import { Badge, Container } from "react-bootstrap";
-import { jobHandler } from "./services/jobHandler";
+import { jobHandler, type Job } from "./services/jobHandler";
 import { useParams } from "react-router-dom";
 import GetBids from "./GetBids";
 
 
-interface jobData {
-    title: string;
-    description: string;
-    budget: number;
-    deadline: string;
-    category: string;
-    required_skills: string[];
-}
 const ViewBids = () => {
     const { jobId } = useParams<{ jobId: string }>();
-    const [job, setJob] = useState<jobData | null>(null);
+    const [job, setJob] = useState<Job | null>(null);
 
     useEffect(() => {
         const fetchJob = async () => {

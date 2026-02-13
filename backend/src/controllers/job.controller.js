@@ -10,14 +10,8 @@ import { ChatThread } from "../models/chat.model.js";
 import { Task } from "../models/task.model.js";
 
 const createJob = asyncHandler(async (req, res) => {
-<<<<<<< HEAD
-    const { title, description, budget, deadline, category, required_skills } = req.body;
-    
-    console.log("createJob - User:", req.user?._id, "Role:", req.user?.role); // DEBUG LOG
-=======
     const { title, description, budget, deadline, category, required_skills } =
         req.body;
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
 
     if (req.user.role !== "Client") {
         throw new ApiError(403, `Only Clients can post jobs. You are: ${req.user.role}`);
@@ -30,7 +24,6 @@ const createJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields (deadline, category) are required");
     }
 
-<<<<<<< HEAD
     try {
         const job = await Job.create({
             title,
@@ -41,7 +34,6 @@ const createJob = asyncHandler(async (req, res) => {
             required_skills: required_skills || [],
             poster_id: req.user?._id
         });
-=======
     if (new Date(deadline) < new Date()) {
         throw new ApiError(400, "Deadline must be in the future");
     }
@@ -53,20 +45,10 @@ const createJob = asyncHandler(async (req, res) => {
     if (required_skills && required_skills.length > 20)
         throw new ApiError(400, "Max 20 skills allowed");
 
-    const job = await Job.create({
-        title,
-        description,
-        budget,
-        deadline,
-        category,
-        required_skills: required_skills || [],
-        poster_id: req.user?._id
-    });
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
+  
 
     await NotificationService.notifyNewJob(job);
 
-<<<<<<< HEAD
     if (required_skills && required_skills.length > 0) {
         try {
             const matchedFreelancers = await User.find({
@@ -93,11 +75,7 @@ const createJob = asyncHandler(async (req, res) => {
         console.error("Error creating job:", error);
         throw new ApiError(500, "Internal Server Error while creating job: " + error.message);
     }
-=======
-    return res
-        .status(201)
-        .json(new ApiResponse(201, job, "Job posted successfully"));
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
+
 });
 
 const getAllJobs = asyncHandler(async (req, res) => {

@@ -21,6 +21,7 @@ import FreelancerNotifications from "./src/freelancer/FreelancerNotifications";
 import AdminLayout from "./src/outlet/AdminLayout";
 import Tasks from "./src/client/WorkRoom/Tasks";
 import FreelancerTasks from "./src/freelancer/WorkRoom/FreelancerTasks";
+import Chat from "./src/client/WorkRoom/Chat";
 
 const router = createBrowserRouter([
   //// Authentication pages
@@ -85,7 +86,8 @@ const router = createBrowserRouter([
       { path: "alljobs", element: <AllJobs /> },
       { path: "view-bids/:jobId", element: <ViewBids /> },
       { path: 'notifications', element: <Notifications /> },
-      { path: "tasks/:jobId", element: <Tasks /> }
+      { path: "tasks/:jobId", element: <Tasks /> },
+      { path: "tasks/:jobId/chat", element: <Chat /> }
     ]
   },
 

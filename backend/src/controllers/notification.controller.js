@@ -6,11 +6,6 @@ import { ValidationHelper } from "../utils/validation.utils.js";
 
 const getUserNotifications = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, type } = req.query;
-<<<<<<< HEAD
-    
-    console.log(`FETCHING NOTIFICATIONS for User: ${req.user._id} (${req.user.role})`); // DEBUG
-=======
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
 
     const matchStage = { recipient: req.user._id };
     if (!ValidationHelper.isEmpty(type)) {

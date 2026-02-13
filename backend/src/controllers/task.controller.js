@@ -100,7 +100,6 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Task not found");
     }
 
-<<<<<<< HEAD
     // Auth check: User must be either Assigned Freelancer OR Job Poster (Client)
     const job = await Job.findById(task.job_id);
     if (!job) {
@@ -119,15 +118,13 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     // Client can move to: "In Progress" (Request Changes)
     
     // Optional: Prevent Client from marking as "Done" directly? (Let freelancer do it)
-    if (isPoster && status === "Done") {
+    // if (isPoster && status === "Done") {
          // Maybe allow it or leave strict? Let's allow flexibility for now.
-=======
     if (task.assigned_user_id.toString() !== req.user._id.toString()) {
         throw new ApiError(
             403,
             "Only the assigned freelancer can update task status"
         );
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
     }
 
     if (task.is_approved) {
@@ -137,26 +134,15 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     task.status = status;
     await task.save();
 
-<<<<<<< HEAD
     // SSE: Notify proper recipient
     const recipientId = isPoster ? task.assigned_user_id : job.poster_id;
 
     if (job) {
-        sseManager.sendToUser(recipientId, "DASHBOARD_UPDATE", {
-            type: "TASK_STATUS_UPDATE",
-            message: `Task '${task.title}' updated to ${status}`,
-            taskId: task._id
-        });
-=======
-    const job = await Job.findById(task.job_id);
-
-    if (job) {
         await NotificationService.notifyTaskStatusUpdate(
-            job.poster_id,
+            recipientId,
             task,
             status
         );
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
     }
 
     return res

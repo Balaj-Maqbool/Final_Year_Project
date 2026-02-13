@@ -20,12 +20,13 @@ const RequireToken = ({ children }: { children: JSX.Element }) => {
                 const userData = await apiRequest<any>("/users/current-user");
                 // If backend returns a user, update store to ensure sync
                 if (JSON.stringify(user) !== JSON.stringify(userData)) {
+                    console.log("[RequireToken] Updating user store with fresh data.");
                     login(userData);
                 }
                 setIsValid(true);
             } catch (error) {
                 // If API fails (401/403), and we trusted the store... we should probably logout
-                console.error("Session verification failed", error);
+                console.error("[RequireToken] Session verification failed:", error);
 
                 // Only redirect if we don't have a user in store (initial load)
                 // OR if we want to force logout on token expiry immediately

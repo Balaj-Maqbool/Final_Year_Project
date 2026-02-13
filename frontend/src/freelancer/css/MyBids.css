@@ -6,10 +6,10 @@
 
 .my-bids-header {
     margin-bottom: 2rem;
-    color: #333;
+    color: var(--text-color);
     font-size: 2rem;
     font-weight: 700;
-    border-bottom: 3px solid #007bff;
+    border-bottom: 3px solid var(--primary-color);
     display: inline-block;
     padding-bottom: 0.5rem;
 }
@@ -53,6 +53,7 @@
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 

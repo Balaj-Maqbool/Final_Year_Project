@@ -96,11 +96,7 @@ const updateUserProfileImage = asyncHandler(async (req, res) => {
         `${CLOUDINARY_ROOT_FOLDER}/Users/${req.user._id}/Profile`
     );
 
-<<<<<<< HEAD
-    if (!profileImage) {
-=======
     if (!profileImage.secure_url) {
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
         throw new ApiError(400, "Error while uploading profile image");
     }
 
@@ -135,11 +131,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         `${CLOUDINARY_ROOT_FOLDER}/Users/${req.user._id}/Cover`
     );
 
-<<<<<<< HEAD
-    if (!coverImage) {
-=======
     if (!coverImage.secure_url) {
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
         throw new ApiError(400, "Error while uploading cover image");
     }
 

@@ -13,7 +13,6 @@ import { AuthService } from "../services/auth.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import crypto from "crypto";
-<<<<<<< HEAD
 
 const cookieOptions = {
     httpOnly: true,
@@ -35,7 +34,6 @@ const generateAccessAndRefreshTokens = async (userId) => {
         throw new ApiError(500, "Something went wrong while generating referesh and access token");
     }
 };
-=======
 import sendEmail from "../utils/sendEmail.js";
 import {
     getPasswordResetTemplate,
@@ -44,7 +42,6 @@ import {
 import { Job } from "../models/job.model.js";
 import { Bid } from "../models/bid.model.js";
 import { ChatThread } from "../models/chat.model.js";
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, username, password, role } = req.body;
@@ -177,7 +174,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken =
         req.cookies.refreshToken || req.body.refreshToken;
 
+    console.log("Refresh token attempt. Cookie present:", !!req.cookies.refreshToken, "Body present:", !!req.body.refreshToken);
+
     if (!incomingRefreshToken) {
+        console.error("No refresh token provided");
         throw new ApiError(401, "unauthorized request");
     }
 
@@ -188,8 +188,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         );
         const user = await User.findById(decodedToken?._id);
 
-        if (!user || incomingRefreshToken !== user?.refreshToken) {
-            throw new ApiError(401, "Invalid or expired refresh token");
+        if (!user) {
+            console.error("User not found for refresh token");
+            throw new ApiError(401, "Invalid refresh token");
+        }
+
+        if (incomingRefreshToken !== user?.refreshToken) {
+            console.error("Refresh token mismatch");
+            throw new ApiError(401, "Expired or used refresh token");
         }
 
         const { accessToken, refreshToken: newRefreshToken } =
@@ -321,77 +327,6 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
     const { accessToken, refreshToken } =
         await AuthService.generateAccessAndRefreshTokens(user._id);
 
-<<<<<<< HEAD
-    if (!email) {
-        throw new ApiError(400, "Email not found in Google Profile");
-    }
-
-    // 1. Check if user exists
-    console.log("Checking if user exists for:", email);
-    let user = await User.findOne({
-        $or: [{ googleId }, { email }]
-    });
-
-    if (user) {
-        console.log("User found:", user._id);
-        // User exists
-        if (!user.googleId) {
-            console.log("Linking Google ID to existing user");
-            // Link account if email matches but no googleId
-            user.googleId = googleId;
-            // Optionally update profile image if empty
-            if (!user.profileImage) user.profileImage = profileImage;
-            await user.save({ validateBeforeSave: false });
-        }
-    } else {
-        console.log("Creating new user");
-        // Create new user
-        // Generate random password
-        const randomPassword = crypto.randomBytes(20).toString("hex");
-
-        // Generate unique username
-        const baseUsername = email.split("@")[0];
-        const uniqueUsername = `${baseUsername}_${crypto.randomInt(1000, 9999)}`;
-        console.log("Generated username:", uniqueUsername, "Role:", role);
-
-        user = await User.create({
-            fullName,
-            email,
-            username: uniqueUsername,
-            password: randomPassword,
-            googleId,
-            role, // Use the role passed in state
-            profileImage,
-            coverImage: ""
-        });
-        console.log("User created:", user._id);
-    }
-
-    // Generate tokens
-    console.log("Generating tokens...");
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
-    console.log("Tokens generated");
-
-    // Redirect to frontend
-    // Use an env variable for frontend URL in production
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    
-    const redirectUrl = `${frontendUrl}/oauth-success?role=${user.role}&success=true`;
-    console.log("Redirecting to:", redirectUrl);
-
-    // SECURITY UPDATE: Set tokens in HttpOnly cookies instead of URL
-    const options = {
-        httpOnly: true,
-        secure: true,
-        maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
-    };
-
-    return res
-        .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
-        .redirect(redirectUrl); // Pass role for routing
-=======
     const { accessTokenMaxAge, refreshTokenMaxAge } =
         AuthService.getCookieMaxAges();
     const options = AuthService.getCookieOptions();
@@ -478,7 +413,6 @@ const resetPassword = asyncHandler(async (req, res) => {
     res.status(200).json(
         new ApiResponse(200, {}, "Password Reset Successfully")
     );
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {

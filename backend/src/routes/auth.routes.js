@@ -10,12 +10,9 @@ import {
     changeCurrentPassword,
     deleteUser,
     handleGoogleCallback,
-<<<<<<< HEAD
-    getCurrentUser
-=======
     forgotPassword,
-    resetPassword
->>>>>>> f4fb3595c067c834428ac2092d67150009b7ce22
+    resetPassword,
+    getCurrentUser
 } from "../controllers/auth.controller.js";
 
 import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
