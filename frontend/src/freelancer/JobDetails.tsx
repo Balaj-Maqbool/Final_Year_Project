@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "react-bootstrap";
 import "./css/bids.css";
 import BidForm from "./Bids";
-import { bidHandler } from "./services/bidHandler";
+import { bidHandler } from "../services/bidHandler";
 
 interface Job {
   _id: string;

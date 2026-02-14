@@ -14,7 +14,7 @@ const createJob = asyncHandler(async (req, res) => {
         req.body;
 
     if (req.user.role !== "Client") {
-        throw new ApiError(403, "Only Clients can post jobs");
+        throw new ApiError(403, `Only Clients can post jobs. You are: ${req.user.role}`);
     }
 
     if (
@@ -24,6 +24,16 @@ const createJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields (deadline, category) are required");
     }
 
+    try {
+        const job = await Job.create({
+            title,
+            description,
+            budget,
+            deadline,
+            category,
+            required_skills: required_skills || [],
+            poster_id: req.user?._id
+        });
     if (new Date(deadline) < new Date()) {
         throw new ApiError(400, "Deadline must be in the future");
     }
@@ -35,21 +45,37 @@ const createJob = asyncHandler(async (req, res) => {
     if (required_skills && required_skills.length > 20)
         throw new ApiError(400, "Max 20 skills allowed");
 
-    const job = await Job.create({
-        title,
-        description,
-        budget,
-        deadline,
-        category,
-        required_skills: required_skills || [],
-        poster_id: req.user?._id
-    });
+  
 
     await NotificationService.notifyNewJob(job);
 
-    return res
-        .status(201)
-        .json(new ApiResponse(201, job, "Job posted successfully"));
+    if (required_skills && required_skills.length > 0) {
+        try {
+            const matchedFreelancers = await User.find({
+                role: "Freelancer",
+                skills: { $in: required_skills }
+            }).select("_id");
+
+            matchedFreelancers.forEach(user => {
+                sseManager.sendToUser(user._id, "DASHBOARD_UPDATE", {
+                    type: "JOB_MATCH",
+                    message: `New job matches your skills: ${title}`,
+                    jobId: job._id
+                });
+            });
+        } catch (error) {
+            console.error("Error sending skill match notifications:", error);
+        }
+    }
+
+        return res.status(201).json(
+            new ApiResponse(201, job, "Job posted successfully")
+        );
+    } catch (error) {
+        console.error("Error creating job:", error);
+        throw new ApiError(500, "Internal Server Error while creating job: " + error.message);
+    }
+
 });
 
 const getAllJobs = asyncHandler(async (req, res) => {

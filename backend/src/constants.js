@@ -12,7 +12,7 @@ const DB_NAME = "FreelanceMarketplace";
 const DataBase_URI = process.env.DataBase_URI;
 
 const PORT = process.env.PORT || 8000;
-const CORS_ORIGIN = process.env.CORS_ORIGIN;
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "";
 const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || "1hr";

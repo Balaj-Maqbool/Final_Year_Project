@@ -2,20 +2,21 @@ import type { JSX } from "react"
 import { Navigate } from "react-router-dom"
 
 
-interface Props{
-    children:JSX.Element,
-    allowedRole:"Client"|"Freelancer"
+interface Props {
+    children: JSX.Element,
+    allowedRole: "Client" | "Freelancer"
 }
 
-const RequireRole=({children,allowedRole}:Props)=>{
+import { useAuthStore } from "../store/useAuthStore"
 
-const role=localStorage.getItem('role')
-if(role!==allowedRole){
-    return <Navigate to='/login' />
-}
-else
+const RequireRole = ({ children, allowedRole }: Props) => {
+    const { user } = useAuthStore()
+
+    if (user?.role !== allowedRole) {
+        return <Navigate to='/login' />
+    }
+
     return children
-
 }
 
 export default RequireRole

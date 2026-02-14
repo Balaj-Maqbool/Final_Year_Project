@@ -3,6 +3,7 @@
 import type { loginData } from "./Login";
 import type { registerData } from "./Register";
 import type { NavigateFunction } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
 
 export const handleRegister = async (
   data: registerData,
@@ -50,17 +51,20 @@ export const handleLogin = async (
     }
 
     
-    localStorage.setItem("token", result.data.accessToken);
-    localStorage.setItem("role", result.data.user.role);
-    localStorage.setItem("user", JSON.stringify(result.data.user));
+    // localStorage.setItem("token", result.data.accessToken); // REMOVED
+    // localStorage.setItem("role", result.data.user.role);   // REMOVED
+    // localStorage.setItem("user", JSON.stringify(result.data.user)); // REMOVED
 
-    console.log("TOKEN SAVED:", result.data.accessToken);
+    // Update Zustand Store
+    useAuthStore.getState().login(result.data.user);
+
+    console.log("LOGIN SUCCESS:", result.data.user.role);
 
     // role-based redirect
     if (result.data.user.role === "Freelancer") {
       navigate("/freelancer/freelancerDashboard");
     } else {
-      navigate("/client/dashboard"); // Assuming client dashboard path
+      navigate("/client/clientDashboard"); 
     }
   } catch (error) {
     console.error(error);

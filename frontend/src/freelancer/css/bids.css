@@ -23,22 +23,27 @@
   padding: 20px;
   border-radius: 12px;
   margin: 25px 0;
+  border: 1px solid var(--border-color);
 }
 
 .info-box {
   display: flex;
   gap: 12px;
   align-items: center;
+  color: var(--text-color);
 }
 
 .info-box .icon {
   font-size: 26px;
+  color: var(--primary-color);
 }
 
 .job-section {
-  background: #ffffff;
+  background: var(--card-bg) !important;
   padding: 25px;
   border-radius: 12px;
   margin-bottom: 25px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.03);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
 }

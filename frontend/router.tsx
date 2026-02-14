@@ -12,6 +12,16 @@ import Bids from "./src/freelancer/JobDetails"
 import MyBids from "./src/freelancer/MyBids";
 import LandingPage from "./src/landing/LandingPage";
 import ProfilePage from "./src/profile/ProfilePage";
+import ClientDashboard from "./src/client/ClientDashboard";
+import PostJob from "./src/client/PostJob";
+import AllJobs from "./src/client/AllJobs";
+import ViewBids from "./src/client/ViewBids";
+import Notifications from "./src/client/ClientNotifications";
+import FreelancerNotifications from "./src/freelancer/FreelancerNotifications";
+import AdminLayout from "./src/outlet/AdminLayout";
+import Tasks from "./src/client/WorkRoom/Tasks";
+import FreelancerTasks from "./src/freelancer/WorkRoom/FreelancerTasks";
+import Chat from "./src/client/WorkRoom/Chat";
 
 const router = createBrowserRouter([
   //// Authentication pages
@@ -20,16 +30,16 @@ const router = createBrowserRouter([
     element: <LandingPage />,
   },
   {
-      path: "/register",
-      element: <RegisterPage />,
+    path: "/register",
+    element: <RegisterPage />,
   },
   {
-      path: "/login",
-      element: <Loginpage />,
+    path: "/login",
+    element: <Loginpage />,
   },
   {
-      path: "/oauth-success",
-      element: <OAuthSuccess />,
+    path: "/oauth-success",
+    element: <OAuthSuccess />,
   },
   ////////Freelancer pages
 
@@ -39,45 +49,53 @@ const router = createBrowserRouter([
     element: (
       <RequireToken>
         <RequireRole allowedRole="Freelancer">
-          <FreelancerLayout  />
+          <FreelancerLayout />
         </RequireRole>
       </RequireToken>
     ),
     children: [
       { path: "freelancerDashboard", element: <FreelancerDashboard /> },
-      {path:'jobs',element:<BrowseJobs/>},
-        {path:'jobs/:jobId',element:<Bids/>},
-        {path:'my-bids',element:<MyBids/>},
+      { path: 'jobs', element: <BrowseJobs /> },
+      { path: 'jobs/:jobId', element: <Bids /> },
+      { path: 'my-bids', element: <MyBids /> },
       { path: "freelancerDashboard", element: <FreelancerDashboard /> },
-      {path:'jobs',element:<BrowseJobs/>},
-      {path:'jobs/:jobId',element:<Bids/>},
-      {path:'my-bids',element:<MyBids/>},
-      {path:'profile',element:<ProfilePage/>}
-    
+      { path: 'jobs', element: <BrowseJobs /> },
+      { path: 'jobs/:jobId', element: <Bids /> },
+      { path: 'my-bids', element: <MyBids /> },
+      { path: 'profile', element: <ProfilePage /> },
+      { path: 'notifications', element: <FreelancerNotifications /> },
+      { path: "jobs/:jobId/tasks", element: <FreelancerTasks /> }
+
     ],
   },
 
-//Admin Pages
-{
-  path:'/client',
+  //Admin Pages
+  {
+    path: '/client',
 
-   element: (
+    element: (
       <RequireToken>
         <RequireRole allowedRole="Client">
-          <FreelancerLayout  />
+          <AdminLayout />
         </RequireRole>
       </RequireToken>
     ),
-    children:[
-      { path: "freelancerDashboard", element: <FreelancerDashboard /> },
+    children: [
+      { path: "clientDashboard", element: <ClientDashboard /> },
+      { path: "postjob", element: <PostJob /> },
+      { path: "alljobs", element: <AllJobs /> },
+      { path: "view-bids/:jobId", element: <ViewBids /> },
+      { path: 'notifications', element: <Notifications /> },
+      { path: "tasks/:jobId", element: <Tasks /> },
+      { path: "tasks/:jobId/chat", element: <Chat /> }
     ]
-},
+  },
 
-//profile pages
-{
-  path:'/profile',
-  element:<ProfilePage/>
-},
+  //profile pages
+  {
+    path: '/profile',
+    element: <ProfilePage />
+  },
 
 ]);
 

@@ -7,11 +7,12 @@ import { ApiResponse } from "./utils/ApiResponse.js";
 import "dotenv/config";
 const app = express();
 
+
 app.use(
     cors({
         origin: CORS_ORIGIN,
         credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     })
 );
 

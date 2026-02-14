@@ -3,55 +3,30 @@ import {
   Card,
   Button,
   Row,
-  
+
   Container,
   Spinner,
   Badge,
   Stack,
 } from "react-bootstrap";
-import {  useNavigate } from "react-router-dom";
-
-export interface Job {
-  _id: string;
-  title: string;
-  description: string;
-  budget: number;
-  deadline: string;
-  category: string;
-}
+import { useNavigate } from "react-router-dom";
+import { jobHandler, type Job } from "../services/jobHandler";
 
 const BrowseJobs = () => {
-                  
 
-    const navigate=useNavigate()
+
+  const navigate = useNavigate()
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
- 
+
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch("http://localhost:8000/api/v1/jobs", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-      credentials: "include",
-        });
+    const fetchJobs = jobHandler.getAllJobs();
 
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(text);
-        }
-
-        const result = await response.json();
-        setJobs(result.data);
-      } catch (error) {
-        console.error("Error fetching jobs", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchJobs();
+    fetchJobs.then((data) => {
+      setJobs(data.docs);
+      setLoading(false);
+    });
   }, []);
 
   if (loading)
@@ -68,11 +43,11 @@ const BrowseJobs = () => {
       <Stack direction="horizontal">
         <Row>
           {jobs.map((job) => (
-         
+
             <Card key={job._id} className="h-100 shadow-sm m-2">
               <Card.Body>
                 <Card.Title>{job.title}</Card.Title>
-              
+
                 <Badge bg="secondary" className="mb-2">
                   {job.category}
                 </Badge>
@@ -87,13 +62,13 @@ const BrowseJobs = () => {
                 <p>
                   <strong>Deadline:</strong> {job.deadline}
                 </p>
-                 
-                 
-                <Button onClick={()=>navigate(`/freelancer/jobs/${job._id}`)} variant="primary" size="sm">
+
+
+                <Button onClick={() => navigate(`/freelancer/jobs/${job._id}`)} variant="primary" size="sm">
                   Apply / Bid
                 </Button>
 
-                <Button onClick={()=>console.log(job)}  className="m-2" variant="secondary" size="sm">
+                <Button onClick={() => console.log(job)} className="m-2" variant="secondary" size="sm">
                   Details
                 </Button>
               </Card.Body>

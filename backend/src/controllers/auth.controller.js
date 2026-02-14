@@ -13,6 +13,27 @@ import { AuthService } from "../services/auth.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 import { CloudinaryHelper } from "../utils/cloudinary.utils.js";
 import crypto from "crypto";
+
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+};
+
+const generateAccessAndRefreshTokens = async (userId) => {
+    try {
+        const user = await User.findById(userId);
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
+
+        user.refreshToken = refreshToken;
+        await user.save({ validateBeforeSave: false });
+
+        return { accessToken, refreshToken };
+    } catch (error) {
+        throw new ApiError(500, "Something went wrong while generating referesh and access token");
+    }
+};
 import sendEmail from "../utils/sendEmail.js";
 import {
     getPasswordResetTemplate,
@@ -153,7 +174,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken =
         req.cookies.refreshToken || req.body.refreshToken;
 
+    console.log("Refresh token attempt. Cookie present:", !!req.cookies.refreshToken, "Body present:", !!req.body.refreshToken);
+
     if (!incomingRefreshToken) {
+        console.error("No refresh token provided");
         throw new ApiError(401, "unauthorized request");
     }
 
@@ -164,8 +188,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         );
         const user = await User.findById(decodedToken?._id);
 
-        if (!user || incomingRefreshToken !== user?.refreshToken) {
-            throw new ApiError(401, "Invalid or expired refresh token");
+        if (!user) {
+            console.error("User not found for refresh token");
+            throw new ApiError(401, "Invalid refresh token");
+        }
+
+        if (incomingRefreshToken !== user?.refreshToken) {
+            console.error("Refresh token mismatch");
+            throw new ApiError(401, "Expired or used refresh token");
         }
 
         const { accessToken, refreshToken: newRefreshToken } =
@@ -385,12 +415,23 @@ const resetPassword = asyncHandler(async (req, res) => {
     );
 });
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            req.user,
+            "User fetched successfully"
+        ))
+})
+
 export {
     registerUser,
     loginUser,
     logoutUser,
     refreshAccessToken,
     changeCurrentPassword,
+    getCurrentUser,
     deleteUser,
     handleGoogleCallback,
     forgotPassword,

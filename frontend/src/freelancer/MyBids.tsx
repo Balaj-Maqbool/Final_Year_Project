@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { bidHandler } from "./services/bidHandler";
+import { bidHandler } from "../services/bidHandler";
 import "./css/MyBids.css";
 import { Link } from "react-router-dom";
 
@@ -9,14 +9,14 @@ interface Bid {
   bid_amount: number;
   message: string;
   timeline: {
-      start_date: string;
-      end_date: string;
+    start_date: string;
+    end_date: string;
   };
   status: "Pending" | "Accepted" | "Rejected";
   job: {
-      title: string;
-      budget: number;
-      deadline: string;
+    title: string;
+    budget: number;
+    deadline: string;
   };
 }
 
@@ -27,8 +27,8 @@ const MyBids = () => {
   useEffect(() => {
     const fetchBids = async () => {
       try {
-        const data = await bidHandler.getAllMyBids();
-        setBids(data);
+        const response = await bidHandler.getAllMyBids();
+        setBids(response.docs as unknown as Bid[]);
       } catch (error) {
         console.error("Failed to load bids", error);
       } finally {
@@ -44,7 +44,7 @@ const MyBids = () => {
   return (
     <div className="my-bids-container">
       <h1 className="my-bids-header">My Bids</h1>
-      
+
       {bids.length === 0 ? (
         <div className="no-bids">
           <p>You haven't placed any bids yet.</p>
@@ -59,7 +59,7 @@ const MyBids = () => {
                   {bid.status}
                 </span>
               </div>
-              
+
               <div className="bid-details">
                 <div className="bid-info-row">
                   <span>Job Budget:</span>

@@ -1,5 +1,6 @@
 import { useRef, type FormEvent } from "react";
 import { Button, Form } from "react-bootstrap";
+import { useAuthStore } from "../store/useAuthStore";
 export interface BidData {
   job_id: string;
   bid_amount: number;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 const BidForm = ({ jobId, onSubmit, existingBid }: Props) => {
+  const { user } = useAuthStore();
   const amountRef = useRef<HTMLInputElement>(null);
   const proposalRef = useRef<HTMLTextAreaElement>(null);
 
@@ -33,21 +35,24 @@ const BidForm = ({ jobId, onSubmit, existingBid }: Props) => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+
     if (!isEditable) return;
+
+    console.log("Submitting bid as:", user?.role);
 
     const startDate = new Date().toISOString();
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + 1);
     const amount = Number(amountRef.current!.value);
     if (!amount || amount <= 0) {
-        alert("Please enter a valid bid amount");
-        return;
+      alert("Please enter a valid bid amount");
+      return;
     }
 
     const message = proposalRef.current!.value;
     if (!message.trim()) {
-        alert("Please enter a proposal message");
-        return;
+      alert("Please enter a proposal message");
+      return;
     }
 
     onSubmit({
@@ -99,7 +104,10 @@ const BidForm = ({ jobId, onSubmit, existingBid }: Props) => {
         </Form.Group>
 
         {isEditable && (
-          <Button variant="primary" type="submit">
+          <Button variant="primary" type="submit" onClick={() => {
+            const { user } = useAuthStore();
+            console.log("Submitting bid as:", user?.role);
+          }}>
             {isEditMode ? "Update Bid" : "Submit Proposal"}
           </Button>
         )}

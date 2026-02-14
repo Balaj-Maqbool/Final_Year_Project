@@ -6,6 +6,7 @@ import { Job } from "../models/job.model.js";
 import mongoose from "mongoose";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
+import { sseManager } from "../utils/SSEManager.js";
 
 const placeBid = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -164,6 +165,7 @@ const updateBidStatus = asyncHandler(async (req, res) => {
     bid.status = status;
     await bid.save();
 
+    // ... (inside updateBidStatus)
     if (status === "Accepted") {
         const updatedJob = await Job.findOneAndUpdate(
             { _id: jobId, status: "Open" },
@@ -187,6 +189,8 @@ const updateBidStatus = asyncHandler(async (req, res) => {
 
         job.status = "Assigned";
         job.assigned_to = bid.user_id;
+        await job.save();
+        console.log(`Job ${job._id} assigned to ${bid.user_id}`);
 
         const otherBids = await Bid.find({
             job_id: jobId,
@@ -217,6 +221,14 @@ const updateBidStatus = asyncHandler(async (req, res) => {
         }
     }
 
+    // SSE: Notify Freelancer of decision
+    console.log(`Sending notification to user ${bid.user_id}`);
+    const notificationResult = await sseManager.sendToUser(bid.user_id, "DASHBOARD_UPDATE", {
+        type: "BID_STATUS_UPDATE",
+        message: `Your bid was ${status}`,
+        jobId: job._id
+    });
+    console.log("Notification send result:", notificationResult);
     await NotificationService.notifyBidStatusUpdate(bid.user_id, job, status);
 
     return res

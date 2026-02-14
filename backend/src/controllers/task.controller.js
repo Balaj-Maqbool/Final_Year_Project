@@ -5,6 +5,7 @@ import { Task } from "../models/task.model.js";
 import { Job } from "../models/job.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
+import mongoose from "mongoose";
 
 const createTask = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -100,6 +101,26 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Task not found");
     }
 
+    // Auth check: User must be either Assigned Freelancer OR Job Poster (Client)
+    const job = await Job.findById(task.job_id);
+    if (!job) {
+        throw new ApiError(404, "Job not found");
+    }
+
+    const isFreelancer = task.assigned_user_id.toString() === req.user._id.toString();
+    const isPoster = job.poster_id.toString() === req.user._id.toString();
+
+    if (!isFreelancer && !isPoster) {
+        throw new ApiError(403, "You are not authorized to update this task");
+    }
+
+    // Business Logic:
+    // Freelancer can move to: "In Progress", "Done" (Submit)
+    // Client can move to: "In Progress" (Request Changes)
+    
+    // Optional: Prevent Client from marking as "Done" directly? (Let freelancer do it)
+    // if (isPoster && status === "Done") {
+         // Maybe allow it or leave strict? Let's allow flexibility for now.
     if (task.assigned_user_id.toString() !== req.user._id.toString()) {
         throw new ApiError(
             403,
@@ -114,11 +135,12 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     task.status = status;
     await task.save();
 
-    const job = await Job.findById(task.job_id);
+    // SSE: Notify proper recipient
+    const recipientId = isPoster ? task.assigned_user_id : job.poster_id;
 
     if (job) {
         await NotificationService.notifyTaskStatusUpdate(
-            job.poster_id,
+            recipientId,
             task,
             status
         );

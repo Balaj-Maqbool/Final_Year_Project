@@ -1,0 +1,191 @@
+/* dashboard.css */
+
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-color);
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+  color: var(--secondary-color);
+  font-size: 1rem;
+}
+
+/* Summary Cards */
+.dashboard-card {
+  border: none;
+  border-radius: 16px;
+  background: var(--card-bg);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+}
+
+[data-theme='dark'] .dashboard-card {
+  background: #1e1e1e !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--secondary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.summary-value {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+/* Active Jobs Section */
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-card {
+  border-radius: 16px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.custom-table {
+  margin-bottom: 0;
+}
+
+.custom-table thead th {
+  background-color: var(--bg-color) !important;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--secondary-color);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  padding: 1rem 1.5rem;
+}
+
+/* Force background on table rows to override Bootstrap striped/hover styles if any */
+.custom-table tbody tr {
+  background-color: var(--card-bg) !important;
+}
+
+.custom-table tbody td {
+  padding: 1rem 1.5rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.95rem;
+  color: var(--text-color) !important;
+  background-color: var(--card-bg) !important;
+}
+
+.status-badge {
+  padding: 0.35em 0.8em;
+  font-weight: 600;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+}
+
+.status-badge.warning {
+  background-color: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+}
+
+.status-badge.info {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #dbeafe;
+}
+
+/* Action Cards */
+.action-card {
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--card-bg) !important;
+}
+
+.action-card .card-title {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  text-transform: none;
+}
+
+.action-card .card-text {
+  color: var(--secondary-color);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primary-custom {
+  background: var(--primary-color) !important;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s;
+  color: white !important;
+}
+
+.btn-primary-custom:hover {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.btn-secondary-custom {
+  background: var(--card-bg) !important;
+  border: 2px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-secondary-custom:hover {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+  background: var(--bg-color) !important;
+}
+
+.btn-outline-custom {
+  background: transparent !important;
+  border: 2px solid var(--primary-color) !important;
+  color: var(--primary-color) !important;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-outline-custom:hover {
+  background: var(--primary-color) !important;
+  color: white !important;
+}

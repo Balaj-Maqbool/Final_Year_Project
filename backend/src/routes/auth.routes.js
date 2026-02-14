@@ -11,7 +11,8 @@ import {
     deleteUser,
     handleGoogleCallback,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    getCurrentUser
 } from "../controllers/auth.controller.js";
 
 import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
@@ -41,6 +42,7 @@ router.route("/google/callback").get(
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/password/change").patch(verifyJWT, changeCurrentPassword);
 router.route("/delete-account").delete(verifyJWT, deleteUser);
+router.route("/current-user").get(verifyJWT, getCurrentUser);
 
 router
     .route("/password/forgot")
