@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Badge, Container } from "react-bootstrap";
-import { jobHandler, type Job } from "./services/jobHandler";
+import { jobHandler, type Job } from "../services/jobHandler";
 import { useParams } from "react-router-dom";
 import GetBids from "./GetBids";
 

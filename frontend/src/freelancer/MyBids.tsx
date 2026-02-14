@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { bidHandler } from "./services/bidHandler";
+import { bidHandler } from "../services/bidHandler";
 import "./css/MyBids.css";
 import { Link } from "react-router-dom";
 

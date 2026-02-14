@@ -11,9 +11,10 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import "../dashboard.css";
+import { apiRequest } from "../services/apiClient";
 
 interface Job {
-  _id: string; // Backend uses _id
+  _id: string; 
   title: string;
   status: string;
   deadline: string;
@@ -42,20 +43,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:8000/api/v1/dashboard/freelancer",
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const result = await response.json();
+        const response = await apiRequest<DashboardData>("/dashboard/freelancer")
         // Backend returns { statusCode, data: { stats: ..., activeJobs: ..., pendingTasks: ... }, message, success }
-        setData(result.data);
+        setData(response);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -152,7 +142,7 @@ const Dashboard = () => {
                         <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}`}>View Details</Button>
                       </td>
                       <td>
-                        <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}/tasks`}>View Tasks</Button>
+                        <Button size="sm" variant="light" as={Link as any} to={`/freelancer/tasks/${job._id}/tasks`}>View Tasks</Button>
                       </td>
                     </tr>
                   ))}

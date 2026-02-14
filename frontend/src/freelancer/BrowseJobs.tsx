@@ -10,7 +10,7 @@ import {
   Stack,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { jobHandler, type Job } from "../client/services/jobHandler";
+import { jobHandler, type Job } from "../services/jobHandler";
 
 const BrowseJobs = () => {
 

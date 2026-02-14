@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { apiRequest } from "../services/apiClient";
 import { Container, Row, Col, Card, Table, Badge, Button, Spinner } from "react-bootstrap";
 import { data, Link } from "react-router-dom";
-import { jobHandler } from "../client/services/jobHandler";
+import { jobHandler } from "../services/jobHandler";
 import "../dashboard.css";
 
 interface Job {
@@ -131,6 +131,9 @@ const ClientDashboard = () => {
                       <td>{new Date(job.deadline).toLocaleDateString()}</td>
                       <td>
                         <Button size="sm" variant="light" as={Link as any} to={`/client/viewbids/${job._id}`}>View</Button>
+                      </td>
+                       <td>
+                        <Button size="sm" variant="light" as={Link as any} to={`/client/tasks/${job._id}/tasks`}>View Tasks</Button>
                       </td>
                       <td>
                         <Button size="sm" variant="light" onClick={() => jobHandler.deleteJob(job._id)} >Delete </Button>

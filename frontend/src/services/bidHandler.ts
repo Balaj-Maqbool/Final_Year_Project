@@ -1,5 +1,5 @@
-import { apiRequest } from "../../services/apiClient";
-import type { PaginatedResponse } from "../../client/services/jobHandler";
+import { apiRequest } from "./apiClient";
+import type { PaginatedResponse } from "./jobHandler";
 const API = "/bids";
 
 export interface BidData {

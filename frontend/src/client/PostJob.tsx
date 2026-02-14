@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Container, Form, Alert, Spinner } from "react-bootstrap";
-import { jobHandler } from "./services/jobHandler";
+import { jobHandler } from "../services/jobHandler";
 import { useNavigate } from "react-router-dom";
 import "./PostJob.css";
 
@@ -37,7 +37,7 @@ const PostJob = () => {
             setLoading(false);
             return;
         }
-            
+
         try {
             await jobHandler.createJob(data);
             navigate("/client/clientDashboard");
@@ -48,7 +48,7 @@ const PostJob = () => {
             setLoading(false);
         }
     };
-   
+
     return (
         <Container>
             <div className="post-job-container">
@@ -64,7 +64,7 @@ const PostJob = () => {
                         <Form.Label className="form-label-custom">Job Title</Form.Label>
                         <Form.Control ref={titleRef} type="text" placeholder="e.g. Full Stack Developer for E-commerce Site" className="form-control-custom" required />
                     </Form.Group>
-                    
+
                     <Form.Group className="form-group-custom">
                         <Form.Label className="form-label-custom">Job Description</Form.Label>
                         <Form.Control ref={descriptionRef} as="textarea" rows={5} placeholder="Describe the project details, requirements, and deliverables..." className="form-control-custom" required />

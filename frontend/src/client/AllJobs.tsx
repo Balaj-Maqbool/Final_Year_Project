@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Container, Stack, Row, Card, Badge, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { jobHandler, type Job } from "./services/jobHandler";
+import { jobHandler, type Job } from "../services/jobHandler";
 
 
 

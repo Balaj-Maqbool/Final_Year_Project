@@ -5,6 +5,7 @@ import { Task } from "../models/task.model.js";
 import { Job } from "../models/job.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
+import mongoose from "mongoose";
 
 const createTask = asyncHandler(async (req, res) => {
     const { jobId } = req.params;

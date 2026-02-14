@@ -1,18 +1,20 @@
-import { apiRequest } from "../../services/apiClient";
+import { apiRequest } from "./apiClient";
 
 export interface Task {
     _id: string;
     title: string;
     description: string;
-    status: "Pending" | "In Progress" | "Completed" | "Done";
+    status: "Pending" | "In Progress" | "Completed" | "Done" | "To Do";
     is_approved: boolean;
     job_id: string;
     assigned_to: string;
 }
 
+import type { PaginatedResponse } from "./jobHandler";
+
 // GET /api/v1/tasks/:jobId
-export const getTasks = async (jobId: string) => {
-    return await apiRequest<Task[]>(`/tasks/${jobId}`);
+export const getTasks = async(jobId: string): Promise<PaginatedResponse<Task>>  => {
+    return await apiRequest<PaginatedResponse<Task>>(`/tasks/${jobId}`);
 };
 
 // POST /api/v1/tasks/:jobId

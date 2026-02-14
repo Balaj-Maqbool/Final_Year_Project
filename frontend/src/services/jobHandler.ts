@@ -1,4 +1,4 @@
-import { apiRequest } from "../../services/apiClient";
+import { apiRequest } from "../services/apiClient";
 
 const API = "/jobs";
 
@@ -45,14 +45,7 @@ export const jobHandler = {
         try {
             return await apiRequest<Job>(`${API}/${jobId}`, "GET");
         } catch (error: any) {
-            // apiRequest throws on non-2xx. If it's a 404, we might want to return null
-            // depending on how the component handles it.
-            // The original code returned null on 404.
-            // However, checking error status strictly is hard with the current apiClient.
-            // We'll let the error propagate or simpler: just return the result.
-            // If strict 404 null return is needed, we'd need to parse the error message 
-            // or modify apiClient to expose status.
-            // For now, let's assuming if it fails, it throws.
+         
             console.error("Error fetching job:", error);
             throw error; 
         }

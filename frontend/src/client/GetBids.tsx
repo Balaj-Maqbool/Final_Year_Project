@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { bidHandler } from "../freelancer/services/bidHandler"
+import { bidHandler } from "../services/bidHandler"
 import { Card, Alert, Spinner, Button, Badge } from "react-bootstrap";
 
 interface Bid {

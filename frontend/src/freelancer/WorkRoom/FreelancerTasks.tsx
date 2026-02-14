@@ -1,10 +1,9 @@
 
-
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, Button, Badge, Alert, Spinner, Container } from "react-bootstrap";
-import { getTasks, updateTaskStatus, } from "../../client/WorkRoom/taskHandler";
-import type { Task } from "../../client/WorkRoom/taskHandler";
+import { getTasks, updateTaskStatus, } from "../../services/taskHandler";
+import type { Task } from "../../services/taskHandler";
 
 
 const FreelancerTasks = () => {
@@ -13,7 +12,7 @@ const FreelancerTasks = () => {
 
 
     // Fetch Tasks
-    const { data: tasks = [], isLoading, isError, error } = useQuery({
+    const { data: tasks, isLoading, isError, error } = useQuery({
         queryKey: ["tasks", jobId],
         queryFn: () => getTasks(jobId!),
         enabled: !!jobId,
@@ -41,7 +40,7 @@ const FreelancerTasks = () => {
 
     if (isLoading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
     if (isError) return <Alert variant="danger">Error loading tasks: {(error as any).message}</Alert>;
-
+    if (!tasks) return null;
     return (
         <Container className="my-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -49,7 +48,7 @@ const FreelancerTasks = () => {
             </div>
 
 
-            {tasks.length === 0 ? (
+            {!tasks.docs || tasks.docs.length === 0 ? (
                 <Alert variant="info">No tasks created for this job yet.</Alert>
             ) : (
                 <Table striped bordered hover responsive>
@@ -63,7 +62,7 @@ const FreelancerTasks = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {tasks.map((task: Task) => (
+                        {tasks.docs.map((task: Task) => (
                             <tr key={task._id}>
                                 <td>{task.title}</td>
                                 <td>{task.description}</td>
@@ -83,7 +82,7 @@ const FreelancerTasks = () => {
                                     )}
                                 </td>
                                 <td>
-                                    {task.status === "Pending" && (
+                                    {(task.status === "Pending" || task.status === "To Do") && (
                                         <Button
                                             variant="primary"
                                             size="sm"
