@@ -2,7 +2,7 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 import { ApiError } from "../utils/ApiError.js";
 
 class RateLimitManager {
-    static create(points = 10, duration = 1, message = "Too many requests") {
+    static create(points, duration, message = "Too many requests") {
         const rateLimiter = new RateLimiterMemory({
             points: points,
             duration: duration
@@ -22,7 +22,7 @@ class RateLimitManager {
 
     static apiGlobal() {
         return this.create(
-            500,
+            1000,
             15 * 60,
             "Too many requests from this IP, please try again later"
         );
@@ -30,7 +30,7 @@ class RateLimitManager {
 
     static apiAuth() {
         return this.create(
-            15,
+            100,
             60 * 60,
             "Too many login attempts, please try again after an hour"
         );
@@ -45,8 +45,8 @@ class RateLimitManager {
     }
 
     static createGlobal(
-        points = 10,
-        duration = 1,
+        points,
+        duration,
         message = "Service busy, please try again"
     ) {
         const rateLimiter = new RateLimiterMemory({
@@ -74,7 +74,7 @@ class RateLimitManager {
         );
     }
 
-    static createWithoutMiddleware(points = 10, duration = 1) {
+    static createWithoutMiddleware(points, duration) {
         return new RateLimiterMemory({
             points: points,
             duration: duration
