@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import "./Navbar.css";
+import NotificationBell from "../notifications/NotificationBell";
 
 import { useTheme } from "../context/ThemeContext";
 
@@ -16,9 +17,8 @@ const Navbar = () => {
           <li><Link to="/client/postjob" className="nav-link">Post a Job</Link></li>
           <li><Link to="/client/alljobs" className="nav-link">All Jobs</Link></li>
           <li><Link to="/client/dashboard" className="nav-link">Dashboard</Link></li>
-          <li><Link to="/client/notifications" className="nav-link">Notifications</Link></li>
+          <li style={{ display: "flex", alignItems: "center" }}><NotificationBell /></li>
           <li><Link to="/client/tasks" className="nav-link">Tasks</Link></li>
-
         </ul>
 
         <div className="nav-menu">

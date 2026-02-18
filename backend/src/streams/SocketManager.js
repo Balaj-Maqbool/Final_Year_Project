@@ -37,7 +37,12 @@ class SocketManager {
                     );
                     if (parsedCookies.accessToken) {
                         token = parsedCookies.accessToken;
+                        console.log("Socket Auth: Found accessToken in cookie");
+                    } else {
+                         console.log("Socket Auth: Cookie present but no accessToken found. Keys:", Object.keys(parsedCookies));
                     }
+                } else {
+                    console.log("Socket Auth: No cookie header received");
                 }
 
                 if (!token && handshake.auth && handshake.auth.token) {
@@ -52,6 +57,7 @@ class SocketManager {
                 }
 
                 if (ValidationHelper.isEmpty(token)) {
+                    console.error("Socket Auth Error: Token missing");
                     return next(
                         new Error("Authentication error: Token missing")
                     );
@@ -59,6 +65,7 @@ class SocketManager {
 
                 const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
                 if (!decoded?._id) {
+                    console.error("Socket Auth Error: Invalid token payload");
                     return next(
                         new Error("Authentication error: Invalid token")
                     );
@@ -68,6 +75,7 @@ class SocketManager {
                     "-password -refreshToken"
                 );
                 if (!user) {
+                    console.error("Socket Auth Error: User not found");
                     return next(
                         new Error("Authentication error: User not found")
                     );
@@ -77,7 +85,7 @@ class SocketManager {
                 next();
             } catch (error) {
                 console.error("Socket Auth Error:", error.message);
-                next(new Error("Authentication error"));
+                next(new Error("Authentication error: " + error.message));
             }
         });
 

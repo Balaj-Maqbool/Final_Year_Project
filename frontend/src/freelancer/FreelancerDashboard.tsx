@@ -14,7 +14,7 @@ import "../dashboard.css";
 import { apiRequest } from "../services/apiClient";
 
 interface Job {
-  _id: string; 
+  _id: string;
   title: string;
   status: string;
   deadline: string;
@@ -150,7 +150,7 @@ const Dashboard = () => {
                     <tr>
                       <td colSpan={4} className="text-center py-4 text-muted">No active jobs found</td>
                     </tr>
-                    
+
                   )}
                 </tbody>
               </Table>
@@ -161,7 +161,7 @@ const Dashboard = () => {
         {/* QUICK ACTIONS */}
         <h4 className="section-title">Quick Actions</h4>
         <Row className="g-4">
-          <Col md={4}>
+          <Col md={3}>
             <Card className="dashboard-card action-card">
               <Card.Body>
                 <Card.Title>Find Work</Card.Title>
@@ -171,7 +171,7 @@ const Dashboard = () => {
             </Card>
           </Col>
 
-          <Col md={4}>
+          <Col md={3}>
             <Card className="dashboard-card action-card">
               <Card.Body>
                 <Card.Title>My Proposals</Card.Title>
@@ -181,12 +181,22 @@ const Dashboard = () => {
             </Card>
           </Col>
 
-          <Col md={4}>
+          <Col md={3}>
             <Card className="dashboard-card action-card">
               <Card.Body>
                 <Card.Title>My Profile</Card.Title>
                 <Card.Text>Update skills and portfolio</Card.Text>
                 <Button as={Link as any} to="/profile" className="btn-outline-custom w-100">Edit Profile</Button>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col md={3}>
+            <Card className="dashboard-card action-card">
+              <Card.Body>
+                <Card.Title>Messages</Card.Title>
+                <Card.Text>Chat with clients</Card.Text>
+                <Button as={Link as any} to="/freelancer/chat" className="btn-primary-custom w-100">Open Chat</Button>
               </Card.Body>
             </Card>
           </Col>

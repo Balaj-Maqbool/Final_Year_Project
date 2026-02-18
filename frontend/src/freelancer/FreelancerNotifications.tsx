@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getNotifications, markAsRead } from "../notifications/notification.services";
+import "../css/Notifications.css";
 
 const FreelancerNotifications = () => {
     const navigate = useNavigate();
@@ -68,49 +69,56 @@ const FreelancerNotifications = () => {
     if (isError) return <div className="alert alert-danger m-3">Failed to load notifications</div>;
 
     return (
-        <div className="container mt-4">
-            <h2 className="mb-4">Freelancer Notifications</h2>
+        <div className="notifications-page-container">
+            <div className="container">
+                <h2 className="notifications-title">Freelancer Notifications</h2>
 
-            {data.length === 0 ? (
-                <p className="text-muted">No notifications yet.</p>
-            ) : (
-                <div className="list-group">
-                    {data.map((n: any) => (
-                        <div
-                            key={n._id}
-                            className={`list-group-item list-group-item-action flex-column align-items-start ${!n.isRead ? "active-notification" : ""}`}
-                            style={{
-                                backgroundColor: n.isRead ? "#fff" : "#f0f8ff",
-                                borderLeft: n.isRead ? "none" : "5px solid #007bff"
-                            }}
-                        >
-                            <div className="d-flex w-100 justify-content-between">
-                                <h5 className="mb-1">{n.type.replace(/_/g, " ")}</h5>
-                                <small className="text-muted">{new Date(n.createdAt).toLocaleDateString()}</small>
-                            </div>
-                            <p className="mb-1">{n.message}</p>
+                {data.length === 0 ? (
+                    <div className="empty-notifications">
+                        <div className="empty-icon">🔔</div>
+                        <p>You have no notifications at the moment.</p>
+                    </div>
+                ) : (
+                    <div className="notification-list">
+                        {data.map((n: any) => (
+                            <div
+                                key={n._id}
+                                className={`notification-card ${n.isRead ? "read" : "unread"}`}
+                                onClick={() => handleView(n)}
+                                style={{ cursor: "pointer" }}
+                            >
+                                <div className="notification-header">
+                                    <span className="notification-type">{n.type.replace(/_/g, " ")}</span>
+                                    <span className="notification-time">{new Date(n.createdAt).toLocaleDateString()}</span>
+                                </div>
 
-                            <div className="mt-2">
-                                {!n.isRead && (
+                                <p className="notification-message">{n.message}</p>
+
+                                <div className="notification-actions">
+                                    {!n.isRead && (
+                                        <button
+                                            className="btn-notif-action btn-mark-read"
+                                            onClick={(e) => handleMarkAsRead(e, n._id)}
+                                            disabled={markReadMutation.isPending}
+                                        >
+                                            {markReadMutation.isPending ? "Marking..." : "Mark as Read"}
+                                        </button>
+                                    )}
                                     <button
-                                        className="btn btn-sm btn-outline-primary me-2"
-                                        onClick={(e) => handleMarkAsRead(e, n._id)}
-                                        disabled={markReadMutation.isPending}
+                                        className="btn-notif-action btn-view-details"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleView(n);
+                                        }}
                                     >
-                                        {markReadMutation.isPending ? "Marking..." : "Mark as Read"}
+                                        View Details
                                     </button>
-                                )}
-                                <button
-                                    className="btn btn-sm btn-secondary"
-                                    onClick={() => handleView(n)}
-                                >
-                                    View Details
-                                </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

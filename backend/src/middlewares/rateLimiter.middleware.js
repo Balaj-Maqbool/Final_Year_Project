@@ -22,7 +22,7 @@ class RateLimitManager {
 
     static apiGlobal() {
         return this.create(
-            1000,
+            100000,
             15 * 60,
             "Too many requests from this IP, please try again later"
         );

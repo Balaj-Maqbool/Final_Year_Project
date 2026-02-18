@@ -104,10 +104,7 @@ const BidForm = ({ jobId, onSubmit, existingBid }: Props) => {
         </Form.Group>
 
         {isEditable && (
-          <Button variant="primary" type="submit" onClick={() => {
-            const { user } = useAuthStore();
-            console.log("Submitting bid as:", user?.role);
-          }}>
+          <Button variant="primary" type="submit">
             {isEditMode ? "Update Bid" : "Submit Proposal"}
           </Button>
         )}

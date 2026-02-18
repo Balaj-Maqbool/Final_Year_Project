@@ -49,24 +49,7 @@ const createJob = asyncHandler(async (req, res) => {
 
     await NotificationService.notifyNewJob(job);
 
-    if (required_skills && required_skills.length > 0) {
-        try {
-            const matchedFreelancers = await User.find({
-                role: "Freelancer",
-                skills: { $in: required_skills }
-            }).select("_id");
 
-            matchedFreelancers.forEach(user => {
-                sseManager.sendToUser(user._id, "DASHBOARD_UPDATE", {
-                    type: "JOB_MATCH",
-                    message: `New job matches your skills: ${title}`,
-                    jobId: job._id
-                });
-            });
-        } catch (error) {
-            console.error("Error sending skill match notifications:", error);
-        }
-    }
 
         return res.status(201).json(
             new ApiResponse(201, job, "Job posted successfully")

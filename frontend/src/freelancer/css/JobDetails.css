@@ -1,0 +1,190 @@
+/* JobDetails.css */
+
+/* =========================
+   PAGE CONTAINER
+========================= */
+.job-details-container {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+    font-family: 'Inter', sans-serif;
+    color: #334155;
+  }
+  
+  /* =========================
+     HEADER SECTION
+  ========================= */
+  .job-header-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .job-header-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: #3b82f6;
+  }
+  
+  .job-title-large {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+  
+  .job-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+  }
+  
+  .job-category-badge {
+    background: #dbeafe;
+    color: #1e40af;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .job-posted-date {
+    color: #64748b;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  /* =========================
+     INFO GRID (Budget etc)
+  ========================= */
+  .job-highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .highlight-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border: 1px solid #f1f5f9;
+  }
+  
+  .highlight-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: #ecfdf5;
+    color: #059669;
+    font-size: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .deadline-icon {
+    background: #fff1f2;
+    color: #e11d48;
+  }
+  
+  .highlight-content label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+  }
+  
+  .highlight-content span {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  
+  /* =========================
+     DESCRIPTION SECTION
+  ========================= */
+  .job-description-section {
+    background: white;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 3rem;
+  }
+  
+  .section-heading {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+  }
+  
+  .description-text {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #475569;
+    white-space: pre-line; /* Preserves newlines */
+  }
+  
+  /* =========================
+     DARK MODE SUPPORT
+  ========================= */
+  [data-theme='dark'] .job-details-container {
+    color: #cbd5e1;
+  }
+  
+  [data-theme='dark'] .job-header-card,
+  [data-theme='dark'] .highlight-card,
+  [data-theme='dark'] .job-description-section {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: none;
+  }
+  
+  [data-theme='dark'] .job-title-large,
+  [data-theme='dark'] .highlight-content span,
+  [data-theme='dark'] .section-heading {
+    color: #f8fafc;
+  }
+  
+  [data-theme='dark'] .description-text {
+    color: #94a3b8;
+  }
+  
+  [data-theme='dark'] .section-heading {
+    border-bottom-color: #334155;
+  }
+  
+  [data-theme='dark'] .highlight-icon {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+  }
+  
+  [data-theme='dark'] .deadline-icon {
+    background: rgba(225, 29, 72, 0.2);
+    color: #fda4af;
+  }

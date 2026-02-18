@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { bidHandler } from "../services/bidHandler"
+import { InitializeChat } from "../services/useChats";
 import { Card, Alert, Spinner, Button, Badge } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 interface Bid {
     _id: string;
@@ -56,17 +58,25 @@ const GetBids = ({ jobId }: GetBidsProps) => {
         try {
             await bidHandler.updateBidStatus(jobId, bidId, "Accepted");
             alert("Bid accepted successfully!");
-            fetchBids(); 
+            fetchBids();
         } catch (err: any) {
             console.error(err);
             alert(err.message || "Failed to accept bid");
         }
     };
 
-    const handleMessage = (freelancerId: string) => {
-        // Placeholder for messaging logic
-        alert(`Starting conversation with freelancer: ${freelancerId}`);
-        console.log("Start conversation with:", freelancerId);
+    const navigate = useNavigate();
+
+    const handleMessage = async (bidId: string) => {
+        try {
+            await InitializeChat(bidId);
+            if (jobId) {
+                navigate(`/client/chat/${jobId}`);
+            }
+        } catch (error) {
+            console.error("Error starting chat:", error);
+            alert("Failed to start chat. Please try again.");
+        }
     };
 
     if (loading) return <div className="text-center py-4"><Spinner animation="border" /></div>;
@@ -126,7 +136,7 @@ const GetBids = ({ jobId }: GetBidsProps) => {
                                 <Button
                                     variant="outline-primary"
                                     size="sm"
-                                    onClick={() => handleMessage(bid.freelancer._id)}
+                                    onClick={() => handleMessage(bid._id)}
                                 >
                                     Message
                                 </Button>

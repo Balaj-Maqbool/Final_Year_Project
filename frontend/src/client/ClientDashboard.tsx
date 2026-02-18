@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../services/apiClient";
 import { Container, Row, Col, Card, Table, Badge, Button, Spinner } from "react-bootstrap";
-import { data, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { jobHandler } from "../services/jobHandler";
 import "../dashboard.css";
 
@@ -44,7 +44,7 @@ const ClientDashboard = () => {
       }
     };
     fetchDashboardData();
-  }, [data]);
+  }, []);
 
 
   if (loading)
@@ -130,10 +130,13 @@ const ClientDashboard = () => {
                       </td>
                       <td>{new Date(job.deadline).toLocaleDateString()}</td>
                       <td>
-                        <Button size="sm" variant="light" as={Link as any} to={`/client/viewbids/${job._id}`}>View</Button>
+                        <Button size="sm" variant="light" as={Link as any} to={`/client/view-bids/${job._id}`}>View</Button>
                       </td>
-                       <td>
-                        <Button size="sm" variant="light" as={Link as any} to={`/client/tasks/${job._id}/tasks`}>View Tasks</Button>
+                      <td>
+                        <Button size="sm" variant="light" as={Link as any} to={`/client/tasks/${job._id}`}>View Tasks</Button>
+                      </td>
+                      <td>
+                        <Button size="sm" variant="light" as={Link as any} to={`/client/chat/${job._id}`}>Chat</Button>
                       </td>
                       <td>
                         <Button size="sm" variant="light" onClick={() => jobHandler.deleteJob(job._id)} >Delete </Button>

@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ChatThread, Message } from "../models/chat.model.js";
 import { Bid } from "../models/bid.model.js";
+import { Notification } from "../models/notification.model.js";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
 import { socketManager } from "../streams/SocketManager.js";
@@ -345,6 +346,63 @@ const markMessagesAsRead = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Messages marked as read"));
 });
 
+const sendMessage = asyncHandler(async (req, res) => {
+    const { threadId } = req.params;
+    const { content, attachments } = req.body;
+
+    // 1. Validate permissions via Service
+    const permission = await chatService.validateMessagePermission(
+        threadId,
+        req.user._id
+    );
+
+    if (!permission.canSend) {
+        throw new ApiError(403, permission.error || "Cannot send message");
+    }
+
+    // 2. Delegate message creation to Service
+    try {
+        const newMessage = await chatService.saveMessage(
+            threadId,
+            req.user._id,
+            content,
+            attachments
+        );
+
+        // Populate for response
+        await newMessage.populate("from", "fullName profileImage email");
+
+        // Real-time update for Chat UI
+        socketManager.emitToRoom(threadId, "new_message", newMessage);
+
+        // 3. Create Notification for Recipient
+        const thread = await ChatThread.findById(threadId);
+        const recipientId = thread.participants.find(
+            (p) => p.toString() !== req.user._id.toString()
+        );
+
+        if (recipientId) {
+            const notification = await Notification.create({
+                recipient: recipientId,
+                type: "NEW_CHAT_MESSAGE",
+                message: `New message from ${req.user.fullName}`,
+                relatedId: threadId,
+                isRead: false
+            });
+
+            // Real-time update for Notification Bell
+            // Emit to the recipient's personal room (userId)
+            socketManager.emitToRoom(recipientId.toString(), "new_notification", notification);
+        }
+
+        return res
+            .status(201)
+            .json(new ApiResponse(201, newMessage, "Message sent"));
+    } catch (error) {
+        throw new ApiError(400, error.message);
+    }
+});
+
 export {
     initializeChat,
     getMyThreads,
@@ -353,5 +411,6 @@ export {
     deleteThread,
     blockThread,
     unblockThread,
-    markMessagesAsRead // exported
+    markMessagesAsRead,
+    sendMessage
 };

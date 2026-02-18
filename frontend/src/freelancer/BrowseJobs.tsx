@@ -68,7 +68,7 @@ const BrowseJobs = () => {
                   Apply / Bid
                 </Button>
 
-                <Button onClick={() => console.log(job)} className="m-2" variant="secondary" size="sm">
+                <Button onClick={() => navigate(`/freelancer/jobs/${job._id}`)} className="m-2" variant="secondary" size="sm">
                   Details
                 </Button>
               </Card.Body>

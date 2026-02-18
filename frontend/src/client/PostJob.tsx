@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Container, Form, Alert, Spinner } from "react-bootstrap";
 import { jobHandler } from "../services/jobHandler";
 import { useNavigate } from "react-router-dom";
-import "./PostJob.css";
+import "./css/PostJob.css";
 
 const PostJob = () => {
     const navigate = useNavigate();

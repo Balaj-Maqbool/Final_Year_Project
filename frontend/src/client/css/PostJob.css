@@ -1,0 +1,145 @@
+/* PostJob.css */
+
+.post-job-container {
+    max-width: 800px;
+    margin: 3rem auto;
+    padding: 3rem;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05); /* Softer shadow */
+    font-family: 'Inter', sans-serif;
+  }
+  
+  /* Header */
+  .post-job-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .post-job-header h2 {
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 2.25rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+  }
+  
+  .post-job-header p {
+    color: #64748b;
+    font-size: 1.1rem;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  /* Form Groups */
+  .form-group-custom {
+    margin-bottom: 1.75rem;
+  }
+  
+  .form-label-custom {
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 0.6rem;
+    display: block;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+  }
+  
+  .form-control-custom {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid #e2e8f0; /* Thicker border */
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s ease-in-out;
+    background-color: #f8fafc;
+    color: #1e293b;
+  }
+  
+  .form-control-custom:focus {
+    outline: none;
+    border-color: #3b82f6; /* Blue accent */
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); /* Nice Focus Ring */
+  }
+  
+  .form-control-custom::placeholder {
+    color: #94a3b8;
+  }
+  
+  /* Textarea Specific */
+  textarea.form-control-custom {
+    resize: vertical;
+    min-height: 120px;
+  }
+  
+  /* Submit Button */
+  .submit-btn-container {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .submit-btn {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  }
+  
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+  
+  .submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    background: #94a3b8;
+  }
+  
+  /* Dark Mode Support */
+  [data-theme='dark'] .post-job-container {
+      background: #1e293b;
+      box-shadow: none;
+  }
+  
+  [data-theme='dark'] .post-job-header h2 {
+      color: #f8fafc;
+  }
+  
+  [data-theme='dark'] .form-label-custom {
+      color: #cbd5e1;
+  }
+  
+  [data-theme='dark'] .form-control-custom {
+      background-color: #0f172a;
+      border-color: #334155;
+      color: #f1f5f9;
+  }
+  
+  [data-theme='dark'] .form-control-custom:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+  }
+  
+  [data-theme='dark'] .submit-btn {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+  }

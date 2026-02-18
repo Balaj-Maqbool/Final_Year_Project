@@ -1,0 +1,210 @@
+/* Notifications.css */
+
+/* =========================
+   CONTAINER & HEADER
+========================= */
+.notifications-page-container {
+  padding: 3rem 0;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.notifications-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+}
+
+.notifications-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 50px;
+  height: 4px;
+  background: #2563eb;
+  border-radius: 2px;
+}
+
+/* =========================
+   NOTIFICATION LIST
+========================= */
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto; /* Center the list */
+}
+
+/* =========================
+   NOTIFICATION CARD
+========================= */
+.notification-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  position: relative;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 4px solid transparent; /* Default border */
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-card.unread {
+  background: #ffffff;
+  border-left-color: #3b82f6; /* Blue accent for unread */
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05); /* Subtle blue glow */
+}
+
+.notification-card.read {
+  background: #f8fafc; /* Slightly graver background for read */
+  border-left-color: #cbd5e1;
+  opacity: 0.85;
+}
+
+.notification-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  opacity: 1; /* Full opacity on hover even if read */
+}
+
+/* Content Layout */
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.notification-type {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+}
+
+.notification-card.unread .notification-type {
+  color: #2563eb; /* Active color for unread */
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.notification-message {
+  font-size: 1rem;
+  color: #334155;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.notification-card.unread .notification-message {
+  color: #0f172a; /* Darker text for unread */
+  font-weight: 500;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+.notification-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end; /* Align buttons to the right */
+  margin-top: auto;
+}
+
+.btn-notif-action {
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-mark-read {
+  background: transparent;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+}
+
+.btn-mark-read:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+}
+
+.btn-view-details {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-view-details:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+.empty-notifications {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #94a3b8;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* =========================
+   DARK MODE SUPPORT
+========================= */
+[data-theme='dark'] .notifications-page-container {
+  background: #0f172a;
+}
+
+[data-theme='dark'] .notifications-title {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .notification-card {
+  background: #1e293b;
+  box-shadow: none;
+}
+
+[data-theme='dark'] .notification-card.read {
+  background: #0f172a; /* Darker for read */
+  border-left-color: #334155;
+}
+
+[data-theme='dark'] .notification-message {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .notification-card.unread .notification-message {
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .btn-mark-read {
+  color: #60a5fa;
+  border-color: #1e3a8a;
+}
+
+[data-theme='dark'] .btn-mark-read:hover {
+  background: #1e3a8a;
+}

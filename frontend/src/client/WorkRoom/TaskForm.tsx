@@ -6,7 +6,7 @@ interface TaskFormProps {
     onSubmit: (title: string, description: string) => void;
 }
 
-const TaskForm = ({ jobId, onSubmit }: TaskFormProps) => {
+const TaskForm = ({ onSubmit }: TaskFormProps) => {
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");

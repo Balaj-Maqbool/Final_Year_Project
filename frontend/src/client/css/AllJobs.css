@@ -1,0 +1,253 @@
+/* AllJobs.css */
+
+/* =========================
+   PAGE CONTAINER & HEADER
+========================= */
+.all-jobs-container {
+  padding: 3rem 0;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.page-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+}
+
+.page-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: #2563eb;
+  border-radius: 2px;
+}
+
+/* =========================
+   GRID LAYOUT
+========================= */
+.jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 2rem;
+}
+
+/* =========================
+   JOB CARD STYLING
+========================= */
+.job-card {
+  background: #ffffff;
+  border: none;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.job-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.job-card:hover::before {
+  opacity: 1;
+}
+
+.card-content {
+  flex-grow: 1;
+}
+
+/* Typography */
+.job-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.job-category-badge {
+  display: inline-block;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35em 0.8em;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.job-description {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Meta Data */
+.job-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
+  margin-bottom: 1.5rem;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-value {
+  font-size: 0.95rem;
+  color: #334155;
+  font-weight: 700;
+}
+
+.budget-highlight {
+  color: #059669; /* Green for money */
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-view-bids, .btn-view-tasks {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-view-bids {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid transparent;
+}
+
+.btn-view-bids:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.btn-view-tasks {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.btn-view-tasks:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4);
+}
+
+.btn-view-tasks:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================
+   DARK MODE SUPPORT
+========================= */
+[data-theme='dark'] .all-jobs-container {
+  background-color: #0f172a;
+}
+
+[data-theme='dark'] .page-title {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .job-card {
+  background: #1e293b;
+  box-shadow: none;
+}
+
+[data-theme='dark'] .job-title {
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .job-description {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .job-meta {
+  border-top-color: #334155;
+}
+
+[data-theme='dark'] .job-category-badge {
+  background: #1e3a8a;
+  color: #bfdbfe;
+}
+
+[data-theme='dark'] .btn-view-bids {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+[data-theme='dark'] .btn-view-bids:hover {
+  background: #475569;
+}
+
+[data-theme='dark'] .meta-value {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .budget-highlight {
+  color: #34d399;
+}

@@ -147,7 +147,9 @@ const getClientDashboard = asyncHandler(async (req, res) => {
 
 //////freelancer dashBoard
 const getFreelancerDashboard = asyncHandler(async (req, res) => {
+    console.log(`[Dashboard Debug] Accessing Freelancer Dashboard. User ID: ${req.user._id}, Role: '${req.user.role}'`);
     if (req.user.role !== "Freelancer") {
+        console.error(`[Dashboard Debug] Access Denied. Expected 'Freelancer', got '${req.user.role}'`);
         throw new ApiError(403, "Only Freelancers can access this dashboard");
     }
 

@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Container, Stack, Row, Card, Badge, Button, Spinner } from "react-bootstrap";
+import { Container, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { jobHandler, type Job } from "../services/jobHandler";
-
-
+import "./css/AllJobs.css";
 
 const AllJobs = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,58 +26,62 @@ const AllJobs = () => {
 
   if (loading)
     return (
-      <div className="text-center mt-5">
-        <Spinner animation="border" />
-      </div>)
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "60vh" }}>
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
 
-  //  const confirmedJobId = jobs._id;
   return (
+    <div className="all-jobs-container">
+      <Container>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h1 className="page-title">Your Projects</h1>
+        </div>
 
-    <Container className="mt-4">
-      <h1 className="mb-4">Your Projects</h1>
-
-      <Stack direction="horizontal">
-        <Row>
+        <div className="jobs-grid">
           {jobs.map((job) => (
-
-            <Card key={job._id} className="h-100 shadow-sm m-2">
-              <Card.Body>
-                <Card.Title>{job.title}</Card.Title>
-
-                <Badge bg="secondary" className="mb-2">
-                  {job.category}
-                </Badge>
-
-                <Card.Text className="mt-2">
-                  {job.description.substring(0, 100)}...
-                </Card.Text>
-
-                <p>
-                  <strong>Budget:</strong> PKR {job.budget}
-                </p>
-                <p>
-                  <strong>Deadline:</strong> {job.deadline}
+            <div key={job._id} className="job-card">
+              <div className="card-content">
+                <span className="job-category-badge">{job.category}</span>
+                <h3 className="job-title">{job.title}</h3>
+                <p className="job-description">
+                  {job.description}
                 </p>
 
+                <div className="job-meta">
+                  <div className="meta-item">
+                    <span className="meta-label">Budget</span>
+                    <span className="meta-value budget-highlight">PKR {job.budget}</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="meta-label">Deadline</span>
+                    <span className="meta-value">{new Date(job.deadline).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
 
-                <Button style={{ marginRight: "10px" }} onClick={() => navigate(`/client/view-bids/${job._id}`)} variant="secondary" size="sm">
+              <div className="action-buttons">
+                <button
+                  className="btn-view-bids"
+                  onClick={() => navigate(`/client/view-bids/${job._id}`)}
+                >
                   View Bids
-                </Button>
-
-                <Button disabled={job.status !== "Assigned"} onClick={() => navigate(`/client/tasks/${job._id}`)} variant="tertiary" size="sm">
+                </button>
+                <button
+                  className="btn-view-tasks"
+                  disabled={job.status !== "Assigned"}
+                  onClick={() => navigate(`/client/tasks/${job._id}`)}
+                >
                   View Tasks
-                </Button>
-
-                {/* <Button onClick={()=>console.log(job)}  className="m-2" variant="secondary" size="sm">
-                  Details
-                </Button> */}
-              </Card.Body>
-            </Card>
+                </button>
+              </div>
+            </div>
           ))}
-        </Row>
-      </Stack>
-    </Container>
+        </div>
+      </Container>
+    </div>
   );
 };
+
 
 export default AllJobs

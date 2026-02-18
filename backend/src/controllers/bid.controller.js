@@ -6,7 +6,7 @@ import { Job } from "../models/job.model.js";
 import mongoose from "mongoose";
 import { NotificationService } from "../services/notification.service.js";
 import { ValidationHelper } from "../utils/validation.utils.js";
-import { sseManager } from "../utils/SSEManager.js";
+import { socketManager } from "../streams/SocketManager.js";
 
 const placeBid = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -55,7 +55,15 @@ const placeBid = asyncHandler(async (req, res) => {
         timeline
     });
 
-    await NotificationService.notifyNewBid(job, bid);
+    console.log("Bid created:", bid._id);
+    console.log("Notifying poster:", job.poster_id);
+
+    try {
+        await NotificationService.notifyNewBid(job, bid);
+    } catch (error) {
+        console.error("Failed to send new bid notification:", error);
+        // Don't block the response if notification fails
+    }
 
     return res
         .status(201)
@@ -221,14 +229,10 @@ const updateBidStatus = asyncHandler(async (req, res) => {
         }
     }
 
-    // SSE: Notify Freelancer of decision
+    // Socket.IO: Notify Freelancer of decision via NotificationService
     console.log(`Sending notification to user ${bid.user_id}`);
-    const notificationResult = await sseManager.sendToUser(bid.user_id, "DASHBOARD_UPDATE", {
-        type: "BID_STATUS_UPDATE",
-        message: `Your bid was ${status}`,
-        jobId: job._id
-    });
-    console.log("Notification send result:", notificationResult);
+    
+    // NotificationService handles DB creation and Socket emission
     await NotificationService.notifyBidStatusUpdate(bid.user_id, job, status);
 
     return res

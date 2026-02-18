@@ -14,6 +14,8 @@ const DataBase_URI = process.env.DataBase_URI;
 const PORT = process.env.PORT || 8000;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
+console.log("Loaded CORS_ORIGIN:", CORS_ORIGIN);
+
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "";
 const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || "1hr";
 

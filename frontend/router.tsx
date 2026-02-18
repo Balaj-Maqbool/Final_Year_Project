@@ -64,7 +64,9 @@ const router = createBrowserRouter([
       { path: 'my-bids', element: <MyBids /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'notifications', element: <FreelancerNotifications /> },
-      { path: "jobs/:jobId/tasks", element: <FreelancerTasks /> }
+      { path: "jobs/:jobId/tasks", element: <FreelancerTasks /> },
+      { path: "chat", element: <Chat /> },
+      { path: "chat/:jobId", element: <Chat /> }
 
     ],
   },
@@ -87,7 +89,7 @@ const router = createBrowserRouter([
       { path: "view-bids/:jobId", element: <ViewBids /> },
       { path: 'notifications', element: <Notifications /> },
       { path: "tasks/:jobId", element: <Tasks /> },
-      { path: "tasks/:jobId/chat", element: <Chat /> }
+      { path: "chat/:jobId", element: <Chat /> }
     ]
   },
 

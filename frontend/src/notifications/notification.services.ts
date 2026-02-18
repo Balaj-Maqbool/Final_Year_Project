@@ -2,17 +2,17 @@ import { apiRequest } from "../services/apiClient";
 
 export const getNotifications = async () => {
     const response = await apiRequest<any>("/notifications");
-    // The backend returns { notifications: [], ... } inside the data object
-    return response.notifications || [];
+    // The backend returns a paginated response with 'docs' array
+    return response.docs || [];
 };
 
 export const markAsRead = async (id: string) => {   
-    const response = await apiRequest(`/notifications/read/${id}`, "PUT");
+    const response = await apiRequest(`/notifications/read/${id}`, "PATCH");
     return response;
 };
 
 export const markAllAsRead = async () => {
-    const response = await apiRequest(`/notifications/read-all`, "PUT");
+    const response = await apiRequest(`/notifications/read-all`, "PATCH");
     return response;
 };
 

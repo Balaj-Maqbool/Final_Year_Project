@@ -1,13 +1,13 @@
 import ThreadsSidebar from "../ChatRoom/ThreadsSidebar";
-import ChatWindow from "../ChatRoom/ChatWindow";  
+import ChatWindow from "../ChatRoom/ChatWindow";
+import "./Chat.css";
 
 const ChatLayout = () => {
     return (
-       <div className="flex h-screen">
-   <ThreadsSidebar />
-   <ChatWindow />
-</div>
-
+        <div className="d-flex chat-layout">
+            <ThreadsSidebar />
+            <ChatWindow />
+        </div>
     );
 };
 
