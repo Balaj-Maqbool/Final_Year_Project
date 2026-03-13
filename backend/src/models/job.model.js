@@ -29,9 +29,14 @@ const jobSchema = new Schema(
             type: [String],
             default: []
         },
+        currency: {
+            type: String,
+            enum: ["usd", "pkr"],
+            default: "usd"
+        },
         status: {
             type: String,
-            enum: ["Open", "Assigned", "Completed"],
+            enum: ["Open", "Assigned", "Completed", "Closed"],
             default: "Open",
             index: true
         },
