@@ -9,16 +9,10 @@ import Stripe from "stripe";
 import { ValidationHelper } from "../utils/validation.utils.js";
 import { NotificationService } from "../services/notification.service.js";
 
-// Initialize Stripe with the secret key from environment
 const stripe = new Stripe(STRIPE_SECRET_KEY);
 
-const PLATFORM_FEE_PERCENTAGE = 0.10; // 10%
+const PLATFORM_FEE_PERCENTAGE = 0.1;
 
-/**
- * @desc Create a Stripe Checkout Session for a Client paying for a Job
- * @route POST /api/v1/payments/create-checkout-session/:jobId
- * @access Protected (Client only)
- */
 const createCheckoutSession = asyncHandler(async (req, res) => {
     if (req.user.role !== "Client") {
         throw new ApiError(403, "Only Clients can initiate payments.");
@@ -38,24 +32,27 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
     }
 
     if (!job.assigned_to) {
-        throw new ApiError(400, "Cannot fund a job that is not assigned to a freelancer.");
+        throw new ApiError(
+            400,
+            "Cannot fund a job that is not assigned to a freelancer."
+        );
     }
 
     if (job.contract_status !== "Pending") {
-        throw new ApiError(400, `Cannot fund this job. Current status is ${job.contract_status}.`);
+        throw new ApiError(
+            400,
+            `Cannot fund this job. Current status is ${job.contract_status}.`
+        );
     }
 
-    // Determine the amount to charge (in USD for test mode simplicity)
     const amount = job.agreed_price > 0 ? job.agreed_price : job.budget;
 
     if (amount <= 0) {
         throw new ApiError(400, "Invalid job budget/price.");
     }
 
-    // Stripe expects amount in cents
     const amountInCents = Math.round(amount * 100);
 
-    // Create the session
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
@@ -78,53 +75,50 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
                 quantity: 1
             }
         ],
-        // Using standard success/cancel URLs, these would usually point to your Frontend
         success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled`
     });
 
-    // We don't save the Payment in DB as "completed" until the webhook fires.
-    // We can save a "pending" record if we want, but it's simpler to just return the URL for now.
-    
-    // Notify the client that payment session is created
     await NotificationService.notifyPaymentInitiated(req.user._id, job);
 
     console.log("stripe session created", session);
 
     return res.status(200).json(
-        new ApiResponse(200, {
-            sessionId: session.id,
-            url: session.url
-        }, "Checkout session created successfully.")
+        new ApiResponse(
+            200,
+            {
+                sessionId: session.id,
+                url: session.url
+            },
+            "Checkout session created successfully."
+        )
     );
 });
 
-/**
- * @desc Handle Stripe Webhook to confirm payment and perform pseudo-escrow DB logic
- * @route POST /api/v1/payments/webhook
- * @access Public (Protected by Stripe Signature)
- */
 const stripeWebhook = async (req, res) => {
-    const payload = req.body; // THIS MUST BE RAW BUFFER, handled in app.js
+    const payload = req.body;
     const sig = req.headers["stripe-signature"];
 
     let event;
 
     try {
         if (!STRIPE_WEBHOOK_SECRET) {
-            console.warn("⚠️ STRIPE_WEBHOOK_SECRET is missing. Webhooks cannot be verified yet.");
-            // For local development, if you don't have the secret yet, we might have to bypass
-            // But for production, this should throw.
+            console.warn(
+                "⚠️ STRIPE_WEBHOOK_SECRET is missing. Webhooks cannot be verified yet."
+            );
             throw new Error("Missing Webhook Secret");
         }
 
-        event = stripe.webhooks.constructEvent(payload, sig, STRIPE_WEBHOOK_SECRET);
+        event = stripe.webhooks.constructEvent(
+            payload,
+            sig,
+            STRIPE_WEBHOOK_SECRET
+        );
     } catch (err) {
         console.error("Webhook signature verification failed:", err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the event
     if (event.type === "checkout.session.completed") {
         const session = event.data.object;
 
@@ -132,32 +126,27 @@ const stripeWebhook = async (req, res) => {
         const clientId = session.metadata.clientId;
         const freelancerId = session.metadata.freelancerId;
 
-        const amountPaid = session.amount_total / 100; // convert from cents
+        const amountPaid = session.amount_total / 100;
 
         try {
-            // 1. Fetch Users & Job
             const client = await User.findById(clientId);
             const freelancer = await User.findById(freelancerId);
             const job = await Job.findById(jobId);
 
             if (client && freelancer && job) {
-                // 2. Perform Pseudo-Escrow Math
                 const platformFee = amountPaid * PLATFORM_FEE_PERCENTAGE;
                 const freelancerEarnings = amountPaid - platformFee;
 
-                // 3. Update Client (totalSpent)
                 client.totalSpent = (client.totalSpent || 0) + amountPaid;
                 await client.save({ validateBeforeSave: false });
 
-                // 4. Update Freelancer (escrowBalance) - Funds are locked here until job completion
-                freelancer.escrowBalance = (freelancer.escrowBalance || 0) + freelancerEarnings;
+                freelancer.escrowBalance =
+                    (freelancer.escrowBalance || 0) + freelancerEarnings;
                 await freelancer.save({ validateBeforeSave: false });
 
-                // 5. Update Job Status
-                job.contract_status = "Active"; // Or whichever status indicates it's funded and work can begin
+                job.contract_status = "Active";
                 await job.save();
 
-                // 6. Record the Payment in our DB
                 await Payment.create({
                     user: client._id,
                     job: job._id,
@@ -169,7 +158,6 @@ const stripeWebhook = async (req, res) => {
                     stripePaymentIntentId: session.payment_intent
                 });
 
-                // 7. Notify both parties
                 await NotificationService.notifyPaymentSuccess(
                     clientId,
                     freelancerId,
@@ -178,29 +166,24 @@ const stripeWebhook = async (req, res) => {
                     session.currency || job.currency
                 );
 
-                console.log(`✅ Payment successful for Job: ${jobId}. Escrow funded.`);
+                console.log(
+                    `✅ Payment successful for Job: ${jobId}. Escrow funded.`
+                );
             }
         } catch (dbError) {
-            console.error("Error processing successful payment in DB:", dbError);
-            // Ideally notify admin or retry mechanism
+            console.error(
+                "Error processing successful payment in DB:",
+                dbError
+            );
         }
     }
 
-    // Return a 200 response to acknowledge receipt of the event
     res.json({ received: true });
 };
 
-/**
- * @desc Get the current user's wallet balance
- * @route GET /api/v1/payments/wallet
- * @access Protected
- */
 const getWalletBalance = asyncHandler(async (req, res) => {
-    // Both Freelancers and Clients can view their financial stats
-    // Note: req.user is already populated by verifyJWT middleware with full user details
     const user = req.user;
 
-    // Fetch the transaction ledger (history of deposits, withdrawals)
     const transactionHistory = await Payment.find({ user: req.user._id })
         .populate({
             path: "job",
@@ -210,22 +193,21 @@ const getWalletBalance = asyncHandler(async (req, res) => {
                 select: "fullName avatar"
             }
         })
-        .sort({ createdAt: -1 }) // Newest first
-        .limit(20); // Limit to recent 20 for performance, can add pagination later
+        .sort({ createdAt: -1 })
+        .limit(20);
 
     return res.status(200).json(
-        new ApiResponse(200, {
-            wallet: user,
-            transactions: transactionHistory
-        }, "Wallet balance and transaction history retrieved successfully.")
+        new ApiResponse(
+            200,
+            {
+                wallet: user,
+                transactions: transactionHistory
+            },
+            "Wallet balance and transaction history retrieved successfully."
+        )
     );
 });
 
-/**
- * @desc Request a withdrawal from pseudo-escrow to bank
- * @route POST /api/v1/payments/withdraw
- * @access Protected (Freelancer only)
- */
 const requestWithdrawal = asyncHandler(async (req, res) => {
     if (req.user.role !== "Freelancer") {
         throw new ApiError(403, "Only Freelancers can request withdrawals.");
@@ -241,29 +223,36 @@ const requestWithdrawal = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Insufficient funds in wallet.");
     }
 
-    // Deduct the requested amount from the active balance
     freelancer.availableBalance -= amount;
     await freelancer.save({ validateBeforeSave: false });
 
-    // Record the withdrawal request (status: pending, requires admin manual payout)
     const withdrawalRecord = await Payment.create({
         user: freelancer._id,
         amount: amount,
         type: "withdrawal",
-        status: "pending" // Admin will change this to 'completed' once they wire the money
+        status: "pending"
     });
 
-    // Notify freelancer that withdrawal request is submitted (defaulting to USD for now as wallet is generic)
-    await NotificationService.notifyWithdrawalRequested(freelancer._id, amount, "usd");
-
-    return res.status(200).json(
-        new ApiResponse(200, withdrawalRecord, "Withdrawal request submitted successfully. Admin will process it shortly.")
+    await NotificationService.notifyWithdrawalRequested(
+        freelancer._id,
+        amount,
+        "usd"
     );
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                withdrawalRecord,
+                "Withdrawal request submitted successfully. Admin will process it shortly."
+            )
+        );
 });
 
 export {
     createCheckoutSession,
     stripeWebhook,
     getWalletBalance,
-    requestWithdrawal
+    requestWithdrawal //exported
 };

@@ -151,7 +151,26 @@
 
 ---
 
-## 11. AI Features (`/ai`) 🤖
+## 11. Media Management (`/media`)
+
+| Method  | Endpoint  | Description                              | Request Body / Params                                                        |
+| :------ | :-------- | :--------------------------------------- | :--------------------------------------------------------------------------- |
+| **GET** | `/config` | Get Cloudinary upload config & signature | _No Body_ <br>Returns: `{ signature, timestamp, apiKey, cloudName, folder }` |
+
+---
+
+## 12. Payments (`/payments`) 💰
+
+| Method   | Endpoint                     | Description                          | Request Body / Params                                              |
+| :------- | :--------------------------- | :----------------------------------- | :----------------------------------------------------------------- |
+| **POST** | `/checkout/session/:jobId`   | Create a Stripe checkout session     | **Param**: `jobId` <br>**Returns**: `{ sessionId, url }`           |
+| **GET**  | `/wallet`                    | Get wallet balance & transaction log | _No Body_ <br>**Returns**: `{ wallet, transactions: [...] }`       |
+| **POST** | `/withdraw`                  | Request a withdrawal                 | **JSON**: `{ "amount": 500 }`                                      |
+| **POST** | `/webhook` (Public Endpoint) | Stripe Webhook (Confirm Funding)     | **Raw Body**: Handled internally for pseudo-escrow balance updates |
+
+---
+
+## 13. AI Features (`/ai`) 🤖
 
 > [!NOTE]
 > All AI routes are rate-limited to **10 requests per minute** globally to respect API quotas.

@@ -1,26 +1,33 @@
 {
     "name": "freelance-marketplace-backend",
     "version": "1.0.0",
-    "description": "Backend for Final Year Project (FYP) - A MERN Stack Freelancing Marketplace",
+    "description": "Advanced AI-driven Freelancing Marketplace Backend featuring Stripe Payments, Pseudo-Escrow, and Real-time Communication.",
     "main": "index.js",
     "type": "module",
     "scripts": {
         "dev": "nodemon src/index.js",
         "start": "node src/index.js",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "lint": "prettier --check ."
     },
     "keywords": [
-        "backend",
-        "javascript",
         "mern",
         "freelancing",
         "marketplace",
-        "fyp",
+        "stripe",
+        "google-gemini",
+        "socket.io",
+        "sse",
+        "escrow",
+        "real-time",
         "nodejs",
         "express",
         "mongodb"
     ],
-    "author": "Balaj Maqbool",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "author": "Balaj Maqbool <balajmaqbool54@gmail.com>",
     "license": "ISC",
     "devDependencies": {
         "nodemon": "^3.1.11",

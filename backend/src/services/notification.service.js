@@ -113,7 +113,13 @@ class NotificationService {
         });
     }
 
-    static async notifyPaymentSuccess(clientId, freelancerId, job, amount, currency = "usd") {
+    static async notifyPaymentSuccess(
+        clientId,
+        freelancerId,
+        job,
+        amount,
+        currency = "usd"
+    ) {
         const symbol = currency.toLowerCase() === "pkr" ? "Rs." : "$";
         // Notify Client
         await sseManager.sendToUser(clientId, "DASHBOARD_UPDATE", {
@@ -130,11 +136,15 @@ class NotificationService {
         });
     }
 
-    static async notifyWithdrawalRequested(freelancerId, amount, currency = "usd") {
+    static async notifyWithdrawalRequested(
+        freelancerId,
+        amount,
+        currency = "usd"
+    ) {
         const symbol = currency.toLowerCase() === "pkr" ? "Rs." : "$";
         await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
             type: "WITHDRAWAL_REQUESTED",
-            message: `Withdrawal request for ${symbol}${amount} submitted successfully.`,
+            message: `Withdrawal request for ${symbol}${amount} submitted successfully.`
         });
     }
 
@@ -146,7 +156,12 @@ class NotificationService {
         });
     }
 
-    static async notifyWithdrawalProcessed(freelancerId, amount, status, currency = "usd") {
+    static async notifyWithdrawalProcessed(
+        freelancerId,
+        amount,
+        status,
+        currency = "usd"
+    ) {
         const symbol = currency.toLowerCase() === "pkr" ? "Rs." : "$";
         await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
             type: "WITHDRAWAL_PROCESSED",

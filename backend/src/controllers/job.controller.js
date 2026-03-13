@@ -345,20 +345,33 @@ const updateJob = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Category is required");
         job.category = category;
     }
-    if (status === "Closed" || (status === "Completed" && job.status !== "Completed" && job.assigned_to)) {
+    if (
+        status === "Closed" ||
+        (status === "Completed" &&
+            job.status !== "Completed" &&
+            job.assigned_to)
+    ) {
         // Release funds if they haven't been released yet
         if (job.contract_status === "Active" && job.assigned_to) {
-            const amountToRelease = job.agreed_price > 0 ? job.agreed_price : job.budget;
-            const platformFee = amountToRelease * 0.10;
+            const amountToRelease =
+                job.agreed_price > 0 ? job.agreed_price : job.budget;
+            const platformFee = amountToRelease * 0.1;
             const freelancerEarnings = amountToRelease - platformFee;
 
             const freelancer = await User.findById(job.assigned_to);
             if (freelancer) {
-                freelancer.escrowBalance = Math.max(0, (freelancer.escrowBalance || 0) - freelancerEarnings); 
-                freelancer.availableBalance = (freelancer.availableBalance || 0) + freelancerEarnings;
-                freelancer.totalEarned = (freelancer.totalEarned || 0) + freelancerEarnings;
+                freelancer.escrowBalance = Math.max(
+                    0,
+                    (freelancer.escrowBalance || 0) - freelancerEarnings
+                );
+                freelancer.availableBalance =
+                    (freelancer.availableBalance || 0) + freelancerEarnings;
+                freelancer.totalEarned =
+                    (freelancer.totalEarned || 0) + freelancerEarnings;
                 await freelancer.save({ validateBeforeSave: false });
-                console.log(`💰 Escrow Released: $${freelancerEarnings} moved to available balance.`);
+                console.log(
+                    `💰 Escrow Released: $${freelancerEarnings} moved to available balance.`
+                );
             }
         }
         // Set contract to Fulfilled

@@ -15,13 +15,12 @@ const generationConfig = {
 };
 
 const FALLBACK_MODELS = [
-    "gemini-flash-latest",       
-    "gemini-2.5-flash",          
-    "gemma-3-1b-it",             
-    "gemma-3-27b-it",            
-    "gemini-2.0-flash-lite"      
+    "gemini-flash-latest",
+    "gemini-2.5-flash",
+    "gemma-3-1b-it",
+    "gemma-3-27b-it",
+    "gemini-2.0-flash-lite"
 ];
-
 
 const aiModel = {
     generateContent: async (prompt) => {
@@ -29,7 +28,9 @@ const aiModel = {
 
         for (const modelName of FALLBACK_MODELS) {
             try {
-                console.log(`🤖 Attempting AI generation with model: ${modelName}`);
+                console.log(
+                    `🤖 Attempting AI generation with model: ${modelName}`
+                );
 
                 const model = genAI.getGenerativeModel({
                     model: modelName,
@@ -39,7 +40,6 @@ const aiModel = {
 
                 // console.log(`✅ Success with ${modelName}`);
                 return result;
-
             } catch (error) {
                 // console.warn(`⚠️ Failed with ${modelName}:`, error.message);
                 lastError = error;
