@@ -8,7 +8,10 @@ A robust backend REST API for a private SaaS freelancing platform. Built with **
 - **Framework**: Express.js
 - **Database**: MongoDB (Mongoose)
 - **Auth**: JWT & Passport.js (Google OAuth)
+- **Payments**: Stripe Checkout & Webhooks
+- **Real-time**: Socket.io & SSE
 - **File Storage**: Cloudinary (Multer)
+- **AI**: Google Gemini AI
 
 ## ✨ Key Features
 
@@ -16,6 +19,7 @@ A robust backend REST API for a private SaaS freelancing platform. Built with **
 
     - Role-based access (Client vs. Freelancer).
     - Google OAuth integration.
+    - Password reset & email verification.
     - Profile & Cover image management.
 
 - **💼 Job Management**
@@ -34,26 +38,34 @@ A robust backend REST API for a private SaaS freelancing platform. Built with **
     - Kanban-style status (To Do, In Progress, Done).
     - Client approval workflow for completed tasks.
 
-- **⭐ Ratings & Reviews**
+- **💰 Payment & Financials**
 
-    - Clients rate Freelancers upon job completion.
-    - Automatic average rating calculation.
-
-- **📊 Dashboards**
-
-    - Aggregated analytics for Clients (Spending, Hires) and Freelancers (Earnings, Success Rate).
-
-- **🔔 Real-time Notifications (SSE)**
-
-    - **Instant Alerts**: Users get real-time toasts for new bids, job matches, and task updates.
-    - **Email-like History**: All notifications are saved to the database for later viewing.
-    - **Smart Filtering**: Notifications are role-aware (e.g., only Freelancers see "New Job" alerts).
+    - **Stripe Integration**: Secure checkout for job funding.
+    - **Escrow System**: Funds held in platform pseudo-escrow until job completion.
+    - **Payment Hub**: View wallet balance, transaction history, and earnings.
+    - **Withdrawals**: Freelancers can request manual bank payouts.
 
 - **🤖 AI Integration (Gemini)**
-    - **Job Architect**: Helps clients draft professional job descriptions from simple prompts.
-    - **Profile Polisher**: Enhances freelancer bios and suggests relevant skills.
-    - **Proposal Generator**: Writes personalized cover letters based on job requirements.
-    - **Task Breakdown**: Automatically breaks down complex jobs into manageable tasks.
+
+    - **Job Architect**: Draft professional job descriptions from simple prompts.
+    - **Profile Polisher**: Enhance bios and suggest relevant skills.
+    - **Proposal Generator**: Write personalized cover letters for job bids.
+    - **Task Breakdown**: Automatically decompose jobs into actionable tasks.
+
+- **📊 Dashboards & Analytics**
+
+    - Aggregated stats for Clients (Spending, Hires) and Freelancers (Earnings, Success Rate).
+
+- **🔔 Real-time Communication**
+    - **Notifications**: Instant SSE-based alerts for bids, messages, and milestones.
+    - **Chat System**: Real-time messaging between clients and freelancers (Socket.io).
+
+## 🛡️ Security & Quality
+
+- **Rate Limiting**: Protection against DDoS and AI quota abuse.
+- **Validation**: Strict input validation using a global helper class.
+- **Error Handling**: Standardized API error/success response architecture.
+- **Privacy**: Cookie-only JWT policies and secure HTTP secrets.
 
 ## 🛠️ Installation & Setup
 
@@ -66,17 +78,17 @@ A robust backend REST API for a private SaaS freelancing platform. Built with **
     Create a `.env` file in the root directory:
     ```env
     PORT=3000
-    MONGODB_URI=your_mongodb_connection_string
-    ACCESS_TOKEN_SECRET=your_jwt_secret
-    ACCESS_TOKEN_EXPIRY=1d
-    REFRESH_TOKEN_SECRET=your_refresh_secret
-    REFRESH_TOKEN_EXPIRY=10d
+    MONGODB_URI=...
+    ACCESS_TOKEN_SECRET=...
+    REFRESH_TOKEN_SECRET=...
+    STRIPE_SECRET_KEY=...
+    STRIPE_WEBHOOK_SECRET=...
+    GEMINI_API_KEY=...
     CLOUDINARY_CLOUD_NAME=...
     CLOUDINARY_API_KEY=...
     CLOUDINARY_API_SECRET=...
     GOOGLE_CLIENT_ID=...
     GOOGLE_CLIENT_SECRET=...
-    GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/users/google/callback
     ```
 4.  **Run the server**:
     ```bash
@@ -85,6 +97,18 @@ A robust backend REST API for a private SaaS freelancing platform. Built with **
 
 ## 📖 API Documentation
 
-Detailed endpoint specifications are available in [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+Detailed endpoint specifications are available in [API_DOCUMENTATION.md](./_integration_docs/api_references/API_DOCUMENTATION.md).
+
+---
+
+## 👨‍💻 Connect with Me
+
+I'm **Balaj Maqbool**, a passionate MERN Stack Developer. Feel free to reach out for collaborations or inquiries!
+
+- **Portfolio**: [balaj-maqbool.vercel.app](https://balaj-maqbool.vercel.app/)
+- **LinkedIn**: [balaj-maqbool](https://linkedin.com/in/balaj-maqbool)
+- **GitHub**: [@balaj-maqbool](https://github.com/balaj-maqbool)
+- **Email**: [balajmaqbool54@gmail.com](mailto:balajmaqbool54@gmail.com)
+- **WhatsApp**: [Direct Message](https://wa.me/923252624261)
 
 ---
