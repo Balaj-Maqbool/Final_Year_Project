@@ -36,6 +36,14 @@ class RateLimitManager {
         );
     }
 
+    static apiPayments() {
+        return this.create(
+            30,
+            15 * 60,
+            "Too many payment requests from this IP. Please try again after 15 minutes."
+        );
+    }
+
     static apiMedia() {
         return this.create(
             10,

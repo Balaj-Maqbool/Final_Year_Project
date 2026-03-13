@@ -1,5 +1,6 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
 import { NotificationService } from "../services/notification.service.js";
@@ -133,6 +134,27 @@ const getMyJobs = asyncHandler(async (req, res) => {
 
     const aggregate = Job.aggregate([
         { $match: { poster_id: req.user._id } },
+        {
+            $lookup: {
+                from: "users",
+                localField: "assigned_to",
+                foreignField: "_id",
+                as: "freelancer",
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            profileImage: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                freelancer: { $first: "$freelancer" }
+            }
+        },
         { $sort: { createdAt: -1 } }
     ]);
 
@@ -179,6 +201,27 @@ const getJobById = asyncHandler(async (req, res) => {
         {
             $addFields: {
                 poster: { $first: "$poster" }
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "assigned_to",
+                foreignField: "_id",
+                as: "freelancer",
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            profileImage: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                freelancer: { $first: "$freelancer" }
             }
         }
     ]);
@@ -276,17 +319,39 @@ const updateJob = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Category is required");
         job.category = category;
     }
+    if (status === "Closed" || (status === "Completed" && job.status !== "Completed" && job.assigned_to)) {
+        // Release funds if they haven't been released yet
+        if (job.contract_status === "Active" && job.assigned_to) {
+            const amountToRelease = job.agreed_price > 0 ? job.agreed_price : job.budget;
+            const platformFee = amountToRelease * 0.10;
+            const freelancerEarnings = amountToRelease - platformFee;
+
+            const freelancer = await User.findById(job.assigned_to);
+            if (freelancer) {
+                freelancer.escrowBalance = Math.max(0, (freelancer.escrowBalance || 0) - freelancerEarnings); 
+                freelancer.availableBalance = (freelancer.availableBalance || 0) + freelancerEarnings;
+                freelancer.totalEarned = (freelancer.totalEarned || 0) + freelancerEarnings;
+                await freelancer.save({ validateBeforeSave: false });
+                console.log(`💰 Escrow Released: $${freelancerEarnings} moved to available balance.`);
+            }
+        }
+        // Set contract to Fulfilled
+        job.contract_status = "Fulfilled";
+    }
+
     if (status !== undefined) {
-        if (!["Open", "Assigned", "Completed"].includes(status)) {
+        if (!["Open", "Assigned", "Completed", "Closed"].includes(status)) {
             throw new ApiError(400, "Invalid status");
         }
         job.status = status;
     }
 
+    // Save job after all checks and potential escrow logic
     await job.save();
 
     if (job.status === "Completed" && job.assigned_to) {
         await NotificationService.notifyJobCompleted(job.assigned_to, job);
+        await NotificationService.notifyJobClosed(req.user._id, job);
     }
 
     return res

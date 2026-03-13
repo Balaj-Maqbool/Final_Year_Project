@@ -18,6 +18,10 @@ app.use(
 import { RateLimitManager } from "./middlewares/rateLimiter.middleware.js";
 app.use("/api", RateLimitManager.apiGlobal());
 
+// Stripe Webhook MUST be parsed as raw body before express.json()
+import { stripeWebhook } from "./controllers/payment.controller.js";
+app.post("/api/v1/payments/webhook", express.raw({ type: "application/json" }), stripeWebhook);
+
 app.use(express.json({ limit: "24kb" }));
 
 app.use(express.static("public"));
@@ -62,6 +66,9 @@ app.use("/api/v1/media", mediaRouter);
 
 import aiRouter from "./routes/ai.routes.js";
 app.use("/api/v1/ai", aiRouter);
+
+import paymentRouter from "./routes/payment.routes.js";
+app.use("/api/v1/payments", paymentRouter);
 
 app.get("/", (req, res) => {
     res.send("API is running...");
