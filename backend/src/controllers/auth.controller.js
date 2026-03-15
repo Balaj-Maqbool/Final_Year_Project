@@ -343,7 +343,7 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
             maxAge: refreshTokenMaxAge
         })
         .redirect(
-            `${frontendUrl}${FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success"}`
+            `${frontendUrl}${FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success"}?success=true&role=${user.role}`
         );
 });
 
