@@ -1,4 +1,12 @@
-node_modules
-dist
-coverage
-.env
+node_modules/
+package-lock.json
+public/
+.agent/
+.gemini/
+.vscode/
+dist/
+build/
+*.log
+.env*
+stripe.exe
+stripe.zip

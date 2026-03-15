@@ -83,6 +83,22 @@ const userSchema = new Schema(
         rating: {
             type: Number,
             default: 0
+        },
+        availableBalance: {
+            type: Number,
+            default: 0
+        },
+        escrowBalance: {
+            type: Number,
+            default: 0
+        },
+        totalEarned: {
+            type: Number,
+            default: 0
+        },
+        totalSpent: {
+            type: Number,
+            default: 0
         }
     },
     {

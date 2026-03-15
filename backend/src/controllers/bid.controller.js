@@ -182,7 +182,7 @@ const updateBidStatus = asyncHandler(async (req, res) => {
                     status: "Assigned",
                     assigned_to: bid.user_id,
                     agreed_price: bid.bid_amount,
-                    contract_status: "Active"
+                    contract_status: "Pending" // Waiting for Client to fund the escrow
                 }
             },
             { new: true }

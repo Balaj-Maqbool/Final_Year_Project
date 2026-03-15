@@ -16,8 +16,32 @@ app.use(
     })
 );
 
+app.use((req, res, next) => {
+    res.setHeader("X-Powered-By", "Balaj-Maqbool-Backend-Engine");
+    next();
+});
+
+app.use((req, res, next) => {
+    const start = Date.now();
+    res.on("finish", () => {
+        const duration = Date.now() - start;
+        console.log(
+            `[${new Date().toLocaleTimeString()}] ${req.method} ${req.originalUrl} - ${res.statusCode} (${duration}ms)`
+        );
+    });
+    next();
+});
+
 import { RateLimitManager } from "./middlewares/rateLimiter.middleware.js";
 app.use("/api", RateLimitManager.apiGlobal());
+
+// Stripe Webhook MUST be parsed as raw body before express.json()
+import { stripeWebhook } from "./controllers/payment.controller.js";
+app.post(
+    "/api/v1/payments/webhook",
+    express.raw({ type: "application/json" }),
+    stripeWebhook
+);
 
 app.use(express.json({ limit: "24kb" }));
 
@@ -64,8 +88,18 @@ app.use("/api/v1/media", mediaRouter);
 import aiRouter from "./routes/ai.routes.js";
 app.use("/api/v1/ai", aiRouter);
 
+import paymentRouter from "./routes/payment.routes.js";
+app.use("/api/v1/payments", paymentRouter);
+
 app.get("/", (req, res) => {
-    res.send("API is running...");
+    res.status(200).json({
+        status: "Healthy",
+        project: "Freelance Marketplace Master API",
+        author: "Balaj Maqbool",
+        version: "1.0.0",
+        contact: "balajmaqbool54@gmail.com",
+        portfolio: "https://balaj-maqbool.vercel.app/"
+    });
 });
 
 app.use((err, req, res, next) => {
