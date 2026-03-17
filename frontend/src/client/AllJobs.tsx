@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Container, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { jobHandler, type Job } from "../services/jobHandler";
+import { paymentHandler } from "../services/paymentHandler";
 import "./css/AllJobs.css";
 
 const AllJobs = () => {
@@ -9,6 +10,7 @@ const AllJobs = () => {
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fundingJobId, setFundingJobId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -23,6 +25,21 @@ const AllJobs = () => {
     };
     fetchJobs();
   }, []);
+
+  const handleFundJob = async (jobId: string) => {
+    try {
+      setFundingJobId(jobId);
+      const res = await paymentHandler.createCheckoutSession(jobId);
+      if (res && res.url) {
+        window.location.href = res.url;
+      }
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      alert("Failed to initiate payment. Please try again.");
+    } finally {
+      setFundingJobId(null);
+    }
+  };
 
   if (loading)
     return (
@@ -57,6 +74,14 @@ const AllJobs = () => {
                     <span className="meta-label">Deadline</span>
                     <span className="meta-value">{new Date(job.deadline).toLocaleDateString()}</span>
                   </div>
+                  {job.status === "Assigned" && job.contract_status && (
+                    <div className="meta-item">
+                      <span className="meta-label">Contract Status</span>
+                      <span className={`meta-value ${job.contract_status === "Pending" ? "text-warning" : "text-success"}`}>
+                        {job.contract_status}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -69,11 +94,20 @@ const AllJobs = () => {
                 </button>
                 <button
                   className="btn-view-tasks"
-                  disabled={job.status !== "Assigned"}
+                  disabled={job.status !== "Assigned" || job.contract_status === "Pending"}
                   onClick={() => navigate(`/client/tasks/${job._id}`)}
                 >
                   View Tasks
                 </button>
+                {job.status === "Assigned" && (!job.contract_status || job.contract_status === "Pending") && (
+                  <button
+                    className="btn btn-primary ml-2"
+                    disabled={fundingJobId === job._id}
+                    onClick={() => handleFundJob(job._id)}
+                  >
+                    {fundingJobId === job._id ? <Spinner size="sm" animation="border" /> : "Fund Escrow"}
+                  </button>
+                )}
               </div>
             </div>
           ))}

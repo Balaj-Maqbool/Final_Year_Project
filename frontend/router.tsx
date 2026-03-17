@@ -22,6 +22,9 @@ import AdminLayout from "./src/outlet/AdminLayout";
 import Tasks from "./src/client/WorkRoom/Tasks";
 import FreelancerTasks from "./src/freelancer/WorkRoom/FreelancerTasks";
 import Chat from "./src/client/WorkRoom/Chat";
+import PaymentSuccess from "./src/payment/PaymentSuccess";
+import PaymentCancelled from "./src/payment/PaymentCancelled";
+import Wallet from "./src/payment/Wallet";
 
 const router = createBrowserRouter([
   //// Authentication pages
@@ -40,6 +43,14 @@ const router = createBrowserRouter([
   {
     path: "/oauth-success",
     element: <OAuthSuccess />,
+  },
+  {
+    path: "/payment-success",
+    element: <PaymentSuccess />,
+  },
+  {
+    path: "/payment-cancelled",
+    element: <PaymentCancelled />,
   },
   ////////Freelancer pages
 
@@ -66,7 +77,8 @@ const router = createBrowserRouter([
       { path: 'notifications', element: <FreelancerNotifications /> },
       { path: "jobs/:jobId/tasks", element: <FreelancerTasks /> },
       { path: "chat", element: <Chat /> },
-      { path: "chat/:jobId", element: <Chat /> }
+      { path: "chat/:jobId", element: <Chat /> },
+      { path: "wallet", element: <Wallet /> }
 
     ],
   },
@@ -89,7 +101,8 @@ const router = createBrowserRouter([
       { path: "view-bids/:jobId", element: <ViewBids /> },
       { path: 'notifications', element: <Notifications /> },
       { path: "tasks/:jobId", element: <Tasks /> },
-      { path: "chat/:jobId", element: <Chat /> }
+      { path: "chat/:jobId", element: <Chat /> },
+      { path: "wallet", element: <Wallet /> }
     ]
   },
 

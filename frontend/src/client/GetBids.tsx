@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { bidHandler } from "../services/bidHandler"
 import { InitializeChat } from "../services/useChats";
+import { paymentHandler } from "../services/paymentHandler";
 import { Card, Alert, Spinner, Button, Badge } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
@@ -53,12 +54,18 @@ const GetBids = ({ jobId }: GetBidsProps) => {
 
     const handleAcceptBid = async (bidId: string) => {
         if (!jobId) return;
-        if (!window.confirm("Are you sure you want to accept this bid?")) return;
+        if (!window.confirm("Are you sure you want to accept this bid? You will be redirected to securely fund the escrow via Stripe.")) return;
 
         try {
             await bidHandler.updateBidStatus(jobId, bidId, "Accepted");
-            alert("Bid accepted successfully!");
-            fetchBids();
+
+            // Redirect to Stripe Checkout instantly to fund the escrow
+            const checkoutSession = await paymentHandler.createCheckoutSession(jobId);
+            if (checkoutSession && checkoutSession.url) {
+                window.location.href = checkoutSession.url;
+            } else {
+                fetchBids();
+            }
         } catch (err: any) {
             console.error(err);
             alert(err.message || "Failed to accept bid");

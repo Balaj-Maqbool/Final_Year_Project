@@ -80,7 +80,7 @@ const getJobBids = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Job not found");
     }
 
-    if (job.poster_id.toString() !== req.user?._id.toString()) {
+    if (req.user.role === "Client" && job.poster_id.toString() !== req.user?._id.toString()) {
         throw new ApiError(
             403,
             "You are not authorized to view bids for this job"

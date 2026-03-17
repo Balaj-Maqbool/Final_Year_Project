@@ -18,6 +18,7 @@ const Navbar = () => {
           <li><Link to="/freelancer/my-bids" className="nav-link">My Bids</Link></li>
           <li><Link to="/freelancer/freelancerDashboard" className="nav-link">Dashboard</Link></li>
           <li style={{ display: "flex", alignItems: "center" }}><NotificationBell /></li>
+          <li><Link to="/freelancer/wallet" className="nav-link">Wallet</Link></li>
         </ul>
 
         <div className="nav-menu">

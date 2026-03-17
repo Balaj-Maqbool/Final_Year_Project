@@ -15,6 +15,8 @@ export interface Job extends JobData {
     _id: string;
     status: string;
     client_id?: string;
+    contract_status?: string;
+    agreed_price?: number;
     // Add other fields returned by the backend if necessary, e.g. status, client_id, etc.
 }
 

@@ -19,6 +19,7 @@ const Navbar = () => {
           <li><Link to="/client/dashboard" className="nav-link">Dashboard</Link></li>
           <li style={{ display: "flex", alignItems: "center" }}><NotificationBell /></li>
           <li><Link to="/client/tasks" className="nav-link">Tasks</Link></li>
+          <li><Link to="/client/wallet" className="nav-link">Wallet</Link></li>
         </ul>
 
         <div className="nav-menu">

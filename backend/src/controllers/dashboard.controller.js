@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Job } from "../models/job.model.js";
 import { Bid } from "../models/bid.model.js";
 import { Task } from "../models/task.model.js";
+import mongoose from "mongoose";
 
 const getClientDashboard = asyncHandler(async (req, res) => {
     if (req.user.role !== "Client") {
