@@ -3,6 +3,8 @@ import RequireRole from "./src/auth/RequireRole";
 import { createBrowserRouter } from "react-router-dom";
 import RegisterPage from "./src/auth/Registerpage";
 import Loginpage from "./src/auth/Loginpage";
+import ForgotPassword from "./src/auth/ForgotPassword";
+import ResetPassword from "./src/auth/ResetPassword";
 import OAuthSuccess from "./src/auth/OAuthSuccess";
 import FreelancerLayout from "./src/outlet/FreelancerLayout";
 import RequireToken from "./src/auth/RequireToken";
@@ -39,6 +41,14 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Loginpage />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password/:token",
+    element: <ResetPassword />,
   },
   {
     path: "/oauth-success",

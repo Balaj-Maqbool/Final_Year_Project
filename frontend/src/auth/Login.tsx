@@ -61,6 +61,9 @@ const Login = ({ onSubmit }: Props) => {
                             placeholder="Enter password"
                             required
                         />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                            <a href="/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--primary-color)', textDecoration: 'none' }}>Forgot password?</a>
+                        </div>
                     </div>
 
                     <div className="form-group">
