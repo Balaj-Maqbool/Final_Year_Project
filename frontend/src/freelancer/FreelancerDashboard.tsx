@@ -10,6 +10,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import "../dashboard.css";
 import { apiRequest } from "../services/apiClient";
 
@@ -62,145 +63,178 @@ const Dashboard = () => {
       </div>
     );
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  };
+
   return (
     <>
       <Container className="dashboard-container">
-        <div className="dashboard-header">
-          <h3>Freelancer Dashboard</h3>
-          <p>Welcome back! Here's an overview of your activity.</p>
-        </div>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible">
+          <motion.div variants={itemVariants} className="dashboard-header">
+            <h3>Freelancer Dashboard</h3>
+            <p>Welcome back! Here's an overview of your activity.</p>
+          </motion.div>
 
-        {/* SUMMARY CARDS */}
-        <Row className="mb-4 g-4">
-          <Col md={3}>
-            <Card className="dashboard-card">
-              <Card.Body>
-                <Card.Title className="card-title">My Applications</Card.Title>
-                <h2 className="summary-value">{data?.stats?.totalBids || 0}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
+          {/* SUMMARY CARDS */}
+          <Row className="mb-4 g-4">
+            <Col md={3}>
+              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
+                <Card className="dashboard-card">
+                  <Card.Body>
+                    <Card.Title className="card-title">My Applications</Card.Title>
+                    <h2 className="summary-value">{data?.stats?.totalBids || 0}</h2>
+                  </Card.Body>
+                </Card>
+              </motion.div>
+            </Col>
 
-          <Col md={3}>
-            <Card className="dashboard-card">
-              <Card.Body>
-                <Card.Title className="card-title">Active Projects</Card.Title>
-                <h2 className="summary-value">{data?.stats?.activeJobsCount || 0}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
+            <Col md={3}>
+              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
+                <Card className="dashboard-card">
+                  <Card.Body>
+                    <Card.Title className="card-title">Active Projects</Card.Title>
+                    <h2 className="summary-value">{data?.stats?.activeJobsCount || 0}</h2>
+                  </Card.Body>
+                </Card>
+              </motion.div>
+            </Col>
 
-          <Col md={3}>
-            <Card className="dashboard-card">
-              <Card.Body>
-                <Card.Title className="card-title">Completed</Card.Title>
-                <h2 className="summary-value">{data?.stats?.completedJobsCount || 0}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
+            <Col md={3}>
+              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
+                <Card className="dashboard-card">
+                  <Card.Body>
+                    <Card.Title className="card-title">Completed</Card.Title>
+                    <h2 className="summary-value">{data?.stats?.completedJobsCount || 0}</h2>
+                  </Card.Body>
+                </Card>
+              </motion.div>
+            </Col>
 
-          <Col md={3}>
-            <Card className="dashboard-card">
-              <Card.Body>
-                <Card.Title className="card-title">Total Earnings</Card.Title>
-                <h2 className="summary-value">Rs {data?.stats?.totalEarnings?.toLocaleString() || 0}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+            <Col md={3}>
+              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
+                <Card className="dashboard-card">
+                  <Card.Body>
+                    <Card.Title className="card-title">Total Earnings</Card.Title>
+                    <h2 className="summary-value">Rs {data?.stats?.totalEarnings?.toLocaleString() || 0}</h2>
+                  </Card.Body>
+                </Card>
+              </motion.div>
+            </Col>
+          </Row>
 
-        {/* ACTIVE JOBS */}
-        <div className="mb-4">
-          <h4 className="section-title">Current Active Jobs</h4>
-          <Card className="table-card">
-            <Card.Body className="p-0">
-              <Table responsive className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Job Title</th>
-                    <th>Status</th>
-                    <th>Deadline</th>
-                    <th>Action</th>
-                    <th>Tasks</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {data?.activeJobs?.map((job) => (
-                    <tr key={job._id}>
-                      <td><strong>{job.title}</strong></td>
-                      <td>
-                        <Badge
-                          className={`status-badge ${job.status === "Assigned" ? "success" : job.status === "Open" ? "info" : "secondary"}`}
-                          bg=""
-                        >
-                          {job.status === "Assigned" ? "In Progress" : job.status}
-                        </Badge>
-                      </td>
-                      <td>{new Date(job.deadline).toLocaleDateString()}</td>
-                      <td>
-                        <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}`}>View Details</Button>
-                      </td>
-                      <td>
-                        <Button size="sm" variant="light" as={Link as any} to={`/freelancer/tasks/${job._id}/tasks`}>View Tasks</Button>
-                      </td>
-                    </tr>
-                  ))}
-                  {(!data?.activeJobs || data.activeJobs.length === 0) && (
+          {/* ACTIVE JOBS */}
+          <motion.div variants={itemVariants} className="mb-4">
+            <h4 className="section-title">Current Active Jobs</h4>
+            <Card className="table-card">
+              <Card.Body className="p-0">
+                <Table responsive className="custom-table">
+                  <thead>
                     <tr>
-                      <td colSpan={4} className="text-center py-4 text-muted">No active jobs found</td>
+                      <th>Job Title</th>
+                      <th>Status</th>
+                      <th>Deadline</th>
+                      <th>Action</th>
+                      <th>Tasks</th>
                     </tr>
+                  </thead>
 
-                  )}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </div>
-
-        {/* QUICK ACTIONS */}
-        <h4 className="section-title">Quick Actions</h4>
-        <Row className="g-4">
-          <Col md={3}>
-            <Card className="dashboard-card action-card">
-              <Card.Body>
-                <Card.Title>Find Work</Card.Title>
-                <Card.Text>Browse new projects to apply for</Card.Text>
-                <Button as={Link as any} to="/freelancer/jobs" className="btn-primary-custom w-100">Browse Jobs</Button>
+                  <motion.tbody 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    transition={{ delay: 0.2 }}
+                  >
+                    {data?.activeJobs?.map((job) => (
+                      <motion.tr key={job._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} whileHover={{ backgroundColor: "rgba(99,102,241,0.05)" }}>
+                        <td><strong>{job.title}</strong></td>
+                        <td>
+                          <Badge
+                            className={`status-badge ${job.status === "Assigned" ? "success" : job.status === "Open" ? "info" : "secondary"}`}
+                            bg=""
+                          >
+                            {job.status === "Assigned" ? "In Progress" : job.status}
+                          </Badge>
+                        </td>
+                        <td>{new Date(job.deadline).toLocaleDateString()}</td>
+                        <td>
+                          <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}`}>View Details</Button>
+                        </td>
+                        <td>
+                          <Button size="sm" variant="light" as={Link as any} to={`/freelancer/tasks/${job._id}/tasks`}>View Tasks</Button>
+                        </td>
+                      </motion.tr>
+                    ))}
+                    {(!data?.activeJobs || data.activeJobs.length === 0) && (
+                      <tr>
+                        <td colSpan={4} className="text-center py-4 text-muted">No active jobs found</td>
+                      </tr>
+                    )}
+                  </motion.tbody>
+                </Table>
               </Card.Body>
             </Card>
-          </Col>
+          </motion.div>
 
-          <Col md={3}>
-            <Card className="dashboard-card action-card">
-              <Card.Body>
-                <Card.Title>My Proposals</Card.Title>
-                <Card.Text>Track status of your bids</Card.Text>
-                <Button as={Link as any} to="/freelancer/my-bids" className="btn-secondary-custom w-100">View Bids</Button>
-              </Card.Body>
-            </Card>
-          </Col>
+          {/* QUICK ACTIONS */}
+          <motion.div variants={itemVariants}>
+            <h4 className="section-title">Quick Actions</h4>
+            <Row className="g-4">
+              <Col md={3}>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <Card className="dashboard-card action-card">
+                    <Card.Body>
+                      <Card.Title>Find Work</Card.Title>
+                      <Card.Text>Browse new projects to apply for</Card.Text>
+                      <Button as={Link as any} to="/freelancer/jobs" className="btn-primary-custom w-100">Browse Jobs</Button>
+                    </Card.Body>
+                  </Card>
+                </motion.div>
+              </Col>
 
-          <Col md={3}>
-            <Card className="dashboard-card action-card">
-              <Card.Body>
-                <Card.Title>My Profile</Card.Title>
-                <Card.Text>Update skills and portfolio</Card.Text>
-                <Button as={Link as any} to="/profile" className="btn-outline-custom w-100">Edit Profile</Button>
-              </Card.Body>
-            </Card>
-          </Col>
+              <Col md={3}>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <Card className="dashboard-card action-card">
+                    <Card.Body>
+                      <Card.Title>My Proposals</Card.Title>
+                      <Card.Text>Track status of your bids</Card.Text>
+                      <Button as={Link as any} to="/freelancer/my-bids" className="btn-secondary-custom w-100">View Bids</Button>
+                    </Card.Body>
+                  </Card>
+                </motion.div>
+              </Col>
 
-          <Col md={3}>
-            <Card className="dashboard-card action-card">
-              <Card.Body>
-                <Card.Title>Messages</Card.Title>
-                <Card.Text>Chat with clients</Card.Text>
-                <Button as={Link as any} to="/freelancer/chat" className="btn-primary-custom w-100">Open Chat</Button>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+              <Col md={3}>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <Card className="dashboard-card action-card">
+                    <Card.Body>
+                      <Card.Title>My Profile</Card.Title>
+                      <Card.Text>Update skills and portfolio</Card.Text>
+                      <Button as={Link as any} to="/profile" className="btn-outline-custom w-100">Edit Profile</Button>
+                    </Card.Body>
+                  </Card>
+                </motion.div>
+              </Col>
+
+              <Col md={3}>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                  <Card className="dashboard-card action-card">
+                    <Card.Body>
+                      <Card.Title>Messages</Card.Title>
+                      <Card.Text>Chat with clients</Card.Text>
+                      <Button as={Link as any} to="/freelancer/chat" className="btn-primary-custom w-100">Open Chat</Button>
+                    </Card.Body>
+                  </Card>
+                </motion.div>
+              </Col>
+            </Row>
+          </motion.div>
+        </motion.div>
       </Container>
     </>
   );

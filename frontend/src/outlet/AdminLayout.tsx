@@ -1,6 +1,7 @@
 
 import { Outlet } from "react-router-dom"
 import ClientNavbar from "../components/ClientNavbar"
+import Footer from "../components/Footer"
 const AdminLayout=()=>{
 
     return(
@@ -10,6 +11,7 @@ const AdminLayout=()=>{
 <div id="main">
     <Outlet/>
 </div>
+<Footer/>
 </>
 
     )

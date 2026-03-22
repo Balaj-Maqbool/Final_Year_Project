@@ -7,16 +7,29 @@
     radial-gradient(circle at 80% 80%, rgba(16,185,129,0.08), transparent 40%),
     #f9fafb;
   color: #0f172a;
+  position: relative;
+  overflow-x: hidden;
 }
 
 /* ================= NAVBAR ================= */
 .landing-nav {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem 2rem;
+  margin: 1.5rem auto 0;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  
+  /* Glassmorphism */
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 1rem;
+  z-index: 1000;
 }
 
 .nav-logo {
@@ -100,8 +113,10 @@
 }
 
 .hero-title span {
+  /* the base will be overridden by .animated-gradient-text span */
   background: linear-gradient(135deg, #6366f1, #10b981);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -152,15 +167,38 @@
 .hero-visual {
   display: flex;
   justify-content: center;
+  position: relative;
+}
+
+.hero-image-container {
+  position: relative;
+  width: 100%;
+  max-width: 550px;
+}
+
+.hero-main-image {
+  width: 100%;
+  height: auto;
+  border-radius: 30px;
+  box-shadow: 0 25px 50px rgba(63, 66, 241, 0.15); /* Tinted shadow to match theme */
+  object-fit: cover;
+  border: 8px solid white;
 }
 
 .dashboard-mock {
   background: white;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 20px;
   box-shadow: 0 30px 60px rgba(0,0,0,0.08);
   width: 100%;
-  max-width: 350px;
+  max-width: 320px;
+}
+
+.floating-dashboard {
+  position: absolute;
+  bottom: -30px;
+  left: -40px;
+  z-index: 10;
 }
 
 .mock-card {
@@ -262,4 +300,80 @@
   .hero-buttons {
     justify-content: center;
   }
+
+  .floating-dashboard {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    margin: -50px auto 0;
+    z-index: 10;
+  }
+}
+
+/* ================= CSS ANIMATIONS ================= */
+.animated-gradient-text span {
+  background: linear-gradient(270deg, #6366f1, #10b981, #6366f1);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientFlow 3s ease infinite;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.pulse-container {
+  display: inline-block;
+  animation: pulseShadow 2s infinite;
+  border-radius: 20px;
+}
+
+@keyframes pulseShadow {
+  0% { box-shadow: 0 0 0 0 rgba(22, 101, 52, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(22, 101, 52, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 101, 52, 0); }
+}
+
+.floating-icon {
+  display: inline-block;
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+.feature-icon-delay-1 { animation-delay: 0.5s; }
+.feature-icon-delay-2 { animation-delay: 1s; }
+.feature-icon-delay-3 { animation-delay: 1.5s; }
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.highlight-text {
+  color: #6366f1;
+}
+
+.glass-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8), transparent);
+  transform: skewX(-25deg);
+  transition: .5s;
+}
+
+.glass-card:hover::before {
+  left: 125%;
+  transition: .5s ease-in-out;
 }

@@ -7,7 +7,7 @@
   --border-color: #dee2e6;
   --primary-color: #0d6efd;
   --secondary-color: #6c757d;
-  --navbar-bg: #ffffff;
+  --navbar-bg: rgba(255, 255, 255, 0.65);
   --navbar-text: #212529;
 }
 
@@ -18,7 +18,7 @@
   --border-color: #333333;
   --primary-color: #3b82f6; /* Lighter blue for dark mode */
   --secondary-color: #a0a0a0;
-  --navbar-bg: #1e1e1e;
+  --navbar-bg: rgba(30, 30, 30, 0.65);
   --navbar-text: #e0e0e0;
 }
 
@@ -70,11 +70,7 @@ a {
   color: var(--primary-color);
 }
 
-/* Navbar specific overrides if needed */
-.custom-navbar {
-    background-color: var(--navbar-bg) !important;
-    border-bottom: 1px solid var(--border-color);
-}
+/* Navbar overrides handled in Navbar.css for glass effect */
 
 .nav-link {
     color: var(--navbar-text) !important;

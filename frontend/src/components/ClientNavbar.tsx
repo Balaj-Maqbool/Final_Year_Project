@@ -16,9 +16,8 @@ const Navbar = () => {
         <ul className="nav-menu">
           <li><Link to="/client/postjob" className="nav-link">Post a Job</Link></li>
           <li><Link to="/client/alljobs" className="nav-link">All Jobs</Link></li>
-          <li><Link to="/client/dashboard" className="nav-link">Dashboard</Link></li>
+          <li><Link to="/client/clientDashboard" className="nav-link">Dashboard</Link></li>
           <li style={{ display: "flex", alignItems: "center" }}><NotificationBell /></li>
-          <li><Link to="/client/tasks" className="nav-link">Tasks</Link></li>
           <li><Link to="/client/wallet" className="nav-link">Wallet</Link></li>
         </ul>
 
