@@ -1,4 +1,5 @@
 import type { Participant } from "../services/useChats";
+import { useNavigate } from "react-router-dom";
 
 interface ChatHeaderProps {
     participants: Participant[];
@@ -6,6 +7,7 @@ interface ChatHeaderProps {
 }
 
 const ChatHeader = ({ participants, currentUserId }: ChatHeaderProps) => {
+    const navigate = useNavigate();
     // Filter out the current user to show the other participant(s)
     const otherParticipant = participants.find(p => p._id !== currentUserId) || participants[0];
     const title = otherParticipant?.fullName || "Chat";
@@ -14,7 +16,11 @@ const ChatHeader = ({ participants, currentUserId }: ChatHeaderProps) => {
     return (
         <div className="chat-header">
             <div className="d-flex align-items-center gap-3">
-                <div className="avatar-container" style={{ width: '40px', height: '40px' }}>
+                <div 
+                    className="avatar-container" 
+                    style={{ width: '40px', height: '40px', cursor: 'pointer' }}
+                    onClick={() => otherParticipant?._id && navigate(`/profile/${otherParticipant._id}`)}
+                >
                     {avatar ? (
                         <img src={avatar} alt={title} className="avatar-image" />
                     ) : (
@@ -24,7 +30,13 @@ const ChatHeader = ({ participants, currentUserId }: ChatHeaderProps) => {
                     )}
                 </div>
                 <div>
-                    <h5 className="m-0 fw-bold text-dark">{title}</h5>
+                    <h5 
+                        className="m-0 fw-bold text-dark" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => otherParticipant?._id && navigate(`/profile/${otherParticipant._id}`)}
+                    >
+                        {title}
+                    </h5>
                     <small className="text-success d-flex align-items-center gap-1">
                         <span className="bg-success rounded-circle d-inline-block" style={{ width: '8px', height: '8px' }}></span> Online
                     </small>

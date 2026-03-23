@@ -4,7 +4,8 @@ import { RateLimitManager } from "../middlewares/rateLimiter.middleware.js";
 import {
     createCheckoutSession,
     getWalletBalance,
-    requestWithdrawal
+    requestWithdrawal,
+    verifyCheckoutSession
 } from "../controllers/payment.controller.js";
 
 const router = Router();
@@ -15,6 +16,12 @@ router.post(
     "/checkout/session/:jobId",
     RateLimitManager.apiPayments(),
     createCheckoutSession
+);
+
+router.post(
+    "/verify-session",
+    RateLimitManager.apiPayments(),
+    verifyCheckoutSession
 );
 
 router.get("/wallet", RateLimitManager.apiPayments(), getWalletBalance);

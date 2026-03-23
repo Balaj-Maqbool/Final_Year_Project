@@ -3,7 +3,11 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, Button, Badge, Alert, Spinner, Container } from "react-bootstrap";
-import { getTasks, createTask, updateTaskStatus, approveTask } from "../../services/taskHandler";
+import { getTasks, createTask, updateTaskStatus, approveTask, deleteTask } from "../../services/taskHandler";
+import { ratingHandler } from "../../services/ratingHandler";
+import { Modal, Form } from "react-bootstrap";
+import { aiHandler } from "../../services/aiHandler";
+import { jobHandler } from "../../services/jobHandler";
 import type { Task } from "../../services/taskHandler";
 import TaskForm from "./TaskForm";
 
@@ -11,11 +15,22 @@ const Tasks = () => {
     const { jobId } = useParams<{ jobId: string }>();
     const queryClient = useQueryClient();
     const [showForm, setShowForm] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [showRatingModal, setShowRatingModal] = useState(false);
+    const [rating, setRating] = useState(5);
+    const [comment, setComment] = useState("");
 
     // Fetch Tasks
     const { data: tasks, isLoading, isError, error } = useQuery({
         queryKey: ["tasks", jobId],
         queryFn: () => getTasks(jobId!),
+        enabled: !!jobId,
+    });
+
+    // Fetch Job to get status
+    const { data: job, refetch: refetchJob } = useQuery({
+        queryKey: ["job", jobId],
+        queryFn: () => jobHandler.getJob(jobId!),
         enabled: !!jobId,
     });
 
@@ -33,7 +48,6 @@ const Tasks = () => {
         }
     });
 
-    // Approve Task Mutation
     const approveTaskMutation = useMutation({
         mutationFn: approveTask,
         onSuccess: () => {
@@ -41,6 +55,17 @@ const Tasks = () => {
         },
         onError: (err: any) => {
             alert(`Failed to approve task: ${err.message}`);
+        }
+    });
+
+    // Delete Task Mutation
+    const deleteTaskMutation = useMutation({
+        mutationFn: deleteTask,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
+        },
+        onError: (err: any) => {
+            alert(`Failed to delete task: ${err.message}`);
         }
     });
 
@@ -54,6 +79,22 @@ const Tasks = () => {
             alert(`Failed to update task: ${err.message}`);
         }
     });
+
+    const submitRatingMutation = useMutation({
+        mutationFn: () => ratingHandler.addRating(jobId!, { rating, comment }),
+        onSuccess: () => {
+            alert("Rating submitted successfully!");
+            setShowRatingModal(false);
+        },
+        onError: (err: any) => {
+            alert(`Failed to submit rating: ${err.response?.data?.message || err.message}`);
+        }
+    });
+
+    const handleRatingSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        submitRatingMutation.mutate();
+    };
 
     const handleCreateTask = (title: string, description: string) => {
         createTaskMutation.mutate({ title, description });
@@ -71,19 +112,100 @@ const Tasks = () => {
         }
     };
 
+    const handleDelete = (taskId: string) => {
+        if (window.confirm("Are you sure you want to delete this task? This action cannot be undone.")) {
+            deleteTaskMutation.mutate(taskId);
+        }
+    };
+
+    const handleAIGenerate = async () => {
+        if (!jobId) return;
+        if (!window.confirm("This will overwrite/add AI generated tasks based on job description. Continue?")) return;
+        
+        setAiLoading(true);
+        try {
+            const job = await jobHandler.getJob(jobId);
+            if (!job || !job.description) {
+                alert("Could not fetch job description.");
+                return;
+            }
+            const aiResponse = await aiHandler.generateTaskBreakdown(job.description);
+            const generatedTasks = aiResponse.tasks;
+            
+            // Create them all in parallel or sequentially
+            for (const t of generatedTasks) {
+                await createTask(jobId, { title: t.title, description: t.description });
+            }
+            queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
+            alert(`Successfully generated ${generatedTasks.length} tasks!`);
+        } catch (err: any) {
+            console.error("AI Generation Error", err);
+            alert("Failed to generate task breakdown with AI.");
+        } finally {
+            setAiLoading(false);
+        }
+    };
+
+    const handleCompleteJob = async () => {
+        if (!jobId) return;
+        if (window.confirm("Are you sure you want to mark this project as completed? This will permanently release the escrow funds to the freelancer!")) {
+            try {
+                await jobHandler.updateJob(jobId, { status: "Completed" } as any);
+                alert("Job marked as completed. Funds have been securely released from Escrow to the Freelancer!");
+                refetchJob();
+                setShowRatingModal(true); // Prompt them to rate immediately after completing
+            } catch (err: any) {
+                alert(`Failed to complete job: ${err.response?.data?.message || err.message}`);
+            }
+        }
+    };
+
     if (isLoading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
     if (isError) return <Alert variant="danger">Error loading tasks: {(error as any).message}</Alert>;
 
     // Handle case where tasks might be undefined (e.g. jobId not yet available, though enabled check handles most cases)
     if (!tasks) return null;
 
+    const totalTasks = tasks.docs?.length || 0;
+    const allTasksApproved = totalTasks > 0 && tasks.docs.every((t: Task) => t.is_approved);
+
     return (
         <Container className="my-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Project Tasks</h2>
-                <Button size="sm" variant={showForm ? "secondary" : "primary"} onClick={() => setShowForm(!showForm)}>
-                    {showForm ? "Cancel" : "Create Task"}
-                </Button>
+                <div className="d-flex gap-2">
+                    {job?.status === "Completed" ? (
+                        <Button 
+                            size="sm" 
+                            variant="warning" 
+                            onClick={() => setShowRatingModal(true)}
+                            style={{ fontWeight: "bold" }}
+                        >
+                            ⭐⭐⭐ Rate Freelancer
+                        </Button>
+                    ) : allTasksApproved ? (
+                        <Button 
+                            size="sm" 
+                            variant="success" 
+                            onClick={handleCompleteJob}
+                            style={{ fontWeight: "bold" }}
+                        >
+                            💰 Complete & Release Escrow
+                        </Button>
+                    ) : null}
+                    <Button 
+                        size="sm" 
+                        variant="primary" 
+                        onClick={handleAIGenerate} 
+                        disabled={aiLoading} 
+                        style={{ backgroundColor: '#8e44ad', borderColor: '#8e44ad' }}
+                    >
+                        {aiLoading ? <Spinner size="sm" animation="border" /> : "✨ Auto-Generate Breakdown"}
+                    </Button>
+                    <Button size="sm" variant={showForm ? "secondary" : "primary"} onClick={() => setShowForm(!showForm)}>
+                        {showForm ? "Cancel" : "Create Task"}
+                    </Button>
+                </div>
             </div>
 
             {showForm && (
@@ -126,32 +248,87 @@ const Tasks = () => {
                                     )}
                                 </td>
                                 <td>
-                                    {!task.is_approved && task.status === "Done" && (
-                                        <div className="d-flex gap-2">
+                                    <div className="d-flex gap-2">
+                                        {!task.is_approved && task.status === "Done" && (
+                                            <>
+                                                <Button
+                                                    variant="success"
+                                                    size="sm"
+                                                    onClick={() => handleApprove(task._id)}
+                                                    disabled={approveTaskMutation.isPending}
+                                                >
+                                                    Approve
+                                                </Button>
+                                                <Button
+                                                    variant="warning"
+                                                    size="sm"
+                                                    onClick={() => handleRequestChanges(task._id)}
+                                                    disabled={submitTaskMutation.isPending}
+                                                >
+                                                    Request Changes
+                                                </Button>
+                                            </>
+                                        )}
+                                        {!task.is_approved && (
                                             <Button
-                                                variant="success"
+                                                variant="outline-danger"
                                                 size="sm"
-                                                onClick={() => handleApprove(task._id)}
-                                                disabled={approveTaskMutation.isPending}
+                                                onClick={() => handleDelete(task._id)}
+                                                disabled={deleteTaskMutation.isPending}
+                                                title="Delete this task"
                                             >
-                                                Approve
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
+                                                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                                  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                                                </svg>
                                             </Button>
-                                            <Button
-                                                variant="warning"
-                                                size="sm"
-                                                onClick={() => handleRequestChanges(task._id)}
-                                                disabled={submitTaskMutation.isPending}
-                                            >
-                                                Request Changes
-                                            </Button>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </Table>
             )}
+
+            <Modal show={showRatingModal} onHide={() => setShowRatingModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Rate Freelancer</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleRatingSubmit}>
+                        <Form.Group className="mb-4">
+                            <Form.Label className="fw-bold">Experience Rating ({rating} Stars)</Form.Label>
+                            <Form.Range 
+                                min={1} 
+                                max={5} 
+                                step={1} 
+                                value={rating} 
+                                onChange={(e) => setRating(Number(e.target.value))} 
+                            />
+                            <div className="d-flex justify-content-between text-muted mt-1" style={{ fontSize: "0.85rem" }}>
+                                <span>Poor</span>
+                                <span>Excellent</span>
+                            </div>
+                        </Form.Group>
+                        <Form.Group className="mb-4">
+                            <Form.Label className="fw-bold">Feedback / Comments</Form.Label>
+                            <Form.Control 
+                                as="textarea" 
+                                rows={4} 
+                                value={comment} 
+                                onChange={(e) => setComment(e.target.value)} 
+                                placeholder="Describe your experience working with this freelancer..."
+                                required
+                                minLength={3}
+                            />
+                        </Form.Group>
+                        <Button variant="primary" type="submit" className="w-100 fw-bold" disabled={submitRatingMutation.isPending}>
+                            {submitRatingMutation.isPending ? "Submitting..." : "Submit Rating"}
+                        </Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
         </Container>
     );
 };

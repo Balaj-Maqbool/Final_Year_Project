@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { getNotifications, markAsRead } from "./notification.services";
+import { getNotifications, markAsRead, markAllAsRead } from "./notification.services";
 
 const Notifications = () => {
     const navigate = useNavigate();
@@ -27,6 +27,17 @@ const Notifications = () => {
                 );
             });
         },
+    });
+
+    // Mark all as read mutation
+    const markAllReadMutation = useMutation({
+        mutationFn: markAllAsRead,
+        onSuccess: () => {
+             queryClient.setQueryData(["notifications"], (oldData: any) => {
+                 if (!oldData) return oldData;
+                 return oldData.map((n: any) => ({ ...n, isRead: true }));
+             });
+        }
     });
 
     const getRedirectLink = (notification: any) => {
@@ -71,7 +82,18 @@ const Notifications = () => {
 
     return (
         <div className="container mt-4">
-            <h2 className="mb-4">Notifications</h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="mb-0">Notifications</h2>
+                {data.some((n: any) => !n.isRead) && (
+                    <button 
+                        className="btn btn-outline-primary"
+                        onClick={() => markAllReadMutation.mutate()}
+                        disabled={markAllReadMutation.isPending}
+                    >
+                        {markAllReadMutation.isPending ? "Marking..." : "Mark All as Read"}
+                    </button>
+                )}
+            </div>
 
             {data.length === 0 ? (
                 <p className="text-muted">No notifications yet.</p>

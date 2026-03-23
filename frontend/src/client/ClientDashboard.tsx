@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../services/apiClient";
 import { Container, Row, Col, Card, Table, Badge, Button, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -30,22 +30,14 @@ interface DashboardData {
 
 const ClientDashboard = () => {
 
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const data = await apiRequest<DashboardData>("/dashboard/client");
-        setData(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-    fetchDashboardData();
-  }, []);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["clientDashboard"],
+    queryFn: async () => {
+      const response = await apiRequest<DashboardData>("/dashboard/client");
+      return response;
+    },
+    staleTime: 5000,
+  });
 
 
   if (loading)

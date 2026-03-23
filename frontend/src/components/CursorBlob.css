@@ -1,0 +1,39 @@
+.cursor-blob {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  pointer-events: none; /* Ignore clicks natively so it never interrupts UX */
+  z-index: 0; /* Ensures it slips cleanly underneath cards and navigation rendering its color into blurs */
+  filter: blur(80px); /* Massive pixel diffusion creates a volumetric lighting effect */
+}
+
+/* Primary emerald to skycast */
+.primary-blob {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, rgba(59, 130, 246, 0.4) 100%);
+  mix-blend-mode: normal; 
+}
+
+/* Delayed purple to pink aesthetic secondary shadow */
+.secondary-blob {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, rgba(236, 72, 153, 0.3) 100%);
+  width: 200px;
+  height: 200px;
+  mix-blend-mode: normal;
+  /* Push trailing slightly right/down for offset naturally */
+  margin-top: 50px;
+  margin-left: 50px;
+}
+
+/* Adapt rendering rules for Dark theme to avoid white washing shadows */
+[data-theme='dark'] .primary-blob {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%);
+  mix-blend-mode: screen; 
+}
+
+[data-theme='dark'] .secondary-blob {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+  mix-blend-mode: screen; 
+}

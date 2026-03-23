@@ -80,18 +80,19 @@ const Wallet = () => {
             <Row className="mb-4 g-4">
                 {isFreelancer ? (
                     <>
-                        <Col md={6}>
-                            <Card className="shadow-sm border-0 h-100 bg-primary text-white">
-                                <Card.Body>
-                                    <Card.Subtitle className="mb-2 text-white-50">Available Balance</Card.Subtitle>
-                                    <Card.Title as="h2" className="mb-0 fw-bold">
+                        <Col md={4}>
+                            <Card className="shadow-lg border-0 h-100 text-white" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '15px' }}>
+                                <Card.Body className="d-flex flex-column justify-content-between p-4">
+                                    <Card.Subtitle className="mb-2 text-white-50" style={{ fontSize: '1rem', letterSpacing: '1px' }}>AVAILABLE BALANCE</Card.Subtitle>
+                                    <Card.Title as="h1" className="mb-0 fw-bold" style={{ fontSize: '2.5rem' }}>
                                         ${wallet.availableBalance?.toFixed(2) || "0.00"}
                                     </Card.Title>
-                                    <div className="mt-3">
+                                    <div className="mt-4">
                                         <Button
                                             variant="light"
                                             onClick={() => setShowWithdrawModal(true)}
                                             disabled={!wallet.availableBalance || wallet.availableBalance <= 0}
+                                            style={{ fontWeight: '600', borderRadius: '8px', padding: '0.5rem 1.5rem' }}
                                         >
                                             Request Withdrawal
                                         </Button>
@@ -99,45 +100,81 @@ const Wallet = () => {
                                 </Card.Body>
                             </Card>
                         </Col>
-                        <Col md={6}>
-                            <Card className="shadow-sm border-0 h-100 bg-info text-white">
-                                <Card.Body>
-                                    <Card.Subtitle className="mb-2 text-white-50">In Escrow</Card.Subtitle>
-                                    <Card.Title as="h2" className="mb-0 fw-bold">
+                        <Col md={4}>
+                            <Card className="shadow-lg border-0 h-100 text-white" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', borderRadius: '15px' }}>
+                                <Card.Body className="p-4">
+                                    <Card.Subtitle className="mb-2 text-white-50" style={{ fontSize: '1rem', letterSpacing: '1px' }}>IN ESCROW</Card.Subtitle>
+                                    <Card.Title as="h1" className="mb-0 fw-bold" style={{ fontSize: '2.5rem' }}>
                                         ${wallet.escrowBalance?.toFixed(2) || "0.00"}
                                     </Card.Title>
+                                    <Card.Text className="mt-4 text-white-50">
+                                        Funds securely held until milestones are completed.
+                                    </Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                        <Col md={4}>
+                            <Card className="shadow-lg border-0 h-100 text-white" style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', borderRadius: '15px' }}>
+                                <Card.Body className="p-4">
+                                    <Card.Subtitle className="mb-2 text-white-50" style={{ fontSize: '1rem', letterSpacing: '1px' }}>LIFETIME EARNINGS</Card.Subtitle>
+                                    <Card.Title as="h1" className="mb-0 fw-bold" style={{ fontSize: '2.5rem' }}>
+                                        ${transactions.filter((t: any) => t.type === 'payment' && t.status === 'completed').reduce((acc: number, cur: any) => acc + cur.amount, 0).toFixed(2)}
+                                    </Card.Title>
+                                    <Card.Text className="mt-4 text-white-50">
+                                        Total earnings processed into available balance.
+                                    </Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>
                     </>
                 ) : (
-                    <Col md={12}>
-                        <Card className="shadow-sm border-0 h-100 bg-primary text-white">
-                            <Card.Body>
-                                <Card.Subtitle className="mb-2 text-white-50">Total Spent</Card.Subtitle>
-                                <Card.Title as="h2" className="mb-0 fw-bold">
-                                    ${wallet.totalSpent?.toFixed(2) || "0.00"}
-                                </Card.Title>
-                            </Card.Body>
-                        </Card>
-                    </Col>
+                    <>
+                        <Col md={6}>
+                            <Card className="shadow-lg border-0 h-100 text-white" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', borderRadius: '15px' }}>
+                                <Card.Body className="p-4">
+                                    <Card.Subtitle className="mb-2 text-white-50" style={{ fontSize: '1rem', letterSpacing: '1px' }}>TOTAL SPENT</Card.Subtitle>
+                                    <Card.Title as="h1" className="mb-0 fw-bold" style={{ fontSize: '2.5rem' }}>
+                                        ${wallet.totalSpent?.toFixed(2) || "0.00"}
+                                    </Card.Title>
+                                    <Card.Text className="mt-4 text-white-50">
+                                        Total amount funded to freelancer escrows.
+                                    </Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                        <Col md={6}>
+                            <Card className="shadow-lg border-0 h-100 text-white" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', borderRadius: '15px' }}>
+                                <Card.Body className="p-4">
+                                    <Card.Subtitle className="mb-2 text-white-50" style={{ fontSize: '1rem', letterSpacing: '1px' }}>ACTIVE TRANSACTIONS</Card.Subtitle>
+                                    <Card.Title as="h1" className="mb-0 fw-bold" style={{ fontSize: '2.5rem' }}>
+                                        {transactions.length}
+                                    </Card.Title>
+                                    <Card.Text className="mt-4 text-white-50">
+                                        Total registered financial operations.
+                                    </Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </>
                 )}
             </Row>
 
             {withdrawSuccess && <Alert variant="success" onClose={() => setWithdrawSuccess("")} dismissible>{withdrawSuccess}</Alert>}
 
-            <Card className="shadow-sm border-0">
-                <Card.Body>
-                    <Card.Title className="mb-4">Recent Transactions</Card.Title>
+            <Card className="shadow-sm border-0 mt-5" style={{ borderRadius: '15px', overflow: 'hidden' }}>
+                <Card.Header className="bg-white border-bottom-0 pt-4 pb-0 px-4">
+                    <Card.Title className="mb-0 fw-bold" style={{ fontSize: '1.5rem', color: 'var(--text-color)' }}>Transaction History</Card.Title>
+                </Card.Header>
+                <Card.Body className="p-4">
                     {transactions && transactions.length > 0 ? (
-                        <Table responsive hover className="align-middle">
-                            <thead>
+                        <Table responsive hover className="align-middle border-top mt-3" style={{ color: 'var(--text-color)' }}>
+                            <thead className="table-light text-muted">
                                 <tr>
-                                    <th>Type</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Job / Details</th>
-                                    <th>Date</th>
+                                    <th className="fw-normal py-3 border-0 rounded-start">TYPE</th>
+                                    <th className="fw-normal py-3 border-0">AMOUNT</th>
+                                    <th className="fw-normal py-3 border-0">STATUS</th>
+                                    <th className="fw-normal py-3 border-0">JOB / DETAILS</th>
+                                    <th className="fw-normal py-3 border-0 rounded-end">DATE</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -148,23 +185,26 @@ const Wallet = () => {
                                                 {tx.type}
                                             </Badge>
                                         </td>
-                                        <td className="fw-bold">
+                                        <td className="fw-bold" style={{ fontSize: '1.1rem' }}>
                                             {tx.currency === "usd" ? "$" : ""}
                                             {tx.amount.toFixed(2)}
                                         </td>
                                         <td>
                                             <Badge
+                                                pill
                                                 bg={
                                                     tx.status === "completed" ? "success" :
                                                         tx.status === "pending" ? "warning" :
                                                             "danger"
                                                 }
+                                                className="px-3 py-2"
+                                                style={{ fontWeight: 500 }}
                                             >
                                                 {tx.status}
                                             </Badge>
                                         </td>
                                         <td>
-                                            {tx.job ? tx.job.title : "N/A"}
+                                            <span style={{ fontWeight: 500 }}>{tx.job ? tx.job.title : "N/A"}</span>
                                         </td>
                                         <td className="text-muted">
                                             {new Date(tx.createdAt).toLocaleDateString()}

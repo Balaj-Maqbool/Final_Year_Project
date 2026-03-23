@@ -1,6 +1,7 @@
-import { useRef, type FormEvent } from "react";
-import { Button, Form } from "react-bootstrap";
+import { useRef, useState, type FormEvent } from "react";
+import { Button, Form, Spinner } from "react-bootstrap";
 import { useAuthStore } from "../store/useAuthStore";
+import { aiHandler } from "../services/aiHandler";
 export interface BidData {
   job_id: string;
   bid_amount: number;
@@ -13,6 +14,7 @@ export interface BidData {
 
 interface Props {
   jobId: string;
+  jobDescription?: string;
   onSubmit: (data: BidData) => void;
   existingBid?: {
     bid_amount: number;
@@ -25,13 +27,43 @@ interface Props {
   };
 }
 
-const BidForm = ({ jobId, onSubmit, existingBid }: Props) => {
+const BidForm = ({ jobId, jobDescription, onSubmit, existingBid }: Props) => {
   const { user } = useAuthStore();
   const amountRef = useRef<HTMLInputElement>(null);
   const proposalRef = useRef<HTMLTextAreaElement>(null);
 
+  const [aiLoading, setAiLoading] = useState(false);
+
   const isEditMode = !!existingBid;
   const isEditable = existingBid?.status === "Pending" || !existingBid;
+
+  const handleAIGenerate = async () => {
+    if (!jobDescription) {
+      alert("Job description is not available to generate a proposal.");
+      return;
+    }
+    setAiLoading(true);
+    try {
+      // Fetch freelancer's full profile to get bio/skills
+      const res = await fetch(`http://localhost:8000/api/v1/users/profile/${user?._id}`, {
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      const data = await res.json();
+      const profile = data.data;
+
+      // Call AI Handler
+      const aiResponse = await aiHandler.generateProposal(jobDescription, profile);
+      if (proposalRef.current) {
+        proposalRef.current.value = aiResponse.proposal_text;
+      }
+    } catch (err) {
+      console.error("AI Generation Error", err);
+      alert("Failed to generate proposal with AI.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -92,11 +124,24 @@ const BidForm = ({ jobId, onSubmit, existingBid }: Props) => {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Proposal Message</Form.Label>
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <Form.Label className="mb-0">Proposal Message</Form.Label>
+            {isEditable && (
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={handleAIGenerate}
+                disabled={aiLoading}
+                style={{ borderColor: '#8e44ad', color: '#8e44ad' }}
+              >
+                {aiLoading ? <Spinner size="sm" animation="border" /> : "✨ Write with AI"}
+              </Button>
+            )}
+          </div>
           <Form.Control
             ref={proposalRef}
             as="textarea"
-            rows={4}
+            rows={8}
             defaultValue={existingBid?.message}
             placeholder="Write your proposal..."
             disabled={!isEditable}

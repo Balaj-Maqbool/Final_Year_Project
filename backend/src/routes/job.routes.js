@@ -5,20 +5,23 @@ import {
     getMyJobs,
     getJobById,
     updateJob,
-    deleteJob
+    deleteJob,
+    requestPaymentRelease
 } from "../controllers/job.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.get("/", getAllJobs);
-
 router.use(verifyJWT);
 
 router.post("/", createJob);
+router.get("/", getAllJobs);
+router.get("/my-jobs", getMyJobs);
+router.get("/:jobId", getJobById);
 
-router.route("/my-jobs").get(getMyJobs);
+router.patch("/:jobId", updateJob);
+router.delete("/:jobId", deleteJob);
 
-router.route("/:jobId").get(getJobById).patch(updateJob).delete(deleteJob);
+router.post("/:jobId/request-payment", requestPaymentRelease);
 
 export default router;

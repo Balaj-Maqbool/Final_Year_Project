@@ -29,7 +29,7 @@ interface GetBidsProps {
 }
 
 const GetBids = ({ jobId }: GetBidsProps) => {
-
+    const navigate = useNavigate();
     const [bids, setBids] = useState<Bid[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -72,8 +72,6 @@ const GetBids = ({ jobId }: GetBidsProps) => {
         }
     };
 
-    const navigate = useNavigate();
-
     const handleMessage = async (bidId: string) => {
         try {
             await InitializeChat(bidId);
@@ -99,7 +97,8 @@ const GetBids = ({ jobId }: GetBidsProps) => {
                             <div className="d-flex align-items-center gap-3">
                                 <div
                                     className="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white"
-                                    style={{ width: "50px", height: "50px", fontSize: "1.2rem" }}
+                                    style={{ width: "50px", height: "50px", fontSize: "1.2rem", cursor: "pointer" }}
+                                    onClick={() => navigate(`/profile/${bid.freelancer._id}`)}
                                 >
                                     {bid.freelancer.profileImage ? (
                                         <img
@@ -112,7 +111,11 @@ const GetBids = ({ jobId }: GetBidsProps) => {
                                     )}
                                 </div>
                                 <div>
-                                    <h5 className="mb-0">
+                                    <h5 
+                                        className="mb-0" 
+                                        style={{ cursor: "pointer" }} 
+                                        onClick={() => navigate(`/profile/${bid.freelancer._id}`)}
+                                    >
                                         {bid.freelancer.fullName}
                                         {bid.status === 'Accepted' && <Badge bg="success" className="ms-2">Accepted</Badge>}
                                     </h5>

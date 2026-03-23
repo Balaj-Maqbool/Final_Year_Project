@@ -140,7 +140,7 @@ class NotificationService {
     }
 
     static async notifyPaymentInitiated(clientId, job) {
-        await sseManager.sendToUser(clientId, "DASHBOARD_UPDATE", {
+        socketManager.emitToRoom(clientId.toString(), "DASHBOARD_UPDATE", {
             type: "PAYMENT_INITIATED",
             message: `Payment initiated for job: ${job.title}`,
             jobId: job._id
@@ -156,14 +156,14 @@ class NotificationService {
     ) {
         const symbol = currency.toLowerCase() === "pkr" ? "Rs." : "$";
         // Notify Client
-        await sseManager.sendToUser(clientId, "DASHBOARD_UPDATE", {
+        socketManager.emitToRoom(clientId.toString(), "DASHBOARD_UPDATE", {
             type: "PAYMENT_SUCCESS",
             message: `Payment of ${symbol}${amount} for '${job.title}' was successful.`,
             jobId: job._id
         });
 
         // Notify Freelancer
-        await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
+        socketManager.emitToRoom(freelancerId.toString(), "DASHBOARD_UPDATE", {
             type: "ESCROW_FUNDED",
             message: `Escrow funded with ${symbol}${amount} for job: ${job.title}`,
             jobId: job._id
@@ -176,14 +176,14 @@ class NotificationService {
         currency = "usd"
     ) {
         const symbol = currency.toLowerCase() === "pkr" ? "Rs." : "$";
-        await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
+        socketManager.emitToRoom(freelancerId.toString(), "DASHBOARD_UPDATE", {
             type: "WITHDRAWAL_REQUESTED",
             message: `Withdrawal request for ${symbol}${amount} submitted successfully.`
         });
     }
 
     static async notifyJobClosed(clientId, job) {
-        await sseManager.sendToUser(clientId, "DASHBOARD_UPDATE", {
+        socketManager.emitToRoom(clientId.toString(), "DASHBOARD_UPDATE", {
             type: "JOB_CLOSED",
             message: `Job '${job.title}' is now closed and funds released to the freelancer.`,
             jobId: job._id
@@ -197,7 +197,7 @@ class NotificationService {
         currency = "usd"
     ) {
         const symbol = currency.toLowerCase() === "pkr" ? "Rs." : "$";
-        await sseManager.sendToUser(freelancerId, "DASHBOARD_UPDATE", {
+        socketManager.emitToRoom(freelancerId.toString(), "DASHBOARD_UPDATE", {
             type: "WITHDRAWAL_PROCESSED",
             message: `Your withdrawal request for ${symbol}${amount} has been ${status}.`,
             status: status

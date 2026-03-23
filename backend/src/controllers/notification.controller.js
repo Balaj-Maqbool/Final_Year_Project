@@ -54,7 +54,7 @@ const markNotificationAsRead = asyncHandler(async (req, res) => {
     }
 
     notification.isRead = true;
-    await notification.save();
+    await notification.save()
 
     return res
         .status(200)

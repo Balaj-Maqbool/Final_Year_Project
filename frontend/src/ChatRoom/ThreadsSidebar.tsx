@@ -3,11 +3,13 @@ import { useChatStore } from "../store/chatStore";
 import { getMyThreads } from "../services/useChats";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const ThreadsSidebar = () => {
     const activeThreadId = useChatStore((state) => state.activeThreadId);
     const setActiveThread = useChatStore((state) => state.setActiveThread);
     const [searchTerm, setSearchTerm] = useState("");
+    const navigate = useNavigate();
 
     const { data: user } = useQuery({ queryKey: ['user'], queryFn: () => JSON.parse(localStorage.getItem('user') || '{}') });
 
@@ -61,7 +63,14 @@ const ThreadsSidebar = () => {
                                     onClick={() => setActiveThread(thread._id)}
                                     className={`thread-item d-flex gap-3 align-items-center ${isActive ? 'active' : ''}`}
                                 >
-                                    <div className="avatar-container">
+                                    <div 
+                                        className="avatar-container" 
+                                        onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            if (otherParticipant?._id) navigate(`/profile/${otherParticipant._id}`); 
+                                        }}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         {otherParticipant?.profileImage ? (
                                             <img src={otherParticipant.profileImage} alt="" className="avatar-image" />
                                         ) : (
@@ -75,7 +84,14 @@ const ThreadsSidebar = () => {
 
                                     <div className="thread-content flex-grow-1">
                                         <div className="thread-top-row">
-                                            <h6 className="thread-name">
+                                            <h6 
+                                                className="thread-name text-decoration-none" 
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={(e) => { 
+                                                    e.stopPropagation(); 
+                                                    if (otherParticipant?._id) navigate(`/profile/${otherParticipant._id}`); 
+                                                }}
+                                            >
                                                 {otherParticipant?.fullName}
                                             </h6>
                                             {thread.lastMessage?.timestamp && (

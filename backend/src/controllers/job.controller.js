@@ -417,11 +417,36 @@ const deleteJob = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Job deleted successfully"));
 });
 
+const requestPaymentRelease = asyncHandler(async (req, res) => {
+    const { jobId } = req.params;
+
+    ValidationHelper.validateId(jobId, "Invalid Job ID");
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+        throw new ApiError(404, "Job not found");
+    }
+
+    if (job.assigned_to?.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Only the assigned freelancer can request payment release");
+    }
+
+    // Send a generic DASHBOARD_UPDATE or generic notification to the client
+    await NotificationService.notifyTaskStatusUpdate(
+        job.poster_id,
+        { _id: jobId, title: "All tasks completed" },
+        "Ready for final Payment Release"
+    );
+
+    return res.status(200).json(new ApiResponse(200, {}, "Payment release request sent successfully"));
+});
+
 export {
     createJob,
     getAllJobs,
     getMyJobs,
     getJobById,
     updateJob,
-    deleteJob // exported
+    deleteJob,
+    requestPaymentRelease
 };

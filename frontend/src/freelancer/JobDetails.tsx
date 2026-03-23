@@ -109,6 +109,7 @@ const JobDetails = () => {
       <div className="bid-section-wrapper">
         <BidForm
           jobId={confirmedJobId}
+          jobDescription={job.description}
           existingBid={myBid}
           onSubmit={async (data) => {
             try {

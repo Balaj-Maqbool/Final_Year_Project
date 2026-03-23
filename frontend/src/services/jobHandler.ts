@@ -38,9 +38,13 @@ export const jobHandler = {
         return await apiRequest<Job>(`${API}`, "POST", data);
     },
 
-    updateJob: async (jobId: string, data: JobData) => {
+    updateJob: async (jobId: string, data: Partial<Job>) => {
         // Backend uses PATCH for updates
         return await apiRequest<Job>(`${API}/${jobId}`, "PATCH", data);
+    },
+
+    requestPaymentRelease: async (jobId: string) => {
+        return await apiRequest(`${API}/${jobId}/request-payment`, "POST");
     },
 
     getJob: async (jobId: string | undefined): Promise<Job> => {

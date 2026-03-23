@@ -158,6 +158,17 @@ const stripeWebhook = async (req, res) => {
                     stripePaymentIntentId: session.payment_intent
                 });
 
+                await Payment.create({
+                    user: freelancer._id,
+                    job: job._id,
+                    amount: freelancerEarnings,
+                    currency: session.currency || job.currency || "usd",
+                    type: "payment",
+                    status: "completed",
+                    stripeSessionId: session.id,
+                    stripePaymentIntentId: session.payment_intent
+                });
+
                 await NotificationService.notifyPaymentSuccess(
                     clientId,
                     freelancerId,
@@ -180,6 +191,85 @@ const stripeWebhook = async (req, res) => {
 
     res.json({ received: true });
 };
+
+const verifyCheckoutSession = asyncHandler(async (req, res) => {
+    // This allows local testing or polling to complete a payment if the webhook fails
+    const { sessionId } = req.body;
+    if (!sessionId) {
+        throw new ApiError(400, "Session ID is required");
+    }
+
+    try {
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        if (session.payment_status !== "paid") {
+            return res.status(400).json(new ApiResponse(400, null, "Payment not completed"));
+        }
+
+        // Check if the payment already exists to prevent double-processing
+        const existingPayment = await Payment.findOne({ stripeSessionId: sessionId, user: req.user._id });
+        if (existingPayment) {
+            return res.status(200).json(new ApiResponse(200, { alreadyProcessed: true }, "Payment already processed."));
+        }
+
+        const jobId = session.metadata.jobId;
+        const clientId = session.metadata.clientId;
+        const freelancerId = session.metadata.freelancerId;
+        const amountPaid = session.amount_total / 100;
+
+        const client = await User.findById(clientId);
+        const freelancer = await User.findById(freelancerId);
+        const job = await Job.findById(jobId);
+
+        if (client && freelancer && job) {
+            const platformFee = amountPaid * PLATFORM_FEE_PERCENTAGE;
+            const freelancerEarnings = amountPaid - platformFee;
+
+            client.totalSpent = (client.totalSpent || 0) + amountPaid;
+            await client.save({ validateBeforeSave: false });
+
+            freelancer.escrowBalance = (freelancer.escrowBalance || 0) + freelancerEarnings;
+            await freelancer.save({ validateBeforeSave: false });
+
+            job.contract_status = "Active";
+            await job.save();
+
+            await Payment.create({
+                user: client._id,
+                job: job._id,
+                amount: amountPaid,
+                currency: session.currency || job.currency || "usd",
+                type: "deposit",
+                status: "completed",
+                stripeSessionId: session.id,
+                stripePaymentIntentId: session.payment_intent
+            });
+
+            await Payment.create({
+                user: freelancer._id,
+                job: job._id,
+                amount: freelancerEarnings,
+                currency: session.currency || job.currency || "usd",
+                type: "payment",
+                status: "completed",
+                stripeSessionId: session.id,
+                stripePaymentIntentId: session.payment_intent
+            });
+
+            await NotificationService.notifyPaymentSuccess(
+                clientId,
+                freelancerId,
+                job,
+                amountPaid,
+                session.currency || job.currency
+            );
+        }
+
+        return res.status(200).json(new ApiResponse(200, { success: true }, "Payment verified successfully."));
+    } catch (error) {
+        console.error("Error verifying checkout session:", error);
+        throw new ApiError(500, "Error verifying payment session.");
+    }
+});
 
 const getWalletBalance = asyncHandler(async (req, res) => {
     const user = req.user;
@@ -254,5 +344,6 @@ export {
     createCheckoutSession,
     stripeWebhook,
     getWalletBalance,
-    requestWithdrawal //exported
+    requestWithdrawal,
+    verifyCheckoutSession
 };

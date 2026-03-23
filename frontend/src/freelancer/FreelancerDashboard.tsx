@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   Row,
@@ -38,23 +38,14 @@ interface DashboardData {
 }
 
 const Dashboard = () => {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const response = await apiRequest<DashboardData>("/dashboard/freelancer")
-        // Backend returns { statusCode, data: { stats: ..., activeJobs: ..., pendingTasks: ... }, message, success }
-        setData(response);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-    fetchDashboardData();
-  }, []);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["freelancerDashboard"],
+    queryFn: async () => {
+      const response = await apiRequest<DashboardData>("/dashboard/freelancer");
+      return response;
+    },
+    staleTime: 5000,
+  });
 
   if (loading)
     return (
@@ -166,7 +157,7 @@ const Dashboard = () => {
                           <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}`}>View Details</Button>
                         </td>
                         <td>
-                          <Button size="sm" variant="light" as={Link as any} to={`/freelancer/tasks/${job._id}/tasks`}>View Tasks</Button>
+                          <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}/tasks`}>View Tasks</Button>
                         </td>
                       </motion.tr>
                     ))}

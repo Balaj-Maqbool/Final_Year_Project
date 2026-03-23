@@ -22,7 +22,7 @@ export const createTask = async (jobId: string, data: { title: string; descripti
     return await apiRequest<Task>(`/tasks/${jobId}`, "POST", data);
 };
 
-// PATCH /api/v1/tasks/:taskId/status (For Freelancer)
+// PATCH /api/v1/tasks/:taskId/status (For Freelancer & Client)
 export const updateTaskStatus = async (taskId: string, status: string) => {
     return await apiRequest<Task>(`/tasks/${taskId}/status`, "PATCH", { status });
 };
@@ -32,5 +32,12 @@ export const approveTask = async (taskId: string) => {
     return await apiRequest<Task>(`/tasks/${taskId}/approve`, "PATCH");
 };
 
-// Note: Backend does not currently have a generic update/delete route in task.routes.js
-// If needed, they should be added to the backend first.
+// PUT /api/v1/tasks/:taskId (For Client)
+export const updateTask = async (taskId: string, data: { title?: string; description?: string }) => {
+    return await apiRequest<Task>(`/tasks/${taskId}`, "PUT", data);
+};
+
+// DELETE /api/v1/tasks/:taskId (For Client)
+export const deleteTask = async (taskId: string) => {
+    return await apiRequest<void>(`/tasks/${taskId}`, "DELETE");
+};

@@ -116,15 +116,12 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
 
     // Business Logic:
     // Freelancer can move to: "In Progress", "Done" (Submit)
-    // Client can move to: "In Progress" (Request Changes)
+    // Client can move to: "In Progress" (Request Changes), maybe "To Do"
     
-    // Optional: Prevent Client from marking as "Done" directly? (Let freelancer do it)
-    // if (isPoster && status === "Done") {
-         // Maybe allow it or leave strict? Let's allow flexibility for now.
-    if (task.assigned_user_id.toString() !== req.user._id.toString()) {
+    if (isPoster && status === "Done") {
         throw new ApiError(
             403,
-            "Only the assigned freelancer can update task status"
+            "Only the assigned freelancer can mark a task as Done"
         );
     }
 

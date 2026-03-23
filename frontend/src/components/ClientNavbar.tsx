@@ -1,13 +1,37 @@
 import { Link } from "react-router-dom";
 import "./Navbar.css";
 import NotificationBell from "../notifications/NotificationBell";
+import { motion, useScroll, useSpring } from "framer-motion";
 
 import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
+
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
   return (
     <nav className="custom-navbar">
+      <motion.div
+        style={{
+          scaleX,
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "3px",
+          originX: 0,
+          background: "linear-gradient(90deg, #10b981 0%, #3b82f6 100%)",
+          zIndex: 10,
+          borderBottomLeftRadius: "24px",
+          borderBottomRightRadius: "24px"
+        }}
+      />
       <div className="navbar-container">
         <Link to="/" className="nav-brand">
           PakFreelance
