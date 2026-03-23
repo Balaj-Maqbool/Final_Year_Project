@@ -9,13 +9,23 @@ connectDB()
 
         socketManager.initialize(server);
 
+        let currentPort = parseInt(PORT, 10);
+
         server.on("error", (error) => {
-            console.log("Server Connection Error !!! ", error);
+            if (error.code === "EADDRINUSE") {
+                console.log(`Port ${currentPort} is busy, deploying on port ${currentPort + 1}...`);
+                currentPort++;
+                server.listen(currentPort);
+            } else {
+                console.log("Server Connection Error !!! ", error);
+            }
         });
 
-        server.listen(PORT, () => {
-            console.log(`server listening at the Port : ${PORT}`);
+        server.on("listening", () => {
+            console.log(`server listening at the Port : ${currentPort}`);
         });
+
+        server.listen(currentPort);
     })
     .catch((error) => {
         console.log("DB Connection Failed !!!", error);
