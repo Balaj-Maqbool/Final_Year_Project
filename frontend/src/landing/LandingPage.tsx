@@ -27,7 +27,7 @@ const slideInRight: Variants = {
   visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } }
 };
 
-const floatAnimation = {
+const floatAnimation: any = {
   y: [0, -12, 0],
   transition: {
     duration: 4,
