@@ -24,7 +24,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (!userStr) return;
 
         // Assuming backend runs on port 8000
-        const newSocket = io('http://localhost:8000', {
+        const newSocket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000', {
             withCredentials: true,
             transports: ['polling', 'websocket'],
         });

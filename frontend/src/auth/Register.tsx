@@ -108,7 +108,7 @@ const Register = ({ onSubmit }: Props) => {
                         style={{ backgroundColor: "#db4437" }}
                         onClick={() => {
                             const role = roleRef.current?.value || "Client";
-                            window.location.href = `http://localhost:8000/api/v1/users/google?role=${role}`;
+                            window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/google?role=${role}`;
                         }}
                     >
                        Sign up with Google

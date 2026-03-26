@@ -45,7 +45,7 @@ const BidForm = ({ jobId, jobDescription, onSubmit, existingBid }: Props) => {
     setAiLoading(true);
     try {
       // Fetch freelancer's full profile to get bio/skills
-      const res = await fetch(`http://localhost:8000/api/v1/users/profile/${user?._id}`, {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/profile/${user?._id}`, {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });

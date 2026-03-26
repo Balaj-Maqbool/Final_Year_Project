@@ -65,7 +65,7 @@ const ProfilePage = () => {
       let targetId = userId;
       if (!targetId) {
         // 1. Get current user ID (lightweight)
-        const meRes = await fetch("http://localhost:8000/api/v1/users/me", {
+        const meRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/me`, {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
         });
@@ -75,7 +75,7 @@ const ProfilePage = () => {
       }
 
       // 2. Get full profile by ID (includes images)
-      const profileRes = await fetch(`http://localhost:8000/api/v1/users/profile/${targetId}`, {
+      const profileRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/profile/${targetId}`, {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
@@ -135,8 +135,8 @@ const ProfilePage = () => {
     formData.append(key, file);
 
     const endpoint = type === "profile"
-      ? "http://localhost:8000/api/v1/users/profile/image"
-      : "http://localhost:8000/api/v1/users/profile/cover";
+      ? `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/profile/image`
+      : `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/profile/cover`;
 
     try {
       const res = await fetch(endpoint, {

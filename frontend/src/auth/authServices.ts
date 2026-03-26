@@ -10,7 +10,7 @@ export const handleRegister = async (
   navigate: NavigateFunction
 ) => {
   try {
-    const response = await fetch("http://localhost:8000/api/v1/users/register", {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -36,7 +36,7 @@ export const handleLogin = async (
   navigate: NavigateFunction
 ) => {
   try {
-    const response = await fetch("http://localhost:8000/api/v1/users/login", {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

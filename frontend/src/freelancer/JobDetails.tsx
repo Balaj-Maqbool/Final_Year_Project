@@ -35,7 +35,7 @@ const JobDetails = () => {
     const fetchJob = async () => {
       if (!jobId) return;
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/jobs/${jobId}`, {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/jobs/${jobId}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
