@@ -4,13 +4,14 @@ import type { loginData } from "./Login";
 import type { registerData } from "./Register";
 import type { NavigateFunction } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
+import { BACKEND_URL } from "../config";
 
 export const handleRegister = async (
   data: registerData,
   navigate: NavigateFunction
 ) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/register`, {
+    const response = await fetch(`${BACKEND_URL}/api/v1/users/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -36,7 +37,7 @@ export const handleLogin = async (
   navigate: NavigateFunction
 ) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/login`, {
+    const response = await fetch(`${BACKEND_URL}/api/v1/users/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

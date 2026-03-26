@@ -4,6 +4,7 @@ import "./css/bids.css"; // Keeping this if needed for BidForm
 import "./css/JobDetails.css"; // New custom CSS
 import BidForm from "./Bids";
 import { bidHandler } from "../services/bidHandler";
+import { BACKEND_URL } from "../config";
 
 interface Job {
   _id: string;
@@ -35,7 +36,7 @@ const JobDetails = () => {
     const fetchJob = async () => {
       if (!jobId) return;
       try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/jobs/${jobId}`, {
+        const res = await fetch(`${BACKEND_URL}/api/v1/jobs/${jobId}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

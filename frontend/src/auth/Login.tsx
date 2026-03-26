@@ -1,5 +1,6 @@
 import { useRef, type FormEvent } from "react"
 import "./auth.css";
+import { BACKEND_URL } from "../config";
 
 export interface loginData {
     email: string,
@@ -86,7 +87,7 @@ const Login = ({ onSubmit }: Props) => {
                         onClick={() => {
                             const role = roleRef.current?.value || "Client";
 
-                            window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/google?role=${role}`;
+                            window.location.href = `${BACKEND_URL}/api/v1/users/google?role=${role}`;
                         }}
                     >
                         Sign in with Google

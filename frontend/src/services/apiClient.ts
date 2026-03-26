@@ -1,4 +1,5 @@
-const BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/api/v1`;
+import { BACKEND_URL } from "../config";
+const BASE_URL = `${BACKEND_URL}/api/v1`;
 
 interface RequestOptions extends RequestInit {
   headers?: Record<string, string>;

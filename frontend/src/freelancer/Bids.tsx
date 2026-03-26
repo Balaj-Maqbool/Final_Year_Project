@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { useAuthStore } from "../store/useAuthStore";
 import { aiHandler } from "../services/aiHandler";
+import { BACKEND_URL } from "../config";
 export interface BidData {
   job_id: string;
   bid_amount: number;
@@ -45,7 +46,7 @@ const BidForm = ({ jobId, jobDescription, onSubmit, existingBid }: Props) => {
     setAiLoading(true);
     try {
       // Fetch freelancer's full profile to get bio/skills
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/profile/${user?._id}`, {
+      const res = await fetch(`${BACKEND_URL}/api/v1/users/profile/${user?._id}`, {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });

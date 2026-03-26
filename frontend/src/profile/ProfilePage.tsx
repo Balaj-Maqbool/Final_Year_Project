@@ -7,6 +7,7 @@ import { Spinner, Button, Form, Alert } from "react-bootstrap";
 import { useQuery } from "@tanstack/react-query";
 import { ratingHandler } from "../services/ratingHandler";
 import "./profile.css";
+import { BACKEND_URL } from "../config";
 
 // Interface matching full user object from backend
 interface UserProfile {
@@ -65,7 +66,7 @@ const ProfilePage = () => {
       let targetId = userId;
       if (!targetId) {
         // 1. Get current user ID (lightweight)
-        const meRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/me`, {
+        const meRes = await fetch(`${BACKEND_URL}/api/v1/users/me`, {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
         });
@@ -75,7 +76,7 @@ const ProfilePage = () => {
       }
 
       // 2. Get full profile by ID (includes images)
-      const profileRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/users/profile/${targetId}`, {
+      const profileRes = await fetch(`${BACKEND_URL}/api/v1/users/profile/${targetId}`, {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
@@ -135,8 +136,8 @@ const ProfilePage = () => {
     formData.append(key, file);
 
     const endpoint = type === "profile"
-      ? `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/profile/image`
-      : `${import.meta.env.VITE_BACKEND_URL}/api/v1/users/profile/cover`;
+      ? `${BACKEND_URL}/api/v1/users/profile/image`
+      : `${BACKEND_URL}/api/v1/users/profile/cover`;
 
     try {
       const res = await fetch(endpoint, {

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
+import { BACKEND_URL } from "../config";
 
 interface SocketContextType {
     socket: Socket | null;
@@ -24,7 +25,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (!userStr) return;
 
         // Assuming backend runs on port 8000
-        const newSocket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000', {
+        const newSocket = io(BACKEND_URL, {
             withCredentials: true,
             transports: ['polling', 'websocket'],
         });
