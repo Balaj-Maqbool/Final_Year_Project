@@ -12,6 +12,7 @@ import {
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../dashboard.css";
+import "../css/buttons.css";
 import { apiRequest } from "../services/apiClient";
 
 interface Job {
@@ -153,12 +154,8 @@ const Dashboard = () => {
                           </Badge>
                         </td>
                         <td>{new Date(job.deadline).toLocaleDateString()}</td>
-                        <td>
-                          <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}`}>View Details</Button>
-                        </td>
-                        <td>
-                          <Button size="sm" variant="light" as={Link as any} to={`/freelancer/jobs/${job._id}/tasks`}>View Tasks</Button>
-                        </td>
+                        <td><Button size="sm" className="btn btn-view" as={Link as any} to={`/freelancer/jobs/${job._id}`}>View Details</Button></td>
+                        <td><Button size="sm" className="btn btn-tasks" as={Link as any} to={`/freelancer/jobs/${job._id}/tasks`}>View Tasks</Button></td>
                       </motion.tr>
                     ))}
                     {(!data?.activeJobs || data.activeJobs.length === 0) && (
@@ -182,7 +179,7 @@ const Dashboard = () => {
                     <Card.Body>
                       <Card.Title>Find Work</Card.Title>
                       <Card.Text>Browse new projects to apply for</Card.Text>
-                      <Button as={Link as any} to="/freelancer/jobs" className="btn-primary-custom w-100">Browse Jobs</Button>
+                      <Button as={Link as any} to="/freelancer/jobs" className="btn-modern primary md w-100">Browse Jobs</Button>
                     </Card.Body>
                   </Card>
                 </motion.div>
@@ -194,7 +191,7 @@ const Dashboard = () => {
                     <Card.Body>
                       <Card.Title>My Proposals</Card.Title>
                       <Card.Text>Track status of your bids</Card.Text>
-                      <Button as={Link as any} to="/freelancer/my-bids" className="btn-secondary-custom w-100">View Bids</Button>
+                      <Button as={Link as any} to="/freelancer/my-bids" className="btn-modern ghost md w-100">View Bids</Button>
                     </Card.Body>
                   </Card>
                 </motion.div>
@@ -206,7 +203,7 @@ const Dashboard = () => {
                     <Card.Body>
                       <Card.Title>My Profile</Card.Title>
                       <Card.Text>Update skills and portfolio</Card.Text>
-                      <Button as={Link as any} to="/profile" className="btn-outline-custom w-100">Edit Profile</Button>
+                      <Button as={Link as any} to="/profile" className="btn-modern success md w-100">Edit Profile</Button>
                     </Card.Body>
                   </Card>
                 </motion.div>
@@ -218,7 +215,7 @@ const Dashboard = () => {
                     <Card.Body>
                       <Card.Title>Messages</Card.Title>
                       <Card.Text>Chat with clients</Card.Text>
-                      <Button as={Link as any} to="/freelancer/chat" className="btn-primary-custom w-100">Open Chat</Button>
+                      <Button as={Link as any} to="/freelancer/chat" className="btn-modern purple md w-100">Open Chat</Button>
                     </Card.Body>
                   </Card>
                 </motion.div>

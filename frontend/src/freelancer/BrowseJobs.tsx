@@ -1,29 +1,17 @@
 import { useEffect, useState } from "react";
-import {
-  Card,
-  Button,
-  Row,
-
-  Container,
-  Spinner,
-  Badge,
-  Stack,
-} from "react-bootstrap";
+import { Container, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { jobHandler, type Job } from "../services/jobHandler";
+import "../css/buttons.css";
+import "./css/BrowseJobs.css";
 
 const BrowseJobs = () => {
-
-
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchJobs = jobHandler.getAllJobs();
-
-    fetchJobs.then((data) => {
+    jobHandler.getAllJobs().then((data) => {
       setJobs(data.docs);
       setLoading(false);
     });
@@ -31,52 +19,68 @@ const BrowseJobs = () => {
 
   if (loading)
     return (
-      <div className="text-center mt-5">
-        <Spinner animation="border" />
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "60vh" }}>
+        <Spinner animation="border" variant="primary" />
       </div>
     );
+
   return (
-    <Container className="mt-4">
-      <h1 className="mb-4">Browse Jobs</h1>
-      <h3>Browse and Apply to Opportunities</h3>
+    <div className="browse-jobs-container">
+      <Container>
+        <h1 className="browse-title">Browse Jobs</h1>
+        <p className="browse-sub">Find the perfect opportunity and place your bid.</p>
 
-      <Stack direction="horizontal">
-        <Row>
+        <div className="browse-grid">
           {jobs.map((job) => (
+            <div key={job._id} className="browse-card">
+              {/* Category Badge */}
+              {job.category && (
+                <span className="browse-badge">{job.category}</span>
+              )}
 
-            <Card key={job._id} className="h-100 shadow-sm m-2">
-              <Card.Body>
-                <Card.Title>{job.title}</Card.Title>
+              <h3 className="browse-card-title">{job.title}</h3>
 
-                <Badge bg="secondary" className="mb-2">
-                  {job.category}
-                </Badge>
+              <p className="browse-card-desc">
+                {job.description.substring(0, 120)}...
+              </p>
 
-                <Card.Text className="mt-2">
-                  {job.description.substring(0, 100)}...
-                </Card.Text>
+              <div className="browse-meta">
+                <div className="browse-meta-item">
+                  <span className="browse-meta-label">Budget</span>
+                  <span className="browse-meta-value budget-green">PKR {job.budget?.toLocaleString()}</span>
+                </div>
+                <div className="browse-meta-item">
+                  <span className="browse-meta-label">Deadline</span>
+                  <span className="browse-meta-value">{new Date(job.deadline).toLocaleDateString()}</span>
+                </div>
+              </div>
 
-                <p>
-                  <strong>Budget:</strong> PKR {job.budget}
-                </p>
-                <p>
-                  <strong>Deadline:</strong> {job.deadline}
-                </p>
-
-
-                <Button onClick={() => navigate(`/freelancer/jobs/${job._id}`)} variant="primary" size="sm">
-                  Apply / Bid
-                </Button>
-
-                <Button onClick={() => navigate(`/freelancer/jobs/${job._id}`)} className="m-2" variant="secondary" size="sm">
-                  Details
-                </Button>
-              </Card.Body>
-            </Card>
+              <div className="browse-actions">
+                <button
+                  className="btn-modern primary sm browse-btn"
+                  onClick={() => navigate(`/freelancer/jobs/${job._id}`)}
+                >
+                  🚀 Apply / Bid
+                </button>
+                <button
+                  className="btn-modern ghost sm browse-btn"
+                  onClick={() => navigate(`/freelancer/jobs/${job._id}`)}
+                >
+                  Details →
+                </button>
+              </div>
+            </div>
           ))}
-        </Row>
-      </Stack>
-    </Container>
+        </div>
+
+        {jobs.length === 0 && (
+          <div style={{ textAlign: "center", padding: "4rem", color: "var(--secondary-color)" }}>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🔍</div>
+            <p>No jobs available right now. Check back soon!</p>
+          </div>
+        )}
+      </Container>
+    </div>
   );
 };
 

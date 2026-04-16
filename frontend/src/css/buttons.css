@@ -1,0 +1,247 @@
+/* ==============================================
+   GLOBAL MODERN BUTTON SYSTEM — buttons.css
+   Import this in any page that needs styled btns
+=============================================== */
+
+/* ---- Shared base ---- */
+.btn-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.btn-modern:hover {
+  transform: translateY(-2px);
+}
+
+.btn-modern:active {
+  transform: translateY(0px) scale(0.97);
+}
+
+.btn-modern:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---- Sizes ---- */
+.btn-modern.sm {
+  padding: 0.38rem 0.85rem;
+  font-size: 0.8rem;
+  border-radius: 8px;
+}
+.btn-modern.md {
+  padding: 0.6rem 1.35rem;
+  font-size: 0.9rem;
+}
+.btn-modern.lg {
+  padding: 0.8rem 1.8rem;
+  font-size: 1rem;
+}
+
+/* =========================================
+   VARIANTS
+========================================= */
+
+/* Primary — Indigo gradient */
+.btn-modern.primary {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+.btn-modern.primary:hover {
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
+  filter: brightness(1.08);
+  color: #fff;
+}
+
+/* Success — Emerald gradient */
+.btn-modern.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+.btn-modern.success:hover {
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.45);
+  filter: brightness(1.08);
+  color: #fff;
+}
+
+/* Danger — Red gradient */
+.btn-modern.danger {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3);
+}
+.btn-modern.danger:hover {
+  box-shadow: 0 8px 20px rgba(244, 63, 94, 0.45);
+  filter: brightness(1.08);
+  color: #fff;
+}
+
+/* Warning — Amber gradient */
+.btn-modern.warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+.btn-modern.warning:hover {
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.45);
+  filter: brightness(1.08);
+  color: #fff;
+}
+
+/* Purple / AI — Violet gradient */
+.btn-modern.purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+}
+.btn-modern.purple:hover {
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.5);
+  filter: brightness(1.08);
+  color: #fff;
+}
+
+/* Ghost / Outline — primary accent */
+.btn-modern.ghost {
+  background: transparent;
+  border: 2px solid #6366f1;
+  color: #6366f1;
+  box-shadow: none;
+}
+.btn-modern.ghost:hover {
+  background: rgba(99, 102, 241, 0.08);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.15);
+}
+
+/* Ghost danger */
+.btn-modern.ghost-danger {
+  background: transparent;
+  border: 2px solid #f43f5e;
+  color: #f43f5e;
+  box-shadow: none;
+}
+.btn-modern.ghost-danger:hover {
+  background: rgba(244, 63, 94, 0.08);
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.15);
+}
+
+/* Neutral / secondary */
+.btn-modern.neutral {
+  background: #f1f5f9;
+  color: #334155;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+}
+.btn-modern.neutral:hover {
+  background: #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  color: #0f172a;
+}
+
+/* ==============================================
+   DARK MODE OVERRIDES
+=============================================== */
+
+[data-theme='dark'] .btn-modern.ghost {
+  border-color: #818cf8;
+  color: #818cf8;
+}
+[data-theme='dark'] .btn-modern.ghost:hover {
+  background: rgba(129, 140, 248, 0.12);
+}
+
+[data-theme='dark'] .btn-modern.ghost-danger {
+  border-color: #fb7185;
+  color: #fb7185;
+}
+[data-theme='dark'] .btn-modern.ghost-danger:hover {
+  background: rgba(251, 113, 133, 0.12);
+}
+
+[data-theme='dark'] .btn-modern.neutral {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+[data-theme='dark'] .btn-modern.neutral:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+/* ==============================================
+   DASHBOARD TABLE ACTION BUTTONS (override Bootstrap .btn-light)
+   Applied globally to all .custom-table buttons
+=============================================== */
+.custom-table .btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+/* View button — indigo pill */
+.custom-table .btn-view {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff !important;
+  box-shadow: 0 3px 8px rgba(99,102,241,0.3);
+}
+.custom-table .btn-view:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(99,102,241,0.45);
+}
+
+/* View Tasks button — teal */
+.custom-table .btn-tasks {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #fff !important;
+  box-shadow: 0 3px 8px rgba(14,165,233,0.3);
+}
+.custom-table .btn-tasks:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(14,165,233,0.45);
+}
+
+/* Chat button — emerald */
+.custom-table .btn-chat {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff !important;
+  box-shadow: 0 3px 8px rgba(16,185,129,0.3);
+}
+.custom-table .btn-chat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(16,185,129,0.45);
+}
+
+/* Delete button — rose */
+.custom-table .btn-delete {
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  color: #fff !important;
+  box-shadow: 0 3px 8px rgba(244,63,94,0.3);
+}
+.custom-table .btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(244,63,94,0.45);
+}
+
+[data-theme='dark'] .custom-table .btn-view,
+[data-theme='dark'] .custom-table .btn-tasks,
+[data-theme='dark'] .custom-table .btn-chat,
+[data-theme='dark'] .custom-table .btn-delete {
+  filter: brightness(0.9);
+}

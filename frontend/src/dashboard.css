@@ -137,33 +137,68 @@
 ========================= */
 
 .status-badge {
-  padding: 6px 14px;
-  font-size: 0.75rem;
+  padding: 5px 12px;
+  font-size: 0.72rem;
   font-weight: 700;
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: inline-block;
+  white-space: nowrap;
+  border: none !important;
+  /* Override Bootstrap Badge inline styles */
+  color: unset !important;
 }
 
 .status-badge.info {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
 }
 
 .status-badge.success {
-  background: #dcfce7;
-  color: #166534;
+  background: #dcfce7 !important;
+  color: #166534 !important;
 }
 
 .status-badge.secondary {
-  background: #f1f5f9;
-  color: #475569;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
 }
 
 .status-badge.warning {
-  background: #fff7ed;
-  color: #c2410c;
+  background: #fff7ed !important;
+  color: #c2410c !important;
+}
+
+.status-badge.danger {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+/* Dark mode badge variants */
+[data-theme='dark'] .status-badge.info {
+  background: rgba(59,130,246,0.18) !important;
+  color: #93c5fd !important;
+}
+
+[data-theme='dark'] .status-badge.success {
+  background: rgba(34,197,94,0.15) !important;
+  color: #4ade80 !important;
+}
+
+[data-theme='dark'] .status-badge.secondary {
+  background: rgba(100,116,139,0.2) !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .status-badge.warning {
+  background: rgba(245,158,11,0.15) !important;
+  color: #fcd34d !important;
+}
+
+[data-theme='dark'] .status-badge.danger {
+  background: rgba(239,68,68,0.15) !important;
+  color: #f87171 !important;
 }
 
 /* =========================
@@ -276,7 +311,8 @@
 ========================= */
 
 [data-theme='dark'] .dashboard-container {
-  background: #0f172a;
+  background: #0f172a !important;
+  color: #e2e8f0;
 }
 
 [data-theme='dark'] .dashboard-card,
@@ -284,30 +320,82 @@
 [data-theme='dark'] .action-card {
   background: #1e293b !important;
   box-shadow: none;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
 }
 
 [data-theme='dark'] .dashboard-header h3,
 [data-theme='dark'] .section-title {
-  color: #f1f5f9;
+  color: #f1f5f9 !important;
 }
 
 [data-theme='dark'] .dashboard-header p,
-[data-theme='dark'] .card-title,
 [data-theme='dark'] .action-card .card-text {
-  color: #94a3b8;
+  color: #94a3b8 !important;
 }
 
+[data-theme='dark'] .card-title {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .summary-value {
+  color: #60a5fa !important;
+}
+
+[data-theme='dark'] .action-card .card-title {
+  color: #f1f5f9 !important;
+}
+
+/* Table head */
 [data-theme='dark'] .custom-table thead th {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+/* Table body rows */
+[data-theme='dark'] .custom-table tbody tr {
   background: #1e293b !important;
-  border-bottom: 1px solid #334155;
+  color: #e2e8f0 !important;
 }
 
 [data-theme='dark'] .custom-table tbody td {
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid #334155 !important;
+  color: #e2e8f0 !important;
+  background: transparent !important;
 }
 
-[data-theme='dark'] .custom-table tbody tr:hover {
+[data-theme='dark'] .custom-table tbody tr:hover td {
+  background: rgba(99,102,241,0.08) !important;
+}
+
+/* Table action buttons */
+[data-theme='dark'] .custom-table .btn-light,
+[data-theme='dark'] .custom-table .btn {
+  background: #334155 !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+[data-theme='dark'] .custom-table .btn:hover {
+  background: #475569 !important;
+}
+
+/* Quick-action card buttons */
+[data-theme='dark'] .btn-secondary-custom {
   background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .btn-outline-custom {
+  border-color: #60a5fa !important;
+  color: #60a5fa !important;
+}
+
+[data-theme='dark'] .btn-outline-custom:hover {
+  background: #60a5fa !important;
+  color: #0f172a !important;
 }
 
 /* =========================

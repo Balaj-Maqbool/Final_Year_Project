@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { jobHandler } from "../services/jobHandler";
 import { motion } from "framer-motion";
 import "../dashboard.css";
+import "../css/buttons.css";
 
 interface Job {
   _id: string;
@@ -134,30 +135,22 @@ const ClientDashboard = () => {
                     transition={{ delay: 0.2 }}
                   >
                     {data?.recentJobs?.map((job) => (
-                      <motion.tr key={job._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} whileHover={{ backgroundColor: "rgba(99,102,241,0.05)" }}>
-                        <td><strong>{job.title}</strong></td>
-                        <td>
-                          <Badge
-                            className={`status-badge ${job.status === "Assigned" ? "success" : job.status === "Open" ? "info" : "secondary"}`}
-                            bg=""
-                          >
-                            {job.status}
-                          </Badge>
-                        </td>
-                        <td>{new Date(job.deadline).toLocaleDateString()}</td>
-                        <td>
-                          <Button size="sm" variant="light" as={Link as any} to={`/client/view-bids/${job._id}`}>View</Button>
-                        </td>
-                        <td>
-                          <Button size="sm" variant="light" as={Link as any} to={`/client/tasks/${job._id}`}>View Tasks</Button>
-                        </td>
-                        <td>
-                          <Button size="sm" variant="light" as={Link as any} to={`/client/chat/${job._id}`}>Chat</Button>
-                        </td>
-                        <td>
-                          <Button size="sm" variant="light" onClick={() => jobHandler.deleteJob(job._id)} >Delete </Button>
-                        </td>
-                      </motion.tr>
+                       <motion.tr key={job._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} whileHover={{ backgroundColor: "rgba(99,102,241,0.05)" }}>
+                         <td><strong>{job.title}</strong></td>
+                         <td>
+                           <Badge
+                             className={`status-badge ${job.status === "Assigned" ? "success" : job.status === "Open" ? "info" : "secondary"}`}
+                             bg=""
+                           >
+                             {job.status}
+                           </Badge>
+                         </td>
+                         <td>{new Date(job.deadline).toLocaleDateString()}</td>
+                         <td><Button size="sm" className="btn btn-view" as={Link as any} to={`/client/view-bids/${job._id}`}>View</Button></td>
+                         <td><Button size="sm" className="btn btn-tasks" as={Link as any} to={`/client/tasks/${job._id}`}>View Tasks</Button></td>
+                         <td><Button size="sm" className="btn btn-chat" as={Link as any} to={`/client/chat/${job._id}`}>Chat</Button></td>
+                         <td><Button size="sm" className="btn btn-delete" onClick={() => jobHandler.deleteJob(job._id)}>Delete</Button></td>
+                       </motion.tr>
                     ))}
                     {(!data?.recentJobs || data.recentJobs.length === 0) && (
                       <tr>
@@ -180,8 +173,7 @@ const ClientDashboard = () => {
                     <Card.Body>
                       <Card.Title>Post a Job</Card.Title>
                       <Card.Text>Find new freelancers to hire</Card.Text>
-
-                      <Button as={Link as any} to="/client/postjob" className="btn-primary-custom w-100">Post New Project</Button>
+                      <Button as={Link as any} to="/client/postjob" className="btn-modern primary md w-100">Post New Project</Button>
                     </Card.Body>
                   </Card>
                 </motion.div>
@@ -193,7 +185,7 @@ const ClientDashboard = () => {
                     <Card.Body>
                       <Card.Title>View Proposals</Card.Title>
                       <Card.Text>Track proposals for your projects</Card.Text>
-                      <Button as={Link as any} to="/client/alljobs" className="btn-secondary-custom w-100">Review Proposals</Button>
+                      <Button as={Link as any} to="/client/alljobs" className="btn-modern ghost md w-100">Review Proposals</Button>
                     </Card.Body>
                   </Card>
                 </motion.div>
@@ -205,7 +197,7 @@ const ClientDashboard = () => {
                     <Card.Body>
                       <Card.Title>View Projects</Card.Title>
                       <Card.Text>View all your projects</Card.Text>
-                      <Button as={Link as any} to="/client/alljobs" className="btn-outline-custom w-100">View Projects</Button>
+                      <Button as={Link as any} to="/client/alljobs" className="btn-modern success md w-100">View Projects</Button>
                     </Card.Body>
                   </Card>
                 </motion.div>
