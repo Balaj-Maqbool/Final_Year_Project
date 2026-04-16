@@ -7,8 +7,12 @@
   margin: 0 auto;
   padding: 3rem 2rem;
   min-height: 100vh;
+  /* Make the whole dashboard page scrollable */
+  overflow-y: auto;
+  overflow-x: hidden;
   background: #f9fafb;
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
 }
 
 /* =========================
@@ -55,8 +59,14 @@
   font-weight: 700;
   color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  /* Removed letter-spacing — it was stretching words beyond card width on mobile */
+  letter-spacing: 0.3px;
   margin-bottom: 1rem;
+  /* Prevent words from breaking at character boundaries */
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+  white-space: normal;
 }
 
 .summary-value {
@@ -83,10 +93,13 @@
 
 .table-card {
   border-radius: 20px;
-  overflow: hidden;
+  /* Allow table to scroll horizontally on small screens */
+  overflow-x: auto;
+  overflow-y: visible;
   background: #ffffff;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   border: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* =========================
@@ -295,4 +308,120 @@
 
 [data-theme='dark'] .custom-table tbody tr:hover {
   background: #1e293b !important;
+}
+
+/* =========================
+   RESPONSIVE — TABLET
+========================= */
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .dashboard-header h3 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-header p {
+    font-size: 0.9rem;
+  }
+
+  .summary-value {
+    font-size: 2rem;
+  }
+
+  /* Stack summary stat cards 2 per row */
+  .dashboard-container .row > [class*='col-md-3'] {
+    flex: 0 0 50%;
+    max-width: 50%;
+    min-width: 0;
+  }
+
+  /* Stack quick action cards 2 per row */
+  .dashboard-container .row > [class*='col-md-4'],
+  .dashboard-container .row > [class*='col-md-3']:not(:first-child) {
+    flex: 0 0 50%;
+    max-width: 50%;
+    min-width: 0;
+  }
+
+  /* Shrink card-title letter spacing on tablet too */
+  .card-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.2px;
+  }
+
+  /* Table cells: smaller padding & font on tablet */
+  .custom-table thead th,
+  .custom-table tbody td {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .section-title {
+    font-size: 1.15rem;
+  }
+}
+
+/* =========================
+   RESPONSIVE — MOBILE
+========================= */
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 1rem 0.75rem;
+  }
+
+  .dashboard-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard-header h3 {
+    font-size: 1.3rem;
+  }
+
+  /* Stack ALL summary stat cards 1 per row */
+  .dashboard-container .row > [class*='col-md-3'] {
+    flex: 0 0 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Stack ALL quick-action cards 1 per row */
+  .dashboard-container .row > [class*='col-md-4'] {
+    flex: 0 0 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Card title: restore normal letter spacing, reduce font slightly */
+  .card-title {
+    font-size: 0.7rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .summary-value {
+    font-size: 1.75rem;
+  }
+
+  /* Compact table for very small screens */
+  .custom-table thead th,
+  .custom-table tbody td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .action-card {
+    padding: 1.25rem;
+  }
+
+  .btn-primary-custom,
+  .btn-secondary-custom,
+  .btn-outline-custom {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
 }

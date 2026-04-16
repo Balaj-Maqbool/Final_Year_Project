@@ -14,29 +14,36 @@
 /* ================= NAVBAR ================= */
 .landing-nav {
   max-width: 1200px;
-  margin: 1.5rem auto 0;
-  padding: 1rem 2rem;
+  margin: 1rem auto 0;
+  padding: 0.85rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
   /* Glassmorphism */
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   position: sticky;
-  top: 1rem;
+  top: 0.75rem;
   z-index: 1000;
+
+  /* Ensure it never bleeds beyond viewport */
+  width: calc(100% - 2rem);
+  box-sizing: border-box;
 }
 
 .nav-logo {
-  font-size: 1.7rem;
+  font-size: clamp(1.2rem, 4vw, 1.7rem);
   font-weight: 900;
   text-decoration: none;
   color: #111827;
+  white-space: nowrap;
 }
 
 .nav-logo span {
@@ -45,16 +52,20 @@
 
 .nav-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .btn-login {
-  padding: 0.6rem 1.4rem;
+  padding: 0.5rem 1rem;
   border-radius: 10px;
   font-weight: 600;
   text-decoration: none;
   color: #334155;
   transition: background 0.2s;
+  white-space: nowrap;
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
 }
 
 .btn-login:hover {
@@ -62,13 +73,15 @@
 }
 
 .btn-register {
-  padding: 0.6rem 1.4rem;
+  padding: 0.5rem 1rem;
   background: #6366f1;
   color: white;
   border-radius: 10px;
   text-decoration: none;
   font-weight: 600;
   transition: 0.2s;
+  white-space: nowrap;
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
 }
 
 .btn-register:hover {
@@ -283,6 +296,8 @@
 }
 
 /* ================= RESPONSIVE ================= */
+
+/* Tablet */
 @media (max-width: 900px) {
   .hero-content {
     grid-template-columns: 1fr;
@@ -307,6 +322,85 @@
     left: 0;
     margin: -50px auto 0;
     z-index: 10;
+  }
+
+  .hero-section {
+    padding: 4rem 1.5rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  /* Navbar */
+  .landing-nav {
+    margin: 0.6rem auto 0;
+    padding: 0.7rem 1rem;
+    top: 0.5rem;
+    width: calc(100% - 1.2rem);
+    border-radius: 12px;
+    gap: 0.4rem;
+  }
+
+  .nav-logo {
+    font-size: 1.25rem;
+  }
+
+  .btn-login,
+  .btn-register {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  /* Hero */
+  .hero-section {
+    padding: 3rem 1rem;
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 8vw, 2.8rem);
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    width: 100%;
+    max-width: 260px;
+    text-align: center;
+    padding: 0.85rem 1.5rem;
+  }
+
+  /* Hide floating dashboard on very small screens to prevent overflow */
+  .floating-dashboard {
+    display: none;
+  }
+
+  /* Features */
+  .features-section {
+    padding: 3rem 1rem;
+  }
+
+  .features-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
   }
 }
 
