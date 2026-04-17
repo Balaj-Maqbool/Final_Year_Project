@@ -7,9 +7,22 @@ import { ApiResponse } from "./utils/ApiResponse.js";
 import "dotenv/config";
 const app = express();
 
+const ALLOWED_ORIGINS = [
+    "https://pakfreelanceforntend.onrender.com",
+    "http://localhost:5173",
+    "http://localhost:3000",
+];
+
 app.use(
     cors({
-        origin: CORS_ORIGIN,
+        origin: (origin, callback) => {
+            // Allow requests with no origin (curl, Postman, same-origin)
+            if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error(`CORS blocked: ${origin}`));
+            }
+        },
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     })
