@@ -1,25 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  Card,
-  Row,
-  Col,
-  Button,
-  Table,
-  Badge,
-  Container,
-  Spinner,
-} from "react-bootstrap";
+import { Row, Col, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { apiRequest } from "../services/apiClient";
+import { getJobVisual, getStatusPillClass } from "../utils/jobVisuals";
 import "../dashboard.css";
 import "../css/buttons.css";
-import { apiRequest } from "../services/apiClient";
 
 interface Job {
   _id: string;
   title: string;
   status: string;
   deadline: string;
+  budget?: number;
 }
 
 interface DashboardStats {
@@ -35,197 +28,186 @@ interface DashboardStats {
 interface DashboardData {
   stats: DashboardStats;
   activeJobs: Job[];
-  // pendingTasks: any[]; // define if needed
 }
 
-const Dashboard = () => {
-  const { data, isLoading: loading } = useQuery({
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+const FreelancerDashboard = () => {
+  const { data, isLoading } = useQuery<DashboardData>({
     queryKey: ["freelancerDashboard"],
-    queryFn: async () => {
-      const response = await apiRequest<DashboardData>("/dashboard/freelancer");
-      return response;
-    },
+    queryFn: async () => apiRequest<DashboardData>("/dashboard/freelancer"),
     staleTime: 5000,
   });
 
-  if (loading)
+  if (isLoading)
     return (
-      <div className="mt-5 text-center">
-        <Spinner animation="border" />
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "60vh" }}>
+        <Spinner animation="border" variant="primary" />
       </div>
     );
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-  };
+  const stats = [
+    { label: "MY\nAPPLICATIONS",  value: data?.stats?.totalBids ?? 0,              color: "blue",   icon: "📋" },
+    { label: "ACTIVE\nPROJECTS",  value: data?.stats?.activeJobsCount ?? 0,         color: "teal",   icon: "💼" },
+    { label: "COMPLETED",         value: data?.stats?.completedJobsCount ?? 0,      color: "purple", icon: "✅" },
+    { label: "TOTAL\nEARNINGS",   value: `Rs ${(data?.stats?.totalEarnings ?? 0).toLocaleString()}`, color: "orange", icon: "💰" },
+  ];
 
   return (
-    <>
-      <Container className="dashboard-container">
-        <motion.div variants={containerVariants} initial="hidden" animate="visible">
-          <motion.div variants={itemVariants} className="dashboard-header">
-            <h3>Freelancer Dashboard</h3>
-            <p>Welcome back! Here's an overview of your activity.</p>
-          </motion.div>
+    <div className="dashboard-container">
+      <motion.div variants={container} initial="hidden" animate="show">
+        {/* ---- Header ---- */}
+        <motion.div variants={item} className="dashboard-header">
+          <h3>Freelancer Dashboard</h3>
+          <p>Welcome back! Here's an overview of your activity.</p>
+        </motion.div>
 
-          {/* SUMMARY CARDS */}
-          <Row className="mb-4 g-4">
+        {/* ---- Gradient Stat Cards ---- */}
+        <motion.div variants={item}>
+          <Row className="g-3 mb-4">
+            {stats.map((s) => (
+              <Col key={s.label} xs={12} sm={6} lg={3}>
+                <motion.div
+                  className={`stat-card-wrap ${s.color}`}
+                  whileHover={{ y: -6 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <svg className="stat-wave" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="20"  r="60" fill="white" />
+                    <circle cx="80"  cy="100" r="40" fill="white" />
+                  </svg>
+                  <div className="stat-icon-circle">{s.icon}</div>
+                  <div className="stat-content">
+                    {s.label.split("\n").map((line, i) => (
+                      <span key={i} className="stat-label-top">{line}</span>
+                    ))}
+                    <div className="stat-value">{s.value}</div>
+                  </div>
+                </motion.div>
+              </Col>
+            ))}
+          </Row>
+        </motion.div>
+
+        {/* ---- Active Jobs ---- */}
+        <motion.div variants={item} className="mb-4">
+          <div className="section-header">
+            <h4 className="section-title">Current Active Jobs</h4>
+            <Link to="/freelancer/jobs" className="section-view-all">Browse More &rsaquo;</Link>
+          </div>
+
+          {(!data?.activeJobs || data.activeJobs.length === 0) ? (
+            <div style={{ textAlign: "center", padding: "3rem", color: "#94a3b8" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🔍</div>
+              <p>No active jobs yet. Browse open projects and place your bid!</p>
+            </div>
+          ) : (
+            <div className="projects-grid">
+              {data.activeJobs.map((job, idx) => (
+                <motion.div
+                  key={job._id}
+                  className="project-card"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.07 }}
+                  whileHover={{ y: -4 }}
+                >
+                  {/* Top row */}
+                  <div className="project-card-top">
+                    <div className={`project-icon-circle ${getJobVisual(job).color}`}>
+                      {getJobVisual(job).icon}
+                    </div>
+                    <div className="project-info">
+                      <p className="project-title">{job.title}</p>
+                      <span className="project-id">
+                        Deadline: {new Date(job.deadline).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {job.budget && (
+                      <span className="project-amount">Rs {job.budget.toLocaleString()}</span>
+                    )}
+                  </div>
+
+                  {/* Mid: status + CTA */}
+                  <div className="project-card-mid">
+                    <span className={`job-status-pill ${getStatusPillClass(job.status)}`}>
+                      {job.status === "Assigned" ? "In Progress" : job.status}
+                    </span>
+                    <Link to={`/freelancer/jobs/${job._id}`} className="btn-view-details-card">
+                      View Details
+                    </Link>
+                  </div>
+
+                  {/* Bottom actions */}
+                  <div className="project-card-actions">
+                    <Link to={`/freelancer/jobs/${job._id}/tasks`} className="btn-pc tasks">Tasks</Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+
+        {/* ---- Quick Actions ---- */}
+        <motion.div variants={item}>
+          <div className="section-header">
+            <h4 className="section-title">Quick Actions</h4>
+          </div>
+          <Row className="g-3">
             <Col md={3}>
-              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-                <Card className="dashboard-card">
-                  <Card.Body>
-                    <Card.Title className="card-title">My Applications</Card.Title>
-                    <h2 className="summary-value">{data?.stats?.totalBids || 0}</h2>
-                  </Card.Body>
-                </Card>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
+                <div className="action-card">
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>🔍</p>
+                  <div className="card-title">Find Work</div>
+                  <p className="card-text">Browse new projects to apply for</p>
+                  <Link to="/freelancer/jobs" className="btn-modern primary md w-100">Browse Jobs</Link>
+                </div>
               </motion.div>
             </Col>
-
             <Col md={3}>
-              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-                <Card className="dashboard-card">
-                  <Card.Body>
-                    <Card.Title className="card-title">Active Projects</Card.Title>
-                    <h2 className="summary-value">{data?.stats?.activeJobsCount || 0}</h2>
-                  </Card.Body>
-                </Card>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
+                <div className="action-card">
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>📬</p>
+                  <div className="card-title">My Proposals</div>
+                  <p className="card-text">Track status of your bids</p>
+                  <Link to="/freelancer/my-bids" className="btn-modern ghost md w-100">View Bids</Link>
+                </div>
               </motion.div>
             </Col>
-
             <Col md={3}>
-              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-                <Card className="dashboard-card">
-                  <Card.Body>
-                    <Card.Title className="card-title">Completed</Card.Title>
-                    <h2 className="summary-value">{data?.stats?.completedJobsCount || 0}</h2>
-                  </Card.Body>
-                </Card>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
+                <div className="action-card">
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>👤</p>
+                  <div className="card-title">My Profile</div>
+                  <p className="card-text">Update skills and portfolio</p>
+                  <Link to="/profile" className="btn-modern success md w-100">Edit Profile</Link>
+                </div>
               </motion.div>
             </Col>
-
             <Col md={3}>
-              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-                <Card className="dashboard-card">
-                  <Card.Body>
-                    <Card.Title className="card-title">Total Earnings</Card.Title>
-                    <h2 className="summary-value">Rs {data?.stats?.totalEarnings?.toLocaleString() || 0}</h2>
-                  </Card.Body>
-                </Card>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
+                <div className="action-card">
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>💬</p>
+                  <div className="card-title">Messages</div>
+                  <p className="card-text">Chat with your clients</p>
+                  <Link to="/freelancer/chat" className="btn-modern purple md w-100">Open Chat</Link>
+                </div>
               </motion.div>
             </Col>
           </Row>
-
-          {/* ACTIVE JOBS */}
-          <motion.div variants={itemVariants} className="mb-4">
-            <h4 className="section-title">Current Active Jobs</h4>
-            <Card className="table-card">
-              <Card.Body className="p-0">
-                <Table responsive className="custom-table">
-                  <thead>
-                    <tr>
-                      <th>Job Title</th>
-                      <th>Status</th>
-                      <th>Deadline</th>
-                      <th>Action</th>
-                      <th>Tasks</th>
-                    </tr>
-                  </thead>
-
-                  <motion.tbody 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }} 
-                    transition={{ delay: 0.2 }}
-                  >
-                    {data?.activeJobs?.map((job) => (
-                      <motion.tr key={job._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} whileHover={{ backgroundColor: "rgba(99,102,241,0.05)" }}>
-                        <td><strong>{job.title}</strong></td>
-                        <td>
-                          <Badge
-                            className={`status-badge ${job.status === "Assigned" ? "success" : job.status === "Open" ? "info" : "secondary"}`}
-                            bg=""
-                          >
-                            {job.status === "Assigned" ? "In Progress" : job.status}
-                          </Badge>
-                        </td>
-                        <td>{new Date(job.deadline).toLocaleDateString()}</td>
-                        <td><Button size="sm" className="btn btn-view" as={Link as any} to={`/freelancer/jobs/${job._id}`}>View Details</Button></td>
-                        <td><Button size="sm" className="btn btn-tasks" as={Link as any} to={`/freelancer/jobs/${job._id}/tasks`}>View Tasks</Button></td>
-                      </motion.tr>
-                    ))}
-                    {(!data?.activeJobs || data.activeJobs.length === 0) && (
-                      <tr>
-                        <td colSpan={4} className="text-center py-4 text-muted">No active jobs found</td>
-                      </tr>
-                    )}
-                  </motion.tbody>
-                </Table>
-              </Card.Body>
-            </Card>
-          </motion.div>
-
-          {/* QUICK ACTIONS */}
-          <motion.div variants={itemVariants}>
-            <h4 className="section-title">Quick Actions</h4>
-            <Row className="g-4">
-              <Col md={3}>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                  <Card className="dashboard-card action-card">
-                    <Card.Body>
-                      <Card.Title>Find Work</Card.Title>
-                      <Card.Text>Browse new projects to apply for</Card.Text>
-                      <Button as={Link as any} to="/freelancer/jobs" className="btn-modern primary md w-100">Browse Jobs</Button>
-                    </Card.Body>
-                  </Card>
-                </motion.div>
-              </Col>
-
-              <Col md={3}>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                  <Card className="dashboard-card action-card">
-                    <Card.Body>
-                      <Card.Title>My Proposals</Card.Title>
-                      <Card.Text>Track status of your bids</Card.Text>
-                      <Button as={Link as any} to="/freelancer/my-bids" className="btn-modern ghost md w-100">View Bids</Button>
-                    </Card.Body>
-                  </Card>
-                </motion.div>
-              </Col>
-
-              <Col md={3}>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                  <Card className="dashboard-card action-card">
-                    <Card.Body>
-                      <Card.Title>My Profile</Card.Title>
-                      <Card.Text>Update skills and portfolio</Card.Text>
-                      <Button as={Link as any} to="/profile" className="btn-modern success md w-100">Edit Profile</Button>
-                    </Card.Body>
-                  </Card>
-                </motion.div>
-              </Col>
-
-              <Col md={3}>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                  <Card className="dashboard-card action-card">
-                    <Card.Body>
-                      <Card.Title>Messages</Card.Title>
-                      <Card.Text>Chat with clients</Card.Text>
-                      <Button as={Link as any} to="/freelancer/chat" className="btn-modern purple md w-100">Open Chat</Button>
-                    </Card.Body>
-                  </Card>
-                </motion.div>
-              </Col>
-            </Row>
-          </motion.div>
         </motion.div>
-      </Container>
-    </>
+      </motion.div>
+    </div>
   );
 };
 
-export default Dashboard;
+export default FreelancerDashboard;
