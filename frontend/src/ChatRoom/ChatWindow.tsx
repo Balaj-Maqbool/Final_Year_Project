@@ -26,16 +26,16 @@ const ChatWindow = () => {
     });
 
     const mutation = useMutation({
-        mutationFn: (content: string) => sendMessage(activeThreadId!, content),
+        mutationFn: ({ content, attachments }: { content: string, attachments?: any[] }) => sendMessage(activeThreadId!, content, attachments),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["messages", activeThreadId] });
             queryClient.invalidateQueries({ queryKey: ["threads"] });
         },
     });
 
-    const handleSendMessage = (content: string) => {
+    const handleSendMessage = (content: string, attachments?: any[]) => {
         if (!activeThreadId) return;
-        mutation.mutate(content);
+        mutation.mutate({ content, attachments });
     };
 
     if (!activeThreadId) {

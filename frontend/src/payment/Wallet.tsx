@@ -118,7 +118,7 @@ const Wallet = () => {
                                 <Card.Body className="p-4">
                                     <Card.Subtitle className="mb-2 text-white-50" style={{ fontSize: '1rem', letterSpacing: '1px' }}>LIFETIME EARNINGS</Card.Subtitle>
                                     <Card.Title as="h1" className="mb-0 fw-bold" style={{ fontSize: '2.5rem' }}>
-                                        ${transactions.filter((t: any) => t.type === 'payment' && t.status === 'completed').reduce((acc: number, cur: any) => acc + cur.amount, 0).toFixed(2)}
+                                        ${wallet.totalEarned?.toFixed(2) || "0.00"}
                                     </Card.Title>
                                     <Card.Text className="mt-4 text-white-50">
                                         Total earnings processed into available balance.

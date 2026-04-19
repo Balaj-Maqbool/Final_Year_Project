@@ -320,7 +320,7 @@ const requestWithdrawal = asyncHandler(async (req, res) => {
         user: freelancer._id,
         amount: amount,
         type: "withdrawal",
-        status: "pending"
+        status: "completed" // Auto-completing for mock showcase purposes
     });
 
     await NotificationService.notifyWithdrawalRequested(
@@ -335,7 +335,7 @@ const requestWithdrawal = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 withdrawalRecord,
-                "Withdrawal request submitted successfully. Admin will process it shortly."
+                "Withdrawal processed successfully! Funds have been sent to your linked account."
             )
         );
 });

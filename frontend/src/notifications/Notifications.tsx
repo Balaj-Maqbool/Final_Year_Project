@@ -7,6 +7,7 @@ import "../css/Notifications.css";
 const Notifications = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     const { data = [], isLoading, isError } = useQuery({
         queryKey: ["notifications"],
@@ -46,6 +47,9 @@ const Notifications = () => {
     const getRedirectLink = (notification: any) => {
         const { type, relatedId } = notification;
         if (!relatedId) return "#";
+        
+        const basePath = user?.role === "Client" ? "/client" : "/freelancer";
+
         switch (type) {
             case "NEW_BID":
             case "BID_WITHDRAWN":
@@ -56,7 +60,10 @@ const Notifications = () => {
             case "NEW_JOB":
                 return `/freelancer/jobs/${relatedId}`;
             case "TASK_STATUS_UPDATE":
-                return `/client/tasks/${relatedId}`;
+            case "SUBMISSION_STATUS_UPDATE":
+                return `${basePath}/tasks/${relatedId}`;
+            case "NEW_CHAT_MESSAGE":
+                return `${basePath}/chat/${relatedId}`;
             default:
                 return "#";
         }
