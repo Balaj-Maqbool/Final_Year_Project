@@ -27,12 +27,14 @@ export interface WalletTransaction {
 }
 
 export interface WalletData {
+    totalEarned:number;
     availableBalance: number;
     escrowBalance: number;
     totalSpent: number;
 }
 
 export interface WalletResponse {
+  
     wallet: WalletData;
     transactions: WalletTransaction[];
 }
