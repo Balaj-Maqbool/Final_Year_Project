@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import "./Navbar.css";
 import NotificationBell from "../notifications/NotificationBell";
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
@@ -46,11 +46,12 @@ const Navbar = () => {
 
         {/* Desktop nav links */}
         <ul className="nav-menu desktop-menu">
-          <li><Link to="/freelancer/jobs" className="nav-link">Find Work</Link></li>
-          <li><Link to="/freelancer/my-bids" className="nav-link">My Bids</Link></li>
-          <li><Link to="/freelancer/freelancerDashboard" className="nav-link">Dashboard</Link></li>
+          <li><NavLink to="/freelancer/jobs" className="nav-link">Find Work</NavLink></li>
+          <li><NavLink to="/freelancer/my-bids" className="nav-link">My Bids</NavLink></li>
+          <li><NavLink to="/freelancer/freelancerDashboard" className="nav-link">Dashboard</NavLink></li>
+          <li><NavLink to="/freelancer/chat" className="nav-link">Messages</NavLink></li>
           <li style={{ display: "flex", alignItems: "center" }}><NotificationBell /></li>
-          <li><Link to="/freelancer/wallet" className="nav-link">Wallet</Link></li>
+          <li><NavLink to="/freelancer/wallet" className="nav-link">Wallet</NavLink></li>
         </ul>
 
         {/* Right side: theme toggle + profile/auth — always visible */}
@@ -105,6 +106,7 @@ const Navbar = () => {
             <Link to="/freelancer/jobs" className="mobile-link" onClick={closeMenu}>Find Work</Link>
             <Link to="/freelancer/my-bids" className="mobile-link" onClick={closeMenu}>My Bids</Link>
             <Link to="/freelancer/freelancerDashboard" className="mobile-link" onClick={closeMenu}>Dashboard</Link>
+            <Link to="/freelancer/chat" className="mobile-link" onClick={closeMenu}>Messages</Link>
             <Link to="/freelancer/wallet" className="mobile-link" onClick={closeMenu}>Wallet</Link>
             <div className="mobile-bell"><NotificationBell /></div>
           </motion.div>

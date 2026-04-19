@@ -1,27 +1,27 @@
 /* =========================
-   BASE NAVBAR
+   BASE NAVBAR (Sleek Dark)
 ========================= */
 .custom-navbar {
-  background-color: rgba(255, 255, 255, 0.45) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  padding: 0.8rem 1.5rem !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  padding: 0.6rem 1.2rem !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
   position: sticky !important;
   top: 1rem !important;
   z-index: 1000 !important;
   margin: 1rem auto !important;
-  max-width: 95% !important;
-  border-radius: 20px !important;
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  max-width: 1200px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
   box-sizing: border-box !important;
   overflow: visible !important;
 }
 
 [data-theme='dark'] .custom-navbar {
-  background-color: rgba(15, 23, 42, 0.75) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  background-color: #0f1218 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* =========================
@@ -40,23 +40,35 @@
    BRAND
 ========================= */
 .nav-brand {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
   text-decoration: none;
-  letter-spacing: -0.5px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   white-space: nowrap;
   flex-shrink: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+[data-theme='dark'] .nav-brand {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.nav-brand::before {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
 .nav-brand span {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  display: none; /* remove earlier gradient if used */
 }
 
 /* =========================
@@ -78,17 +90,39 @@
 }
 
 .nav-link {
-  color: var(--text-dark);
+  color: #4b5563;
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.2s;
-  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
   white-space: nowrap;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
 }
 
-.nav-link:hover,
+.nav-link:hover {
+  color: #111827;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
 .nav-link.active {
-  color: var(--primary);
+  color: #111827;
+  background-color: rgba(0, 0, 0, 0.07);
+  font-weight: 600;
+}
+
+/* Dark mode links */
+[data-theme='dark'] .nav-link {
+  color: #9ca3af;
+}
+[data-theme='dark'] .nav-link:hover {
+  color: #e5e7eb;
+  background-color: transparent;
+}
+[data-theme='dark'] .nav-link.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-weight: 500;
 }
 
 /* =========================
@@ -137,23 +171,33 @@
    NOTIFICATION BELL
 ========================= */
 .bell {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: transform 0.2s ease;
-  padding: 0.5rem;
-  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #4b5563;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .bell:hover {
-  background-color: #f1f5f9;
-  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #111827;
+}
+
+[data-theme='dark'] .bell {
+  color: #9ca3af;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 [data-theme='dark'] .bell:hover {
-  background-color: #334155;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 /* =========================

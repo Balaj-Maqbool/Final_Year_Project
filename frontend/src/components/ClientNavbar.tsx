@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import "./Navbar.css";
 import NotificationBell from "../notifications/NotificationBell";
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
@@ -47,11 +47,12 @@ const ClientNavbar = () => {
 
         {/* Desktop nav links */}
         <ul className="nav-menu desktop-menu">
-          <li><Link to="/client/postjob" className="nav-link">Post a Job</Link></li>
-          <li><Link to="/client/alljobs" className="nav-link">All Jobs</Link></li>
-          <li><Link to="/client/clientDashboard" className="nav-link">Dashboard</Link></li>
+          <li><NavLink to="/client/postjob" className="nav-link">Post a job</NavLink></li>
+          <li><NavLink to="/client/alljobs" className="nav-link">All jobs</NavLink></li>
+          <li><NavLink to="/client/clientDashboard" className="nav-link">Dashboard</NavLink></li>
+          <li><NavLink to="/client/chat" className="nav-link">Messages</NavLink></li>
           <li style={{ display: "flex", alignItems: "center" }}><NotificationBell /></li>
-          <li><Link to="/client/wallet" className="nav-link">Wallet</Link></li>
+          <li><NavLink to="/client/wallet" className="nav-link">Wallet</NavLink></li>
         </ul>
 
         {/* Right side: theme toggle + profile/auth — always visible */}
@@ -106,6 +107,7 @@ const ClientNavbar = () => {
             <Link to="/client/postjob" className="mobile-link" onClick={closeMenu}>Post a Job</Link>
             <Link to="/client/alljobs" className="mobile-link" onClick={closeMenu}>All Jobs</Link>
             <Link to="/client/clientDashboard" className="mobile-link" onClick={closeMenu}>Dashboard</Link>
+            <Link to="/client/chat" className="mobile-link" onClick={closeMenu}>Messages</Link>
             <Link to="/client/wallet" className="mobile-link" onClick={closeMenu}>Wallet</Link>
             <div className="mobile-bell"><NotificationBell /></div>
           </motion.div>

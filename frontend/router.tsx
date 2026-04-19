@@ -111,6 +111,7 @@ const router = createBrowserRouter([
       { path: "view-bids/:jobId", element: <ViewBids /> },
       { path: 'notifications', element: <Notifications /> },
       { path: "tasks/:jobId", element: <Tasks /> },
+      { path: "chat", element: <Chat /> },
       { path: "chat/:jobId", element: <Chat /> },
       { path: "wallet", element: <Wallet /> }
     ]
