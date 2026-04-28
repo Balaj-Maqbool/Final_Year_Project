@@ -5,6 +5,7 @@ import { Container, Row, Col, Card, Badge } from "react-bootstrap";
 import "./LandingPage.css";
 import Footer from "../components/Footer";
 import CursorBlob from "../components/CursorBlob";
+import { FaShieldAlt, FaMoneyBillWave, FaCheckCircle, FaRocket } from "react-icons/fa";
 
 // Animation Variants
 const fadeIn: Variants = {
@@ -62,6 +63,36 @@ const LandingPage = () => {
           </motion.div>
         </div>
       </motion.nav>
+
+      {/* Top Banner with Image */}
+      <motion.section 
+        className="top-banner-section"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <div className="top-banner-wrapper">
+          <img src="/landing page.jpg" alt="Freelance Banner" className="top-banner-bg" />
+          <div className="top-banner-overlay">
+            <motion.h2 
+              className="top-banner-title"
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              Empowering Your <span>Freelance</span> Journey
+            </motion.h2>
+            <motion.p 
+              className="top-banner-desc"
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              Discover endless possibilities, connect with top clients, and build your career on your own terms.
+            </motion.p>
+          </div>
+        </div>
+      </motion.section>
 
       {/* Hero Section */}
       <section className="hero-section">
@@ -158,7 +189,7 @@ const LandingPage = () => {
           viewport={{ once: true, amount: 0.2 }}
         >
           <motion.div variants={fadeIn} className="feature-card glass-card" whileHover={{ y: -8, scale: 1.02 }}>
-            <span className="feature-icon floating-icon">🛡️</span>
+            <span className="feature-icon floating-icon" style={{ color: "#6366f1" }}><FaShieldAlt /></span>
             <h3>Secure Escrow</h3>
             <p>
               Your payment stays protected until work is completed
@@ -167,7 +198,7 @@ const LandingPage = () => {
           </motion.div>
 
           <motion.div variants={fadeIn} className="feature-card glass-card" whileHover={{ y: -8, scale: 1.02 }}>
-            <span className="feature-icon floating-icon feature-icon-delay-1">💸</span>
+            <span className="feature-icon floating-icon feature-icon-delay-1" style={{ color: "#10b981" }}><FaMoneyBillWave /></span>
             <h3>Local Payments</h3>
             <p>
               Pay & withdraw easily via JazzCash, Easypaisa
@@ -176,7 +207,7 @@ const LandingPage = () => {
           </motion.div>
 
           <motion.div variants={fadeIn} className="feature-card glass-card" whileHover={{ y: -8, scale: 1.02 }}>
-            <span className="feature-icon floating-icon feature-icon-delay-2">✅</span>
+            <span className="feature-icon floating-icon feature-icon-delay-2" style={{ color: "#10b981" }}><FaCheckCircle /></span>
             <h3>Verified Talent</h3>
             <p>
               CNIC-verified freelancers to ensure trust
@@ -185,7 +216,7 @@ const LandingPage = () => {
           </motion.div>
 
           <motion.div variants={fadeIn} className="feature-card glass-card" whileHover={{ y: -8, scale: 1.02 }}>
-            <span className="feature-icon floating-icon feature-icon-delay-3">🚀</span>
+            <span className="feature-icon floating-icon feature-icon-delay-3" style={{ color: "#f59e0b" }}><FaRocket /></span>
             <h3>Grow Your Business</h3>
             <p>
               Access thousands of opportunities across Pakistan

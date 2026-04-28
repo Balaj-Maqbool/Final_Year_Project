@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useChatStore } from "../store/chatStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { getMyThreads } from "../services/useChats";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -11,7 +12,7 @@ const ThreadsSidebar = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
 
-    const { data: user } = useQuery({ queryKey: ['user'], queryFn: () => JSON.parse(localStorage.getItem('user') || '{}') });
+    const user = useAuthStore((state) => state.user);
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ["threads"],

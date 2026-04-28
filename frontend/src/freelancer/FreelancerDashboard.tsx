@@ -6,6 +6,7 @@ import { apiRequest } from "../services/apiClient";
 import { getJobVisual, getStatusPillClass } from "../utils/jobVisuals";
 import "../dashboard.css";
 import "../css/buttons.css";
+import { FaClipboardList, FaBriefcase, FaCheckCircle, FaMoneyBillWave, FaSearch, FaInbox, FaUserAlt, FaComments } from "react-icons/fa";
 
 interface Job {
   _id: string;
@@ -56,10 +57,10 @@ const FreelancerDashboard = () => {
     );
 
   const stats = [
-    { label: "MY\nAPPLICATIONS",  value: data?.stats?.totalBids ?? 0,              color: "blue",   icon: "📋" },
-    { label: "ACTIVE\nPROJECTS",  value: data?.stats?.activeJobsCount ?? 0,         color: "teal",   icon: "💼" },
-    { label: "COMPLETED",         value: data?.stats?.completedJobsCount ?? 0,      color: "purple", icon: "✅" },
-    { label: "TOTAL\nEARNINGS",   value: `Rs ${(data?.stats?.totalEarnings ?? 0).toLocaleString()}`, color: "orange", icon: "💰" },
+    { label: "MY\nAPPLICATIONS",  value: data?.stats?.totalBids ?? 0,              color: "blue",   icon: <FaClipboardList /> },
+    { label: "ACTIVE\nPROJECTS",  value: data?.stats?.activeJobsCount ?? 0,         color: "teal",   icon: <FaBriefcase /> },
+    { label: "COMPLETED",         value: data?.stats?.completedJobsCount ?? 0,      color: "purple", icon: <FaCheckCircle /> },
+    { label: "TOTAL\nEARNINGS",   value: `Rs ${(data?.stats?.totalEarnings ?? 0).toLocaleString()}`, color: "orange", icon: <FaMoneyBillWave /> },
   ];
 
   return (
@@ -107,7 +108,7 @@ const FreelancerDashboard = () => {
 
           {(!data?.activeJobs || data.activeJobs.length === 0) ? (
             <div style={{ textAlign: "center", padding: "3rem", color: "#94a3b8" }}>
-              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🔍</div>
+              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}><FaSearch /></div>
               <p>No active jobs yet. Browse open projects and place your bid!</p>
             </div>
           ) : (
@@ -166,7 +167,7 @@ const FreelancerDashboard = () => {
             <Col md={3}>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
                 <div className="action-card">
-                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>🔍</p>
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem", color: "#6366f1" }}><FaSearch /></p>
                   <div className="card-title">Find Work</div>
                   <p className="card-text">Browse new projects to apply for</p>
                   <Link to="/freelancer/jobs" className="btn-modern primary md w-100">Browse Jobs</Link>
@@ -176,7 +177,7 @@ const FreelancerDashboard = () => {
             <Col md={3}>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
                 <div className="action-card">
-                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>📬</p>
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem", color: "#10b981" }}><FaInbox /></p>
                   <div className="card-title">My Proposals</div>
                   <p className="card-text">Track status of your bids</p>
                   <Link to="/freelancer/my-bids" className="btn-modern ghost md w-100">View Bids</Link>
@@ -186,7 +187,7 @@ const FreelancerDashboard = () => {
             <Col md={3}>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
                 <div className="action-card">
-                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>👤</p>
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem", color: "#f59e0b" }}><FaUserAlt /></p>
                   <div className="card-title">My Profile</div>
                   <p className="card-text">Update skills and portfolio</p>
                   <Link to="/profile" className="btn-modern success md w-100">Edit Profile</Link>
@@ -196,7 +197,7 @@ const FreelancerDashboard = () => {
             <Col md={3}>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
                 <div className="action-card">
-                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>💬</p>
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem", color: "#8b5cf6" }}><FaComments /></p>
                   <div className="card-title">Messages</div>
                   <p className="card-text">Chat with your clients</p>
                   <Link to="/freelancer/chat" className="btn-modern purple md w-100">Open Chat</Link>

@@ -7,6 +7,7 @@ import { apiRequest } from "../services/apiClient";
 import { getJobVisual, getStatusPillClass, getStatusLabel } from "../utils/jobVisuals";
 import "../dashboard.css";
 import "../css/buttons.css";
+import { FaClipboardList, FaBriefcase, FaCheckCircle, FaMoneyBillWave, FaRocket, FaInbox, FaFolderOpen } from "react-icons/fa";
 
 interface Job {
   _id: string;
@@ -58,10 +59,10 @@ const ClientDashboard = () => {
     );
 
   const stats = [
-    { label: "TOTAL\nAPPLICATIONS", value: data?.stats?.totalBidsReceived ?? 0, color: "blue",   icon: "📋" },
-    { label: "ACTIVE\nJOBS",        value: data?.stats?.assignedJobs ?? 0,       color: "teal",   icon: "💼" },
-    { label: "COMPLETED\nPROJECTS", value: data?.stats?.completedJobs ?? 0,      color: "purple", icon: "✅" },
-    { label: "TOTAL\nSPENT",        value: `Rs ${(data?.stats?.totalBudgetSpent ?? 0).toLocaleString()}`, color: "orange", icon: "💰" },
+    { label: "TOTAL\nAPPLICATIONS", value: data?.stats?.totalBidsReceived ?? 0, color: "blue",   icon: <FaClipboardList /> },
+    { label: "ACTIVE\nJOBS",        value: data?.stats?.assignedJobs ?? 0,       color: "teal",   icon: <FaBriefcase /> },
+    { label: "COMPLETED\nPROJECTS", value: data?.stats?.completedJobs ?? 0,      color: "purple", icon: <FaCheckCircle /> },
+    { label: "TOTAL\nSPENT",        value: `Rs ${(data?.stats?.totalBudgetSpent ?? 0).toLocaleString()}`, color: "orange", icon: <FaMoneyBillWave /> },
   ];
 
   return (
@@ -111,7 +112,7 @@ const ClientDashboard = () => {
 
           {(!data?.recentJobs || data.recentJobs.length === 0) ? (
             <div style={{ textAlign: "center", padding: "3rem", color: "#94a3b8" }}>
-              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>📂</div>
+              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}><FaFolderOpen /></div>
               <p>No recent projects yet. Post a job to get started!</p>
             </div>
           ) : (
@@ -178,7 +179,7 @@ const ClientDashboard = () => {
             <Col md={4}>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
                 <div className="action-card">
-                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>🚀</p>
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}><FaRocket /></p>
                   <div className="card-title">Post a Job</div>
                   <p className="card-text">Find new freelancers to hire</p>
                   <Link to="/client/postjob" className="btn-modern primary md w-100">Post New Project</Link>
@@ -188,7 +189,7 @@ const ClientDashboard = () => {
             <Col md={4}>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
                 <div className="action-card">
-                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>📬</p>
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}><FaInbox /></p>
                   <div className="card-title">View Proposals</div>
                   <p className="card-text">Track proposals for your projects</p>
                   <Link to="/client/alljobs" className="btn-modern ghost md w-100">Review Proposals</Link>
@@ -198,7 +199,7 @@ const ClientDashboard = () => {
             <Col md={4}>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ height: "100%" }}>
                 <div className="action-card">
-                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>📁</p>
+                  <p style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}><FaFolderOpen /></p>
                   <div className="card-title">View Projects</div>
                   <p className="card-text">View all your posted projects</p>
                   <Link to="/client/alljobs" className="btn-modern success md w-100">View Projects</Link>

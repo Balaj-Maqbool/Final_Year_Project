@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useChatStore } from "../store/chatStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { getThreadMessages, sendMessage, getMyThreads, type Chat } from "../services/useChats";
 import { useParams, Link } from "react-router-dom";
 import ChatHeader from "./ChatHeader";
@@ -9,7 +10,7 @@ import MessageInput from "./MessageInput";
 const ChatWindow = () => {
     const activeThreadId = useChatStore((state) => state.activeThreadId);
     const queryClient = useQueryClient();
-    const { data: user } = useQuery({ queryKey: ['user'], queryFn: () => JSON.parse(localStorage.getItem('user') || '{}') });
+    const user = useAuthStore((state) => state.user);
     const { jobId } = useParams();
 
     const { data: threads } = useQuery({
