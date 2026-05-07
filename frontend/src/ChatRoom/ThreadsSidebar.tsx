@@ -24,7 +24,9 @@ const ThreadsSidebar = () => {
     const threads = data?.docs || [];
     const filteredThreads = threads.filter(thread => {
         const otherParticipant = thread.participants.find(p => p._id !== user?._id);
-        return otherParticipant?.fullName.toLowerCase().includes(searchTerm.toLowerCase());
+        const nameMatch = otherParticipant?.fullName.toLowerCase().includes(searchTerm.toLowerCase());
+        const titleMatch = thread.jobDetails?.title?.toLowerCase().includes(searchTerm.toLowerCase());
+        return nameMatch || titleMatch;
     });
 
     return (
@@ -84,16 +86,23 @@ const ThreadsSidebar = () => {
 
                                     <div className="thread-content flex-grow-1">
                                         <div className="thread-top-row">
-                                            <h6 
-                                                className="thread-name text-decoration-none" 
-                                                style={{ cursor: 'pointer' }}
+                                            <div 
+                                                className="d-flex flex-column"
+                                                style={{ cursor: 'pointer', overflow: 'hidden', minWidth: 0, paddingRight: '8px' }}
                                                 onClick={(e) => { 
                                                     e.stopPropagation(); 
                                                     if (otherParticipant?._id) navigate(`/profile/${otherParticipant._id}`); 
                                                 }}
                                             >
-                                                {otherParticipant?.fullName}
-                                            </h6>
+                                                <h6 className="thread-name text-decoration-none mb-0 text-truncate">
+                                                    {otherParticipant?.fullName}
+                                                </h6>
+                                                {thread.jobDetails?.title && (
+                                                    <small className="text-muted text-truncate" style={{ fontSize: '0.75rem', marginTop: '2px' }}>
+                                                        {thread.jobDetails.title}
+                                                    </small>
+                                                )}
+                                            </div>
                                             {thread.lastMessage?.timestamp && (
                                                 <span className="thread-time">
                                                     {formatDistanceToNow(new Date(thread.lastMessage.timestamp), { addSuffix: false }).replace('about ', '')}

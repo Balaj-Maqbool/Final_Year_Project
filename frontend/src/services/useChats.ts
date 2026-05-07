@@ -11,6 +11,10 @@ export interface Participant {
 export interface Chat{
     participants:Participant[],
     jobId:string,
+    jobDetails?: {
+        _id: string;
+        title: string;
+    };
     bidId:string,
     status:string,
     lastMessage?: {

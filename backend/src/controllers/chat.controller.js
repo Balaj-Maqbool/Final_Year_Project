@@ -116,6 +116,27 @@ const getMyThreads = asyncHandler(async (req, res) => {
             }
         },
         {
+            $lookup: {
+                from: "jobs",
+                localField: "jobId",
+                foreignField: "_id",
+                as: "jobDetails",
+                pipeline: [
+                    {
+                        $project: {
+                            title: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $unwind: {
+                path: "$jobDetails",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
             $sort: { "lastMessage.timestamp": -1 }
         }
     ]);
