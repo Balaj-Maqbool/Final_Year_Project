@@ -25,6 +25,7 @@ const Register = ({ onSubmit }: Props) => {
   const [role, setRole]       = useState("");
   const [showPass, setShowPass] = useState(false);
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Password strength
   const getStrength = (p: string) => {
@@ -42,12 +43,30 @@ const Register = ({ onSubmit }: Props) => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!role) { alert("Please select a role."); return; }
+    const newErrors: Record<string, string> = {};
+
+    const fullName = fullNameRef.current!.value;
+    const username = usernameRef.current!.value;
+    const email = emailRef.current!.value;
+    const pass = passRef.current!.value;
+
+    if (!fullName || fullName.length < 3) newErrors.fullName = "Full name must be at least 3 characters.";
+    if (!username || username.length < 3) newErrors.username = "Username must be at least 3 characters.";
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Please enter a valid email address.";
+    if (!pass || pass.length < 8) newErrors.password = "Password must be at least 8 characters long.";
+    if (!role) newErrors.role = "Please select a role.";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     onSubmit({
-      fullName: fullNameRef.current!.value,
-      username: usernameRef.current!.value,
-      email:    emailRef.current!.value,
-      password: passRef.current!.value,
+      fullName,
+      username,
+      email,
+      password: pass,
       role,
     });
   };
@@ -78,8 +97,8 @@ const Register = ({ onSubmit }: Props) => {
                 type="text"
                 className="mf-input"
                 placeholder="Aisha Khan"
-                required
               />
+              {errors.fullName && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "4px" }}>{errors.fullName}</div>}
             </div>
             <div className="mf-group">
               <label className="mf-label">Username</label>
@@ -89,8 +108,8 @@ const Register = ({ onSubmit }: Props) => {
                 type="text"
                 className="mf-input"
                 placeholder="aishakhan"
-                required
               />
+              {errors.username && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "4px" }}>{errors.username}</div>}
             </div>
           </div>
 
@@ -105,9 +124,9 @@ const Register = ({ onSubmit }: Props) => {
                 type="email"
                 className="mf-input"
                 placeholder="you@example.com"
-                required
               />
             </div>
+            {errors.email && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "4px" }}>{errors.email}</div>}
           </div>
 
           {/* Role chips */}
@@ -119,12 +138,13 @@ const Register = ({ onSubmit }: Props) => {
                   key={r}
                   type="button"
                   className={`mf-chip ${role === r ? "active" : ""}`}
-                  onClick={() => setRole(r)}
+                  onClick={() => { setRole(r); setErrors(prev => ({ ...prev, role: "" })); }}
                 >
                   {r === "Freelancer" ? "🧑‍💻 Freelancer" : "🏢 Client"}
                 </button>
               ))}
             </div>
+            {errors.role && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "4px" }}>{errors.role}</div>}
           </div>
 
           {/* Password */}
@@ -140,7 +160,6 @@ const Register = ({ onSubmit }: Props) => {
                 placeholder="At least 8 characters"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                required
                 minLength={8}
               />
               <button
@@ -151,6 +170,7 @@ const Register = ({ onSubmit }: Props) => {
                 {showPass ? "hide" : "show"}
               </button>
             </div>
+            {errors.password && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "4px" }}>{errors.password}</div>}
 
             {/* Strength bar */}
             {password.length > 0 && (

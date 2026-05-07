@@ -62,6 +62,15 @@ const PostJob = () => {
       setLoading(false);
       return;
     }
+
+    const selectedDate = new Date(data.deadline);
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    if (selectedDate < todayDate) {
+      setError("Deadline cannot be in the past.");
+      setLoading(false);
+      return;
+    }
     try {
       await jobHandler.createJob(data);
       navigate("/client/clientDashboard");
@@ -148,6 +157,7 @@ const PostJob = () => {
                   type="date"
                   className="mf-input"
                   required
+                  min={new Date().toISOString().split("T")[0]}
                 />
               </div>
             </div>

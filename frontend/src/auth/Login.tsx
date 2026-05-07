@@ -17,13 +17,28 @@ const Login = ({ onSubmit }: Props) => {
   const passRef  = useRef<HTMLInputElement>(null);
   const [role, setRole]       = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!role) { alert("Please select a role."); return; }
+    const newErrors: Record<string, string> = {};
+
+    const email = emailRef.current!.value;
+    const password = passRef.current!.value;
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Please enter a valid email address.";
+    if (!password || password.length < 8) newErrors.password = "Password must be at least 8 characters long.";
+    if (!role) newErrors.role = "Please select a role.";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     onSubmit({
-      email:    emailRef.current!.value,
-      password: passRef.current!.value,
+      email,
+      password,
       role,
     });
   };
@@ -55,9 +70,9 @@ const Login = ({ onSubmit }: Props) => {
                 type="email"
                 className="mf-input"
                 placeholder="you@example.com"
-                required
               />
             </div>
+            {errors.email && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "4px" }}>{errors.email}</div>}
           </div>
 
           {/* Password */}
@@ -71,7 +86,6 @@ const Login = ({ onSubmit }: Props) => {
                 type={showPass ? "text" : "password"}
                 className="mf-input"
                 placeholder="Enter your password"
-                required
               />
               <button
                 type="button"
@@ -81,6 +95,7 @@ const Login = ({ onSubmit }: Props) => {
                 {showPass ? "hide" : "show"}
               </button>
             </div>
+            {errors.password && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "4px" }}>{errors.password}</div>}
             <div style={{ textAlign: "right", marginTop: "6px" }}>
               <a href="/forgot-password" style={{ fontSize: "0.8rem", color: "#a78bfa", textDecoration: "none" }}>
                 Forgot password?
@@ -97,12 +112,13 @@ const Login = ({ onSubmit }: Props) => {
                   key={r}
                   type="button"
                   className={`mf-chip ${role === r ? "active" : ""}`}
-                  onClick={() => setRole(r)}
+                  onClick={() => { setRole(r); setErrors(prev => ({ ...prev, role: "" })); }}
                 >
                   {r}
                 </button>
               ))}
             </div>
+            {errors.role && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "4px" }}>{errors.role}</div>}
           </div>
 
           {/* Submit */}

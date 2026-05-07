@@ -56,7 +56,7 @@ const ThreadsSidebar = () => {
                         {filteredThreads.map((thread) => {
                             const otherParticipant = thread.participants.find(p => p._id !== user?._id) || thread.participants[0];
                             const isActive = activeThreadId === thread._id;
-                            const unreadCount = thread.unreadCounts?.[user?._id] || 0;
+                            const unreadCount = (user?._id ? thread.unreadCounts?.[user._id] : 0) || 0;
 
                             return (
                                 <div

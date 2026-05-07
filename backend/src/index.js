@@ -30,3 +30,5 @@ connectDB()
     .catch((error) => {
         console.log("DB Connection Failed !!!", error);
     });
+
+// Triggering restart for DB connection retry

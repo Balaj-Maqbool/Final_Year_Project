@@ -81,7 +81,7 @@ const ChatWindow = () => {
 
             <MessageList
                 messages={messages}
-                currentUserId={user?._id}
+                currentUserId={user?._id || ''}
             />
 
             <MessageInput
