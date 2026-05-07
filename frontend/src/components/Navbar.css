@@ -1,79 +1,151 @@
-/* Navbar.css */
+/* =========================
+   BASE NAVBAR (Sleek Dark)
+========================= */
 .custom-navbar {
-  background-color: rgba(255, 255, 255, 0.45) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  padding: 0.8rem 2rem !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  padding: 0.6rem 1.2rem !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
   position: sticky !important;
-  top: 1.5rem !important;
+  top: 1rem !important;
   z-index: 1000 !important;
-  margin: 1.5rem auto !important;
-  max-width: 95% !important;
-  border-radius: 24px !important;
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  margin: 1rem auto !important;
+  max-width: 1200px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
 }
 
 [data-theme='dark'] .custom-navbar {
-  background-color: rgba(15, 23, 42, 0.45) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  background-color: #0f1218 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
 }
 
+/* =========================
+   INNER CONTAINER
+========================= */
 .navbar-container {
   max-width: 1280px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
 }
 
+/* =========================
+   BRAND
+========================= */
 .nav-brand {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
   text-decoration: none;
-  letter-spacing: -0.5px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+[data-theme='dark'] .nav-brand {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.nav-brand::before {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
 .nav-brand span {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  display: none; /* remove earlier gradient if used */
 }
 
+/* =========================
+   DESKTOP NAV LINKS (ul)
+========================= */
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
   list-style: none;
   margin: 0;
   padding: 0;
+  flex-wrap: wrap;
+}
+
+/* Class specifically for the <ul> on desktop */
+.desktop-menu {
+  display: flex;
 }
 
 .nav-link {
-  color: var(--text-dark);
+  color: #4b5563;
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.2s;
-  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
 }
 
-.nav-link:hover, .nav-link.active {
-  color: var(--primary);
+.nav-link:hover {
+  color: #111827;
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
+.nav-link.active {
+  color: #111827;
+  background-color: rgba(0, 0, 0, 0.07);
+  font-weight: 600;
+}
+
+/* Dark mode links */
+[data-theme='dark'] .nav-link {
+  color: #9ca3af;
+}
+[data-theme='dark'] .nav-link:hover {
+  color: #e5e7eb;
+  background-color: transparent;
+}
+[data-theme='dark'] .nav-link.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-weight: 500;
+}
+
+/* =========================
+   RIGHT SIDE (theme + auth)
+========================= */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* =========================
+   BUTTONS
+========================= */
 .nav-btn {
-  padding: 0.6rem 1.25rem;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: all 0.2s;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .nav-btn-secondary {
@@ -95,23 +167,190 @@
   transform: translateY(-1px);
 }
 
-/* Notification Bell Styles */
+/* =========================
+   NOTIFICATION BELL
+========================= */
 .bell {
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-    padding: 0.5rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .bell:hover {
-    background-color: #f1f5f9;
-    transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #111827;
+}
+
+[data-theme='dark'] .bell {
+  color: #9ca3af;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 [data-theme='dark'] .bell:hover {
-    background-color: #334155;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* =========================
+   HAMBURGER BUTTON
+========================= */
+.hamburger {
+  display: none;            /* Hidden on desktop */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  gap: 5px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.hamburger:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='dark'] .hamburger:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text-dark, #0f172a);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+/* Animate to X when open */
+.hamburger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* =========================
+   MOBILE DROPDOWN MENU
+========================= */
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .mobile-menu {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.mobile-link {
+  display: block;
+  padding: 0.7rem 1rem;
+  color: var(--text-dark, #0f172a);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mobile-link:hover {
+  background: rgba(99, 102, 241, 0.08);
+  color: #6366f1;
+}
+
+[data-theme='dark'] .mobile-link {
+  color: #e2e8f0;
+}
+
+[data-theme='dark'] .mobile-link:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.mobile-bell {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+}
+
+/* =========================
+   RESPONSIVE — TABLET (≤900px)
+   Show hamburger, hide desktop links
+========================= */
+@media (max-width: 900px) {
+  .custom-navbar {
+    padding: 0.65rem 1.1rem !important;
+  }
+
+  /* Hide desktop link list */
+  .desktop-menu {
+    display: none !important;
+  }
+
+  /* Show hamburger */
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-brand {
+    font-size: 1.2rem;
+  }
+
+  .nav-btn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .nav-right {
+    gap: 0.4rem;
+  }
+}
+
+/* =========================
+   RESPONSIVE — MOBILE (≤600px)
+========================= */
+@media (max-width: 600px) {
+  .custom-navbar {
+    margin: 0.5rem auto !important;
+    padding: 0.6rem 0.9rem !important;
+    top: 0.5rem !important;
+    border-radius: 14px !important;
+  }
+
+  .nav-brand {
+    font-size: 1.05rem;
+  }
+
+  .nav-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .theme-toggle {
+    padding: 4px 8px !important;
+    font-size: 0.85rem !important;
+  }
 }

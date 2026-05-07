@@ -1,0 +1,429 @@
+/* ================================================
+   MODERN FORM SYSTEM — forms.css
+   Dark-first design inspired by premium SaaS forms
+   Import in Login, Register, PostJob, BidForm
+================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ---- Page wrapper ---- */
+.mf-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: #0d0d14;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ---- Card ---- */
+.mf-card {
+  background: #13131f;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 2.5rem 2.25rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  animation: mf-rise 0.45s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.mf-card-wide {
+  max-width: 680px;
+}
+
+@keyframes mf-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Badge tag above heading ---- */
+.mf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(139,92,246,0.18);
+  border: 1px solid rgba(139,92,246,0.35);
+  color: #a78bfa;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1.25rem;
+}
+.mf-badge::before {
+  content: '●';
+  font-size: 0.55rem;
+}
+
+/* ---- Heading ---- */
+.mf-heading {
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+}
+
+.mf-subheading {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+/* ---- Field label ---- */
+.mf-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 0.55rem;
+}
+
+/* ---- Field group ---- */
+.mf-group {
+  margin-bottom: 1.25rem;
+}
+
+.mf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .mf-row { grid-template-columns: 1fr; }
+}
+
+/* ---- Input base ---- */
+.mf-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: #1c1c2a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #f3f4f6;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.mf-input::placeholder {
+  color: #4b5563;
+}
+
+.mf-input:focus {
+  background: #1f1f30;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.18);
+}
+
+.mf-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- Input with icon ---- */
+.mf-input-wrap {
+  position: relative;
+}
+
+.mf-input-wrap .mf-input {
+  padding-left: 2.6rem;
+}
+
+.mf-input-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4b5563;
+  font-size: 1rem;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Password show/hide toggle */
+.mf-input-action {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  transition: color 0.15s;
+}
+.mf-input-action:hover { color: #a78bfa; }
+
+/* ---- Textarea ---- */
+.mf-textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+/* ---- Select ---- */
+.mf-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+/* ---- Role chip pills ---- */
+.mf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.mf-chip {
+  padding: 0.45rem 1.1rem;
+  background: #1c1c2a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  color: #9ca3af;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: 'Inter', sans-serif;
+}
+
+.mf-chip:hover {
+  border-color: rgba(124,58,237,0.5);
+  color: #d8b4fe;
+  background: rgba(124,58,237,0.08);
+}
+
+.mf-chip.active {
+  background: rgba(124,58,237,0.2);
+  border-color: #7c3aed;
+  color: #c4b5fd;
+}
+
+/* ---- Divider ---- */
+.mf-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: #374151;
+  font-size: 0.8rem;
+}
+.mf-divider::before,
+.mf-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+}
+
+/* ---- Submit button ---- */
+.mf-submit {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s, filter 0.18s;
+  box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+  margin-top: 0.5rem;
+  letter-spacing: 0.01em;
+}
+
+.mf-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(124,58,237,0.55);
+  filter: brightness(1.07);
+}
+
+.mf-submit:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.mf-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---- Secondary / social button ---- */
+.mf-btn-social {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: 0.78rem;
+  background: #1c1c2a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #e5e7eb;
+  font-size: 0.92rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.18s;
+  text-decoration: none;
+  margin-top: 0.5rem;
+}
+
+.mf-btn-social:hover {
+  background: #23233a;
+  border-color: rgba(255,255,255,0.2);
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+/* ---- Footer link ---- */
+.mf-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.mf-footer a,
+.mf-footer button {
+  color: #a78bfa;
+  font-weight: 600;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.3rem;
+  font-family: 'Inter', sans-serif;
+  font-size: inherit;
+  transition: color 0.15s;
+}
+.mf-footer a:hover,
+.mf-footer button:hover { color: #c4b5fd; text-decoration: underline; }
+
+/* ---- Error / alert ---- */
+.mf-error {
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.88rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ---- AI card ---- */
+.mf-ai-card {
+  background: rgba(139,92,246,0.08);
+  border: 1px solid rgba(139,92,246,0.25);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.mf-ai-title {
+  color: #c4b5fd;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+}
+
+.mf-ai-text {
+  color: #78716c;
+  font-size: 0.85rem;
+  margin-bottom: 0.9rem;
+}
+
+.mf-ai-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.mf-ai-input {
+  flex: 1;
+}
+
+.mf-ai-btn {
+  padding: 0.78rem 1.2rem;
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 12px rgba(124,58,237,0.35);
+}
+.mf-ai-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(124,58,237,0.5); }
+.mf-ai-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* ---- Section title (for PostJob / BidForm pages) ---- */
+.mf-section-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.3rem;
+  letter-spacing: -0.02em;
+}
+
+.mf-section-sub {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---- Light mode overrides ---- */
+[data-theme='light'] .mf-page { background: #f3f4f6; }
+[data-theme='light'] .mf-card {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+[data-theme='light'] .mf-badge { background: rgba(124,58,237,0.1); color: #7c3aed; border-color: rgba(124,58,237,0.25); }
+[data-theme='light'] .mf-heading { color: #0f172a; }
+[data-theme='light'] .mf-subheading { color: #64748b; }
+[data-theme='light'] .mf-label { color: #475569; }
+[data-theme='light'] .mf-input {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+[data-theme='light'] .mf-input::placeholder { color: #94a3b8; }
+[data-theme='light'] .mf-input:focus { background: #fff; border-color: #7c3aed; }
+[data-theme='light'] .mf-chip { background: #f1f5f9; border-color: #e2e8f0; color: #64748b; }
+[data-theme='light'] .mf-chip:hover { border-color: #7c3aed; color: #7c3aed; background: rgba(124,58,237,0.06); }
+[data-theme='light'] .mf-chip.active { background: rgba(124,58,237,0.1); border-color: #7c3aed; color: #6d28d9; }
+[data-theme='light'] .mf-btn-social { background: #f8fafc; border-color: #e2e8f0; color: #334155; }
+[data-theme='light'] .mf-btn-social:hover { background: #f1f5f9; color: #0f172a; }
+[data-theme='light'] .mf-footer { color: #94a3b8; }
+[data-theme='light'] .mf-ai-card { background: rgba(124,58,237,0.05); border-color: rgba(124,58,237,0.2); }
+[data-theme='light'] .mf-ai-text { color: #94a3b8; }
+[data-theme='light'] .mf-section-title { color: #0f172a; }
+[data-theme='light'] .mf-section-sub { color: #64748b; }
+[data-theme='light'] .mf-divider { color: #94a3b8; }
+[data-theme='light'] .mf-divider::before,
+[data-theme='light'] .mf-divider::after { background: #e2e8f0; }
+[data-theme='light'] .mf-select { background-color: #f8fafc; }

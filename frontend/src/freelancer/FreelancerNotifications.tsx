@@ -1,31 +1,44 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { getNotifications, markAsRead } from "../notifications/notification.services";
+import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from "../notifications/notification.services";
+import "../css/buttons.css";
 import "../css/Notifications.css";
 
 const FreelancerNotifications = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    // Fetch notifications
-    const {
-        data = [], // Default to empty array
-        isLoading,
-        isError,
-    } = useQuery({
+    const { data = [], isLoading, isError } = useQuery({
         queryKey: ["notifications"],
         queryFn: getNotifications,
     });
 
-    // Mark as read mutation
     const markReadMutation = useMutation({
         mutationFn: markAsRead,
         onSuccess: (_, id) => {
             queryClient.setQueryData(["notifications"], (oldData: any) => {
                 if (!oldData) return oldData;
-                return oldData.map((n: any) =>
-                    n._id === id ? { ...n, isRead: true } : n
-                );
+                return oldData.map((n: any) => n._id === id ? { ...n, isRead: true } : n);
+            });
+        },
+    });
+
+    const markAllReadMutation = useMutation({
+        mutationFn: markAllAsRead,
+        onSuccess: () => {
+            queryClient.setQueryData(["notifications"], (oldData: any) => {
+                if (!oldData) return oldData;
+                return oldData.map((n: any) => ({ ...n, isRead: true }));
+            });
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteNotification,
+        onSuccess: (_, id) => {
+            queryClient.setQueryData(["notifications"], (oldData: any) => {
+                if (!oldData) return oldData;
+                return oldData.filter((n: any) => n._id !== id);
             });
         },
     });
@@ -33,45 +46,51 @@ const FreelancerNotifications = () => {
     const getRedirectLink = (notification: any) => {
         const { type, relatedId } = notification;
         if (!relatedId) return "#";
-
         switch (type) {
             case "BID_STATUS_UPDATE":
-                // If bid status changed, maybe go to "My Bids" or the Job details
                 return `/freelancer/my-bids`;
             case "NEW_JOB_AVAILABLE":
             case "JOB_MATCH":
             case "NEW_JOB":
-                // If relatedId is job ID
                 return `/freelancer/jobs/${relatedId}`;
+            case "TASK_STATUS_UPDATE":
+                return `/freelancer/jobs/${relatedId}/tasks`;
             default:
-                // Fallback
                 return `/freelancer/freelancerDashboard`;
         }
     };
 
-    const handleMarkAsRead = (e: React.MouseEvent, id: string) => {
-        e.stopPropagation();
-        markReadMutation.mutate(id);
-    };
-
     const handleView = (notification: any) => {
         const url = getRedirectLink(notification);
-        if (url !== "#") {
-            // Optionally mark as read when viewing
-            if (!notification.isRead) {
-                markReadMutation.mutate(notification._id);
-            }
-            navigate(url);
-        }
+        if (!notification.isRead) markReadMutation.mutate(notification._id);
+        navigate(url);
     };
 
-    if (isLoading) return <div className="text-center mt-5"><div className="spinner-border text-primary"></div></div>;
+    if (isLoading) return (
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "60vh" }}>
+            <div className="spinner-border text-primary" />
+        </div>
+    );
     if (isError) return <div className="alert alert-danger m-3">Failed to load notifications</div>;
+
+    const hasUnread = data.some((n: any) => !n.isRead);
 
     return (
         <div className="notifications-page-container">
-            <div className="container">
-                <h2 className="notifications-title">Freelancer Notifications</h2>
+            <div className="container py-4">
+                {/* Header */}
+                <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <h2 className="notifications-title mb-0">Notifications</h2>
+                    {hasUnread && (
+                        <button
+                            className="btn-notif-action btn-mark-read"
+                            onClick={() => markAllReadMutation.mutate()}
+                            disabled={markAllReadMutation.isPending}
+                        >
+                            {markAllReadMutation.isPending ? "Marking..." : "✓ Mark All as Read"}
+                        </button>
+                    )}
+                </div>
 
                 {data.length === 0 ? (
                     <div className="empty-notifications">
@@ -84,12 +103,14 @@ const FreelancerNotifications = () => {
                             <div
                                 key={n._id}
                                 className={`notification-card ${n.isRead ? "read" : "unread"}`}
-                                onClick={() => handleView(n)}
-                                style={{ cursor: "pointer" }}
                             >
                                 <div className="notification-header">
-                                    <span className="notification-type">{n.type.replace(/_/g, " ")}</span>
-                                    <span className="notification-time">{new Date(n.createdAt).toLocaleDateString()}</span>
+                                    <span className="notification-type">
+                                        {n.type.replace(/_/g, " ")}
+                                    </span>
+                                    <span className="notification-time">
+                                        {new Date(n.createdAt).toLocaleDateString()}
+                                    </span>
                                 </div>
 
                                 <p className="notification-message">{n.message}</p>
@@ -98,20 +119,31 @@ const FreelancerNotifications = () => {
                                     {!n.isRead && (
                                         <button
                                             className="btn-notif-action btn-mark-read"
-                                            onClick={(e) => handleMarkAsRead(e, n._id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                markReadMutation.mutate(n._id);
+                                            }}
                                             disabled={markReadMutation.isPending}
                                         >
-                                            {markReadMutation.isPending ? "Marking..." : "Mark as Read"}
+                                            ✓ Mark as Read
                                         </button>
                                     )}
                                     <button
                                         className="btn-notif-action btn-view-details"
+                                        onClick={() => handleView(n)}
+                                    >
+                                        View Details →
+                                    </button>
+                                    <button
+                                        className="btn-notif-action btn-delete-notif"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleView(n);
+                                            deleteMutation.mutate(n._id);
                                         }}
+                                        disabled={deleteMutation.isPending}
+                                        title="Delete notification"
                                     >
-                                        View Details
+                                        🗑
                                     </button>
                                 </div>
                             </div>

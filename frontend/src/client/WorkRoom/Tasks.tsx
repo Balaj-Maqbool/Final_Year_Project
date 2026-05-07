@@ -10,6 +10,7 @@ import { aiHandler } from "../../services/aiHandler";
 import { jobHandler } from "../../services/jobHandler";
 import type { Task } from "../../services/taskHandler";
 import TaskForm from "./TaskForm";
+import "../../css/buttons.css";
 
 const Tasks = () => {
     const { jobId } = useParams<{ jobId: string }>();
@@ -175,35 +176,36 @@ const Tasks = () => {
                 <h2>Project Tasks</h2>
                 <div className="d-flex gap-2">
                     {job?.status === "Completed" ? (
-                        <Button 
-                            size="sm" 
-                            variant="warning" 
+                        <Button
+                            size="sm"
+                            className="btn-modern warning sm"
                             onClick={() => setShowRatingModal(true)}
-                            style={{ fontWeight: "bold" }}
                         >
-                            ⭐⭐⭐ Rate Freelancer
+                            ⭐ Rate Freelancer
                         </Button>
                     ) : allTasksApproved ? (
-                        <Button 
-                            size="sm" 
-                            variant="success" 
+                        <Button
+                            size="sm"
+                            className="btn-modern success sm"
                             onClick={handleCompleteJob}
-                            style={{ fontWeight: "bold" }}
                         >
                             💰 Complete & Release Escrow
                         </Button>
                     ) : null}
-                    <Button 
-                        size="sm" 
-                        variant="primary" 
-                        onClick={handleAIGenerate} 
-                        disabled={aiLoading} 
-                        style={{ backgroundColor: '#8e44ad', borderColor: '#8e44ad' }}
+                    <Button
+                        size="sm"
+                        className="btn-modern purple sm"
+                        onClick={handleAIGenerate}
+                        disabled={aiLoading}
                     >
                         {aiLoading ? <Spinner size="sm" animation="border" /> : "✨ Auto-Generate Breakdown"}
                     </Button>
-                    <Button size="sm" variant={showForm ? "secondary" : "primary"} onClick={() => setShowForm(!showForm)}>
-                        {showForm ? "Cancel" : "Create Task"}
+                    <Button
+                        size="sm"
+                        className={showForm ? "btn-modern neutral sm" : "btn-modern primary sm"}
+                        onClick={() => setShowForm(!showForm)}
+                    >
+                        {showForm ? "✕ Cancel" : "+ Create Task"}
                     </Button>
                 </div>
             </div>
@@ -252,35 +254,29 @@ const Tasks = () => {
                                         {!task.is_approved && task.status === "Done" && (
                                             <>
                                                 <Button
-                                                    variant="success"
-                                                    size="sm"
+                                                    className="btn-modern success sm"
                                                     onClick={() => handleApprove(task._id)}
                                                     disabled={approveTaskMutation.isPending}
                                                 >
-                                                    Approve
+                                                    ✓ Approve
                                                 </Button>
                                                 <Button
-                                                    variant="warning"
-                                                    size="sm"
+                                                    className="btn-modern warning sm"
                                                     onClick={() => handleRequestChanges(task._id)}
                                                     disabled={submitTaskMutation.isPending}
                                                 >
-                                                    Request Changes
+                                                    ↩ Request Changes
                                                 </Button>
                                             </>
                                         )}
                                         {!task.is_approved && (
                                             <Button
-                                                variant="outline-danger"
-                                                size="sm"
+                                                className="btn-modern danger sm"
                                                 onClick={() => handleDelete(task._id)}
                                                 disabled={deleteTaskMutation.isPending}
                                                 title="Delete this task"
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
-                                                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                                                  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                                                </svg>
+                                                🗑
                                             </Button>
                                         )}
                                     </div>
@@ -323,8 +319,8 @@ const Tasks = () => {
                                 minLength={3}
                             />
                         </Form.Group>
-                        <Button variant="primary" type="submit" className="w-100 fw-bold" disabled={submitRatingMutation.isPending}>
-                            {submitRatingMutation.isPending ? "Submitting..." : "Submit Rating"}
+                        <Button className="btn-modern primary md w-100" type="submit" disabled={submitRatingMutation.isPending}>
+                            {submitRatingMutation.isPending ? "Submitting..." : "⭐ Submit Rating"}
                         </Button>
                     </Form>
                 </Modal.Body>

@@ -17,7 +17,7 @@ const Chat = () => {
 
     useEffect(() => {
         if (jobId && threads?.docs) {
-            const thread = threads.docs.find((t) => t.jobId === jobId);
+            const thread = threads.docs.find((t) => t.jobId === jobId || t._id === jobId);
             if (thread && thread._id !== activeThreadId) {
                 setActiveThread(thread._id);
             }

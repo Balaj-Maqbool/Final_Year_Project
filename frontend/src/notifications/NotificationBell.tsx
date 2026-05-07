@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useQuery } from "@tanstack/react-query";
 import { getNotifications } from "./notification.services";
-
+//note:Notification system uses server polling every 30seconds
 const NotificationBell = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthStore();
@@ -11,7 +11,7 @@ const NotificationBell = () => {
       queryKey: ["notifications"],
       queryFn: getNotifications,
       enabled: !!isAuthenticated && !!user,
-      refetchInterval: 30000, // Poll every 30 seconds
+      refetchInterval: 30000, 
   });
 
   const unreadCount = notifications.filter((n: any) => !n.isRead).length;

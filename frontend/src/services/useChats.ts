@@ -37,7 +37,8 @@ export interface Message{
     status:string,
     createdAt:string,
     updatedAt:string,
-    __v:number
+    __v:number,
+    attachments?: { url: string; publicId: string; resourceType: string; originalName?: string; }[]
 }
 
 export const InitializeChat = async(bidId:string)=>{
@@ -77,7 +78,7 @@ export const unblockThread = async (threadId:string)=>{
     return await apiRequest<void>(`/chats/${threadId}/unblock`)
 }
 
-export const sendMessage = async (threadId: string, content: string) => {
-    return await apiRequest<Message>(`/chats/${threadId}/messages`, "POST", { content });
+export const sendMessage = async (threadId: string, content: string, attachments?: any[]) => {
+    return await apiRequest<Message>(`/chats/${threadId}/messages`, "POST", { content, attachments });
 }
     

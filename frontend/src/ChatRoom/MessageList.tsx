@@ -16,7 +16,7 @@ const MessageList = ({ messages, currentUserId }: MessageListProps) => {
 
     return (
         <div className="message-list custom-scrollbar">
-            {messages.map((msgRef) => (
+            {[...messages].reverse().map((msgRef) => (
                 <MessageBubble
                     key={msgRef._id}
                     message={msgRef}

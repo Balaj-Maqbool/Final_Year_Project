@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useChatStore } from "../store/chatStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { getThreadMessages, sendMessage, getMyThreads, type Chat } from "../services/useChats";
 import { useParams, Link } from "react-router-dom";
 import ChatHeader from "./ChatHeader";
@@ -9,7 +10,7 @@ import MessageInput from "./MessageInput";
 const ChatWindow = () => {
     const activeThreadId = useChatStore((state) => state.activeThreadId);
     const queryClient = useQueryClient();
-    const { data: user } = useQuery({ queryKey: ['user'], queryFn: () => JSON.parse(localStorage.getItem('user') || '{}') });
+    const user = useAuthStore((state) => state.user);
     const { jobId } = useParams();
 
     const { data: threads } = useQuery({
@@ -26,16 +27,16 @@ const ChatWindow = () => {
     });
 
     const mutation = useMutation({
-        mutationFn: (content: string) => sendMessage(activeThreadId!, content),
+        mutationFn: ({ content, attachments }: { content: string, attachments?: any[] }) => sendMessage(activeThreadId!, content, attachments),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["messages", activeThreadId] });
             queryClient.invalidateQueries({ queryKey: ["threads"] });
         },
     });
 
-    const handleSendMessage = (content: string) => {
+    const handleSendMessage = (content: string, attachments?: any[]) => {
         if (!activeThreadId) return;
-        mutation.mutate(content);
+        mutation.mutate({ content, attachments });
     };
 
     if (!activeThreadId) {
@@ -80,7 +81,7 @@ const ChatWindow = () => {
 
             <MessageList
                 messages={messages}
-                currentUserId={user?._id}
+                currentUserId={user?._id || ''}
             />
 
             <MessageInput
