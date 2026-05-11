@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { getThreadMessages, sendMessage, getMyThreads, type Chat } from "../services/useChats";
+import { getThreadMessages, sendMessage, getMyThreads, deleteMessage, type Chat } from "../services/useChats";
 import { useParams, Link } from "react-router-dom";
 import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
@@ -34,9 +34,23 @@ const ChatWindow = () => {
         },
     });
 
+    const deleteMutation = useMutation({
+        mutationFn: (messageId: string) => deleteMessage(messageId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["messages", activeThreadId] });
+            queryClient.invalidateQueries({ queryKey: ["threads"] });
+        },
+    });
+
     const handleSendMessage = (content: string, attachments?: any[]) => {
         if (!activeThreadId) return;
         mutation.mutate({ content, attachments });
+    };
+
+    const handleDeleteMessage = (messageId: string) => {
+        if (window.confirm("Are you sure you want to delete this message?")) {
+            deleteMutation.mutate(messageId);
+        }
     };
 
     if (!activeThreadId) {
@@ -82,6 +96,8 @@ const ChatWindow = () => {
             <MessageList
                 messages={messages}
                 currentUserId={user?._id || ''}
+                activeThreadId={activeThreadId}
+                onDeleteMessage={handleDeleteMessage}
             />
 
             <MessageInput

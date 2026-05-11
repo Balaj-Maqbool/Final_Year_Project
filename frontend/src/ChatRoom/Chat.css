@@ -480,3 +480,16 @@
     color: #475569 !important;
 }
 
+.delete-btn-hover {
+    opacity: 0 !important;
+    transition: opacity 0.2s;
+}
+
+.message-bubble:hover .delete-btn-hover {
+    opacity: 0.7 !important;
+}
+
+.message-bubble:hover .delete-btn-hover:hover {
+    opacity: 1 !important;
+    color: #ef4444 !important;
+}

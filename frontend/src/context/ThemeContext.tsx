@@ -18,6 +18,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         localStorage.setItem("theme", theme);
         document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.setAttribute("data-bs-theme", theme); // Applies global dark mode to Bootstrap 5 components natively
     }, [theme]);
 
     const toggleTheme = () => {

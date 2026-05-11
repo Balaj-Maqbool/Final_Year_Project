@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { BACKEND_URL } from "../config";
 
 interface SocketContextType {
@@ -24,7 +25,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const userStr = localStorage.getItem('user');
         if (!userStr) return;
 
-        // Assuming backend runs on port 8000
+        // if backend runs on port 8000
         const newSocket = io(BACKEND_URL, {
             withCredentials: true,
             transports: ['polling', 'websocket'],
@@ -49,8 +50,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             // Invalidate notifications query to refresh the list
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
 
-            // Optional: Show a toast or play a sound here
-            // toast.info(notification.message);
+            // Show a beautiful toast
+            toast(notification.message || 'New Notification', {
+                icon: '🔔',
+                style: {
+                    borderRadius: '10px',
+                    background: '#333',
+                    color: '#fff',
+                },
+            });
         });
 
         // Listen for new messages to update chat threads list

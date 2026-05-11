@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from "./notification.services";
+import toast from 'react-hot-toast';
 import "../css/buttons.css";
 import "../css/Notifications.css";
 
@@ -21,6 +22,8 @@ const Notifications = () => {
                 if (!oldData) return oldData;
                 return oldData.map((n: any) => n._id === id ? { ...n, isRead: true } : n);
             });
+            // Optional subtle toast or we can omit it so we don't spam the user
+            // toast.success("Marked as read", { duration: 2000, position: 'bottom-center' });
         },
     });
 
@@ -31,6 +34,7 @@ const Notifications = () => {
                 if (!oldData) return oldData;
                 return oldData.map((n: any) => ({ ...n, isRead: true }));
             });
+            toast.success("All notifications marked as read!");
         },
     });
 
@@ -41,6 +45,7 @@ const Notifications = () => {
                 if (!oldData) return oldData;
                 return oldData.filter((n: any) => n._id !== id);
             });
+            toast.success("Notification deleted", { duration: 2000 });
         },
     });
 

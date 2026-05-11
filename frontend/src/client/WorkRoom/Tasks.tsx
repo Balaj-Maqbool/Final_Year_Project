@@ -10,11 +10,13 @@ import { aiHandler } from "../../services/aiHandler";
 import { jobHandler } from "../../services/jobHandler";
 import type { Task } from "../../services/taskHandler";
 import TaskForm from "./TaskForm";
+import { useTheme } from "../../context/ThemeContext";
 import "../../css/buttons.css";
 
 const Tasks = () => {
     const { jobId } = useParams<{ jobId: string }>();
     const queryClient = useQueryClient();
+    const { theme } = useTheme();
     const [showForm, setShowForm] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
     const [showRatingModal, setShowRatingModal] = useState(false);
@@ -219,7 +221,7 @@ const Tasks = () => {
             {!tasks.docs || tasks.docs.length === 0 ? (
                 <Alert variant="info">No tasks created for this job yet.</Alert>
             ) : (
-                <Table striped bordered hover responsive>
+                <Table striped bordered hover responsive variant={theme === "dark" ? "dark" : undefined}>
                     <thead>
                         <tr>
                             <th>Title</th>

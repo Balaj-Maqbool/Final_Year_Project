@@ -33,11 +33,12 @@ export interface Chat{
 export interface Message{
     _id:string,
     content:string,
-    from:Participant,
+    from:Participant | string,
     status:string,
     createdAt:string,
     updatedAt:string,
     __v:number,
+    isDeleted?:boolean,
     attachments?: { url: string; publicId: string; resourceType: string; originalName?: string; }[]
 }
 
@@ -50,8 +51,7 @@ export const getMyThreads = async ()=>{
 }
 
 export const deleteThread = async(threadId:string)=>{
-
-    return await apiRequest<void>(`/chats/${threadId}`)
+    return await apiRequest<void>(`/chats/${threadId}`, "DELETE")
 }
 
 export const getThreadMessages = async (threadId:string)=>{
@@ -60,8 +60,7 @@ return await apiRequest<PaginatedResponse<Message>>(`/chats/${threadId}/messages
 }
 
 export const deleteMessage = async (messageId:string)=>{
-return await apiRequest<Message>(`/chats/messages/${messageId}`)
-
+    return await apiRequest<Message>(`/chats/messages/${messageId}`, "DELETE")
 }
 
 export const markMessagesAsRead = async (threadId:string)=>{

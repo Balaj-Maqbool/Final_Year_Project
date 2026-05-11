@@ -1,9 +1,4 @@
-/* ================================================
-   DASHBOARD — Modern Redesign
-   Matches the gradient card + project grid design
-================================================ */
 
-/* ---- Page Wrapper ---- */
 .dashboard-container {
   max-width: 1300px;
   margin: 0 auto;
@@ -16,7 +11,6 @@
   background: linear-gradient(145deg, #eef2ff 0%, #f8faff 40%, #f0f9ff 100%);
 }
 
-/* Decorative background blob top-right */
 .dashboard-container::before {
   content: '';
   position: fixed;
