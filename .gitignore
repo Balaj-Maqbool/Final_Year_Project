@@ -1,5 +1,8 @@
 .vscode
 ./vscode
+./tools/generate_docs.py
+./tools/generate_docs.bat
+./tools/generate_docs.ps1
 # Logs
 logs
 *.log
