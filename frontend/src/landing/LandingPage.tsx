@@ -236,7 +236,7 @@ const LandingPage = () => {
             viewport={{ once: true, amount: 0.5 }}
             variants={fadeIn}
           >
-            <h2 style={{ fontSize: "2.5rem", fontWeight: 700, marginBottom: '20px' }}>Platform <span className="highlight-text">Roadmap</span></h2>
+            <h2 style={{ fontSize: "2.5rem", fontWeight: 700, marginBottom: '20px' }}> <span className="highlight-text">Platform Roadmap</span></h2>
             <p style={{ color: "#94a3b8", fontSize: "1.1rem", maxWidth: "700px", margin: "0 auto" }}>
               We're constantly evolving to bring you the best experience possible. Here's a secure peek into the premium features we are building behind the scenes.
             </p>

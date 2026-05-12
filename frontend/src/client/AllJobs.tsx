@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Spinner } from "react-bootstrap";
+import { Container, Spinner, Modal, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { jobHandler, type Job } from "../services/jobHandler";
 import { paymentHandler } from "../services/paymentHandler";
@@ -11,6 +11,11 @@ const AllJobs = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [fundingJobId, setFundingJobId] = useState<string | null>(null);
+
+  // Escrow modal state
+  const [showEscrowModal, setShowEscrowModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [escrowAmount, setEscrowAmount] = useState<number>(0);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -26,10 +31,24 @@ const AllJobs = () => {
     fetchJobs();
   }, []);
 
-  const handleFundJob = async (jobId: string) => {
+  const openEscrowModal = (job: Job) => {
+    setSelectedJob(job);
+    // Default to the agreed price (bid amount) or budget
+    setEscrowAmount(job.agreed_price && job.agreed_price > 0 ? job.agreed_price : job.budget);
+    setShowEscrowModal(true);
+  };
+
+  const handleFundJob = async () => {
+    if (!selectedJob) return;
+    if (escrowAmount <= 0) {
+      alert("Please enter a valid amount.");
+      return;
+    }
+
     try {
-      setFundingJobId(jobId);
-      const res = await paymentHandler.createCheckoutSession(jobId);
+      setFundingJobId(selectedJob._id);
+      setShowEscrowModal(false);
+      const res = await paymentHandler.createCheckoutSession(selectedJob._id, escrowAmount);
       if (res && res.url) {
         window.location.href = res.url;
       }
@@ -74,6 +93,16 @@ const AllJobs = () => {
                     <span className="meta-label">Deadline</span>
                     <span className="meta-value">{new Date(job.deadline).toLocaleDateString()}</span>
                   </div>
+                  <div className="meta-item">
+                    <span className="meta-label">Status</span>
+                    <span className={`meta-value ${
+                      job.status === "Open" ? "text-info" :
+                      job.status === "Assigned" ? "text-warning" :
+                      job.status === "Completed" ? "text-success" : "text-muted"
+                    }`}>
+                      {job.status}
+                    </span>
+                  </div>
                   {job.status === "Assigned" && job.contract_status && (
                     <div className="meta-item">
                       <span className="meta-label">Contract Status</span>
@@ -101,9 +130,9 @@ const AllJobs = () => {
                 </button>
                 {job.status === "Assigned" && (!job.contract_status || job.contract_status === "Pending") && (
                   <button
-                    className="btn btn-primary ml-2"
+                    className="btn-fund-escrow"
                     disabled={fundingJobId === job._id}
-                    onClick={() => handleFundJob(job._id)}
+                    onClick={() => openEscrowModal(job)}
                   >
                     {fundingJobId === job._id ? <Spinner size="sm" animation="border" /> : "Fund Escrow"}
                   </button>
@@ -113,6 +142,65 @@ const AllJobs = () => {
           ))}
         </div>
       </Container>
+
+      {/* Fund Escrow Modal */}
+      <Modal
+        show={showEscrowModal}
+        onHide={() => setShowEscrowModal(false)}
+        centered
+        className="escrow-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Fund Escrow</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedJob && (
+            <>
+              <p className="text-muted mb-3">
+                You are funding escrow for: <strong>{selectedJob.title}</strong>
+              </p>
+              <div className="escrow-info-row mb-3">
+                <div>
+                  <small className="text-muted">Original Budget</small>
+                  <div className="fw-bold text-success">PKR {selectedJob.budget.toLocaleString()}</div>
+                </div>
+                {selectedJob.agreed_price && selectedJob.agreed_price > 0 && selectedJob.agreed_price !== selectedJob.budget && (
+                  <div>
+                    <small className="text-muted">Bid Amount</small>
+                    <div className="fw-bold text-primary">PKR {selectedJob.agreed_price.toLocaleString()}</div>
+                  </div>
+                )}
+              </div>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold">Agreed Amount (PKR)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  value={escrowAmount}
+                  onChange={(e) => setEscrowAmount(Number(e.target.value))}
+                  placeholder="Enter the agreed amount"
+                  className="escrow-amount-input"
+                />
+                <Form.Text className="text-muted">
+                  You can adjust this if you and the freelancer agreed on a different price.
+                </Form.Text>
+              </Form.Group>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={() => setShowEscrowModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            className="btn-confirm-escrow"
+            onClick={handleFundJob}
+            disabled={escrowAmount <= 0}
+          >
+            Proceed to Payment — PKR {escrowAmount.toLocaleString()}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

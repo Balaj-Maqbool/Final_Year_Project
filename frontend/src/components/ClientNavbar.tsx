@@ -48,7 +48,7 @@ const ClientNavbar = () => {
         {/* Desktop nav links */}
         <ul className="nav-menu desktop-menu">
           <li><NavLink to="/client/postjob" className="nav-link">Post a job</NavLink></li>
-          <li><NavLink to="/client/alljobs" className="nav-link">All jobs</NavLink></li>
+          <li><NavLink to="/client/alljobs" className="nav-link">All Projects</NavLink></li>
           <li><NavLink to="/client/clientDashboard" className="nav-link">Dashboard</NavLink></li>
           <li><NavLink to="/client/chat" className="nav-link">Messages</NavLink></li>
           <li style={{ display: "flex", alignItems: "center" }}><NotificationBell /></li>

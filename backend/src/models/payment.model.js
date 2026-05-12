@@ -21,7 +21,7 @@ const paymentSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ["deposit", "withdrawal", "platform_fee"],
+            enum: ["deposit", "withdrawal", "platform_fee", "payment"],
             required: true
         },
         status: {

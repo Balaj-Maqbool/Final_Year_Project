@@ -19,6 +19,7 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
     }
 
     const { jobId } = req.params;
+    const { amount: customAmount } = req.body;
     ValidationHelper.validateId(jobId, "Invalid Job ID");
 
     const job = await Job.findById(jobId);
@@ -43,6 +44,12 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
             400,
             `Cannot fund this job. Current status is ${job.contract_status}.`
         );
+    }
+
+    // If client provides a custom agreed amount, update the job
+    if (customAmount && customAmount > 0) {
+        job.agreed_price = customAmount;
+        await job.save();
     }
 
     const amount = job.agreed_price > 0 ? job.agreed_price : job.budget;

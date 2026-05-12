@@ -19,7 +19,7 @@ const ChatWindow = () => {
     });
     const activeThread = threads?.docs.find((t: Chat) => t._id === activeThreadId);
 
-    const { data, isLoading, isError } = useQuery({
+    const { data, isLoading, isError  } = useQuery({
         queryKey: ["messages", activeThreadId],
         queryFn: () => getThreadMessages(activeThreadId!),
         enabled: !!activeThreadId,
