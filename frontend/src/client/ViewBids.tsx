@@ -3,7 +3,7 @@ import { Badge, Container } from "react-bootstrap";
 import { jobHandler, type Job } from "../services/jobHandler";
 import { useParams } from "react-router-dom";
 import GetBids from "./GetBids";
-import { color } from "framer-motion";
+
 
 
 const ViewBids = () => {
@@ -50,7 +50,7 @@ const ViewBids = () => {
                     <p>{job?.description}</p>
                 </div>
 
-                {/* Bids section will go here */}
+                {/* Bid Component here */}
                 <div className="mt-5">
                     <h3>Bids</h3>
                     <GetBids jobId={jobId} />

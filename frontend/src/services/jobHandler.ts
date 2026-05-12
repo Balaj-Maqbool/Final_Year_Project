@@ -17,7 +17,19 @@ export interface Job extends JobData {
     client_id?: string;
     contract_status?: string;
     agreed_price?: number;
-    // Add other fields returned by the backend if necessary, e.g. status, client_id, etc.
+    assigned_to?: string;
+    poster_id?: string;
+    poster?: {
+        _id: string;
+        fullName: string;
+        email?: string;
+        profileImage?: string;
+    };
+    freelancer?: {
+        _id: string;
+        fullName: string;
+        profileImage?: string;
+    };
 }
 
 export interface PaginatedResponse<T> {

@@ -59,6 +59,14 @@ class AuthService {
         });
 
         if (user) {
+            // Enforce one role per email — same as credential-based registration
+            if (requestedRole && user.role !== requestedRole) {
+                throw new ApiError(
+                    409,
+                    `This email is already registered as a ${user.role}. You cannot sign in as a ${requestedRole} with the same email.`
+                );
+            }
+
             if (ValidationHelper.isEmpty(user.googleId)) {
                 user.googleId = googleId;
                 if (ValidationHelper.isEmpty(user.profileImage))

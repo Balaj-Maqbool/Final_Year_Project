@@ -323,28 +323,37 @@ const handleGoogleCallback = asyncHandler(async (req, res) => {
 
     if (!profile) throw new ApiError(400, "Google Authentication Failed");
 
-    const user = await AuthService.processGoogleAuth(profile, requestedRole);
-    const { accessToken, refreshToken } =
-        await AuthService.generateAccessAndRefreshTokens(user._id);
-
-    const { accessTokenMaxAge, refreshTokenMaxAge } =
-        AuthService.getCookieMaxAges();
-    const options = AuthService.getCookieOptions();
     const frontendUrl = FRONTEND_URL || "http://localhost:5173";
 
-    return res
-        .status(200)
-        .cookie("accessToken", accessToken, {
-            ...options,
-            maxAge: accessTokenMaxAge
-        })
-        .cookie("refreshToken", refreshToken, {
-            ...options,
-            maxAge: refreshTokenMaxAge
-        })
-        .redirect(
-            `${frontendUrl}${FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success"}?success=true&role=${user.role}`
+    try {
+        const user = await AuthService.processGoogleAuth(profile, requestedRole);
+        const { accessToken, refreshToken } =
+            await AuthService.generateAccessAndRefreshTokens(user._id);
+
+        const { accessTokenMaxAge, refreshTokenMaxAge } =
+            AuthService.getCookieMaxAges();
+        const options = AuthService.getCookieOptions();
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, {
+                ...options,
+                maxAge: accessTokenMaxAge
+            })
+            .cookie("refreshToken", refreshToken, {
+                ...options,
+                maxAge: refreshTokenMaxAge
+            })
+            .redirect(
+                `${frontendUrl}${FRONTEND_OAUTH_SUCCESS_PATH || "/oauth-success"}?success=true&role=${user.role}`
+            );
+    } catch (error) {
+        // Redirect to login with error message (e.g. role mismatch)
+        const errorMsg = encodeURIComponent(error.message || "Google authentication failed");
+        return res.redirect(
+            `${frontendUrl}/login?error=${errorMsg}`
         );
+    }
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
