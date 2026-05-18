@@ -42,7 +42,7 @@ const LandingPage = () => {
     <div className="landing-container">
       <CursorBlob />
       {/* Navigation */}
-      <motion.nav 
+      <motion.nav
         className="landing-nav"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -65,7 +65,7 @@ const LandingPage = () => {
       </motion.nav>
 
       {/* Top Banner with Image */}
-      <motion.section 
+      <motion.section
         className="top-banner-section"
         initial={{ opacity: 0, y: 20 }}
         animate={{ y: 0, opacity: 1 }}
@@ -74,7 +74,7 @@ const LandingPage = () => {
         <div className="top-banner-wrapper">
           <img src="/landing page.jpg" alt="Freelance Banner" className="top-banner-bg" />
           <div className="top-banner-overlay">
-            <motion.h2 
+            <motion.h2
               className="top-banner-title"
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -82,7 +82,7 @@ const LandingPage = () => {
             >
               Empowering Your <span>Freelance</span> Journey
             </motion.h2>
-            <motion.p 
+            <motion.p
               className="top-banner-desc"
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -98,13 +98,13 @@ const LandingPage = () => {
       <section className="hero-section">
         <div className="hero-content">
           {/* Left Side */}
-          <motion.div 
+          <motion.div
             className="hero-text"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
           >
-            
+
 
             <motion.h1 variants={fadeIn} className="hero-title animated-gradient-text">
               Find & Hire <span>Top Talent</span>
@@ -133,7 +133,7 @@ const LandingPage = () => {
           </motion.div>
 
           {/* Right Side Visual */}
-          <motion.div 
+          <motion.div
             className="hero-visual"
             variants={slideInRight}
             initial="hidden"
@@ -141,28 +141,28 @@ const LandingPage = () => {
           >
             <div className="hero-image-container">
               <img src="/freelancer_working.png" alt="Freelancer working happily" className="hero-main-image" />
-              <motion.div 
+              <motion.div
                 className="dashboard-mock floating-dashboard"
                 animate={floatAnimation}
               >
-              <motion.div className="mock-card mock-float-1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-                <h4>Active Project</h4>
-                <p>Frontend Developer Needed</p>
-                <div className="pulse-container">
-                  <span className="badge-success">In Progress</span>
-                </div>
-              </motion.div>
+                <motion.div className="mock-card mock-float-1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+                  <h4>Active Project</h4>
+                  <p>Frontend Developer Needed</p>
+                  <div className="pulse-container">
+                    <span className="badge-success">In Progress</span>
+                  </div>
+                </motion.div>
 
-              <motion.div className="mock-card mock-float-2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
-                <h4>Total Bids</h4>
-                <p>12 Freelancers Applied</p>
-              </motion.div>
+                <motion.div className="mock-card mock-float-2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
+                  <h4>Total Bids</h4>
+                  <p>12 Freelancers Applied</p>
+                </motion.div>
 
-              <motion.div className="mock-card mock-float-3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7 }}>
-                <h4>Escrow Secured</h4>
-                <p>Rs. 75,000 Protected</p>
+                <motion.div className="mock-card mock-float-3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7 }}>
+                  <h4>Escrow Secured</h4>
+                  <p>Rs. 75,000 Protected</p>
+                </motion.div>
               </motion.div>
-            </motion.div>
             </div>
           </motion.div>
         </div>
@@ -170,7 +170,7 @@ const LandingPage = () => {
 
       {/* Features Section */}
       <section className="features-section">
-        <motion.div 
+        <motion.div
           className="features-header"
           initial="hidden"
           whileInView="visible"
@@ -181,7 +181,7 @@ const LandingPage = () => {
           <p>Built for Pakistan, trusted by thousands.</p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="features-grid"
           variants={staggerContainer}
           initial="hidden"
@@ -229,7 +229,7 @@ const LandingPage = () => {
       {/* Platform Roadmap Section */}
       <section className="roadmap-section py-5" style={{ backgroundColor: "#0b1120", color: "#f8fafc", padding: "80px 0" }}>
         <Container>
-          <motion.div 
+          <motion.div
             className="text-center mb-5"
             initial="hidden"
             whileInView="visible"

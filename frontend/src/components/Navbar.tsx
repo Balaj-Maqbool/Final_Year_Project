@@ -41,7 +41,7 @@ const Navbar = () => {
       <div className="navbar-container">
         {/* Brand */}
         <Link to="/" className="nav-brand" onClick={closeMenu}>
-          PakFreelance
+        PakFreelance
         </Link>
 
         {/* Desktop nav links */}

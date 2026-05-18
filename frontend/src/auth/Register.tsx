@@ -53,7 +53,17 @@ const Register = ({ onSubmit }: Props) => {
     if (!fullName || fullName.length < 3) newErrors.fullName = "Full name must be at least 3 characters.";
     if (!username || username.length < 3) newErrors.username = "Username must be at least 3 characters.";
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Please enter a valid email address.";
-    if (!pass || pass.length < 8) newErrors.password = "Password must be at least 8 characters long.";
+    if (!pass || pass.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long.";
+    } else if (!/[A-Z]/.test(pass)) {
+      newErrors.password = "Password must contain at least one uppercase letter (A-Z).";
+    } else if (!/[a-z]/.test(pass)) {
+      newErrors.password = "Password must contain at least one lowercase letter (a-z).";
+    } else if (!/\d/.test(pass)) {
+      newErrors.password = "Password must contain at least one number (0-9).";
+    } else if (!/[@$!%*?&#]/.test(pass)) {
+      newErrors.password = "Password must contain at least one special character (@$!%*?&#).";
+    }
     if (!role) newErrors.role = "Please select a role.";
 
     if (Object.keys(newErrors).length > 0) {
@@ -157,7 +167,7 @@ const Register = ({ onSubmit }: Props) => {
                 ref={passRef}
                 type={showPass ? "text" : "password"}
                 className="mf-input"
-                placeholder="At least 8 characters"
+                placeholder="Min 8 chars, uppercase, number & special char"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 minLength={8}
@@ -171,6 +181,15 @@ const Register = ({ onSubmit }: Props) => {
               </button>
             </div>
             {errors.password && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "4px" }}>{errors.password}</div>}
+
+            {/* Password requirements */}
+            <div style={{ marginTop: "8px", fontSize: "0.75rem", color: "#94a3b8" }}>
+              <div style={{ color: password.length >= 8 ? "#22c55e" : "#94a3b8" }}>✓ At least 8 characters</div>
+              <div style={{ color: /[A-Z]/.test(password) ? "#22c55e" : "#94a3b8" }}>✓ One uppercase letter (A-Z)</div>
+              <div style={{ color: /[a-z]/.test(password) ? "#22c55e" : "#94a3b8" }}>✓ One lowercase letter (a-z)</div>
+              <div style={{ color: /\d/.test(password) ? "#22c55e" : "#94a3b8" }}>✓ One number (0-9)</div>
+              <div style={{ color: /[@$!%*?&#]/.test(password) ? "#22c55e" : "#94a3b8" }}>✓ One special character (@$!%*?&amp;#)</div>
+            </div>
 
             {/* Strength bar */}
             {password.length > 0 && (

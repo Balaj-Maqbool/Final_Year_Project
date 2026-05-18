@@ -39,7 +39,17 @@ const Login = ({ onSubmit }: Props) => {
     const password = passRef.current!.value;
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Please enter a valid email address.";
-    if (!password || password.length < 8) newErrors.password = "Password must be at least 8 characters long.";
+    if (!password || password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long.";
+    } else if (!/[A-Z]/.test(password)) {
+      newErrors.password = "Password must contain at least one uppercase letter (A-Z).";
+    } else if (!/[a-z]/.test(password)) {
+      newErrors.password = "Password must contain at least one lowercase letter (a-z).";
+    } else if (!/\d/.test(password)) {
+      newErrors.password = "Password must contain at least one number (0-9).";
+    } else if (!/[@$!%*?&#]/.test(password)) {
+      newErrors.password = "Password must contain at least one special character (@$!%*?&#).";
+    }
     if (!role) newErrors.role = "Please select a role.";
 
     if (Object.keys(newErrors).length > 0) {

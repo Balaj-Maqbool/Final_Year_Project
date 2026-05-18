@@ -8,7 +8,7 @@ import { useTheme } from "../context/ThemeContext";
 
 const ClientNavbar = () => {
   const { theme, toggleTheme } = useTheme();
-  // ✅ Fixed: was missing useAuthStore — caused profile/notification differences vs FreelancerNavbar
+  //   missing useAuthStore — caused profile/notification differences vs FreelancerNavbar
   const { isAuthenticated, user } = useAuthStore();
   const [menuOpen, setMenuOpen] = useState(false);
 

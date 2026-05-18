@@ -154,7 +154,7 @@ const ClientDashboard = () => {
                       <span className="project-id">Deadline: {new Date(job.deadline).toLocaleDateString()}</span>
                     </div>
                     {job.budget && (
-                      <span className="project-amount">Rs {job.budget.toLocaleString()}</span>
+                      <span className="project-amount">Rs {Math.round(job.budget)}</span>
                     )}
                   </div>
 
@@ -170,11 +170,11 @@ const ClientDashboard = () => {
                       View Details
                     </Link>
                   </div>
-
+                  
                   {/* Bottom actions */}
                   <div className="project-card-actions">
-                    <Link to={`/client/tasks/${job._id}`} className="btn-pc tasks">Tasks</Link>
-                    <Link to={`/client/chat/${job._id}`}  className="btn-pc chat">Chat</Link>
+                    <Link to={`/client/chat/${job._id}`} className="btn-pc tasks">Tasks</Link>
+                    <Link to={`/client/tasks/${job._id}`}  className="btn-pc chat">Chat</Link>
                     {job.status === "Open" && (
                       <button
                         className="btn-pc delete"

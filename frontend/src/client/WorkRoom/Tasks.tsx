@@ -28,6 +28,7 @@ const Tasks = () => {
     const { data: tasks, isLoading, isError, error } = useQuery({
         queryKey: ["tasks", jobId],
         queryFn: () => getTasks(jobId!),
+        
         enabled: !!jobId,
     });
 
@@ -242,7 +243,14 @@ const Tasks = () => {
             </div>
 
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <div></div>
+                <div>
+                    {totalTasks > 0 && job?.status !== "Completed" && (
+                        <small className="text-muted">
+                            {tasks.docs.filter((t: Task) => t.is_approved).length}/{totalTasks} tasks approved
+                            {!allTasksApproved && " — approve all tasks to release escrow"}
+                        </small>
+                    )}
+                </div>
                 <div className="d-flex gap-2">
                     {job?.status === "Completed" ? (
                         <Button
@@ -252,15 +260,17 @@ const Tasks = () => {
                         >
                             ⭐ Rate Freelancer
                         </Button>
-                    ) : allTasksApproved ? (
+                    ) : (
                         <Button
                             size="sm"
-                            className="btn-modern success sm"
+                            className={allTasksApproved ? "btn-modern success sm" : "btn-modern neutral sm"}
                             onClick={handleCompleteJob}
+                            disabled={!allTasksApproved}
+                            title={!allTasksApproved ? "All tasks must be approved before you can release escrow" : "Mark project as complete and release escrow to freelancer"}
                         >
                             💰 Complete & Release Escrow
                         </Button>
-                    ) : null}
+                    )}
                     <Button
                         size="sm"
                         className="btn-modern purple sm"

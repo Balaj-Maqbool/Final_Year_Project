@@ -9,7 +9,7 @@ import { ratingHandler } from "../services/ratingHandler";
 import "./profile.css";
 import { BACKEND_URL } from "../config";
 
-// Interface matching full user object from backend
+
 interface UserProfile {
   _id: string;
   fullName: string;
@@ -25,7 +25,6 @@ interface UserProfile {
 const ProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuthStore();
   
@@ -61,37 +60,43 @@ const ProfilePage = () => {
     }
   };
 
-  const fetchProfile = async () => {
-    try {
-      let targetId = userId;
-      if (!targetId) {
-        // 1. Get current user ID (lightweight)
-        const meRes = await fetch(`${BACKEND_URL}/api/v1/users/me`, {
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        });
-        if (!meRes.ok) throw new Error("Failed to fetch me");
-        const meData = await meRes.json();
-        targetId = meData.data._id;
-      }
-
-      // 2. Get full profile by ID (includes images)
-      const profileRes = await fetch(`${BACKEND_URL}/api/v1/users/profile/${targetId}`, {
+  const fetchProfileFn = async () => {
+    let targetId = userId;
+    if (!targetId) {
+      // 1. Get current user ID (lightweight)
+      const meRes = await fetch(`${BACKEND_URL}/api/v1/users/me`, {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
-      if (!profileRes.ok) throw new Error("Failed to fetch profile");
-      const profileData = await profileRes.json();
-
-      setUser(profileData.data);
-      if (profileData.data.bio) setEditBio(profileData.data.bio);
-      if (profileData.data.skills) setEditSkills(profileData.data.skills.join(", "));
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    } finally {
-      setLoading(false);
+      if (!meRes.ok) throw new Error("Failed to fetch me");
+      const meData = await meRes.json();
+      targetId = meData.data._id;
     }
+
+    // 2. Get full profile by ID (includes images)
+    const profileRes = await fetch(`${BACKEND_URL}/api/v1/users/profile/${targetId}`, {
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+    if (!profileRes.ok) throw new Error("Failed to fetch profile");
+    const profileData = await profileRes.json();
+
+    return profileData.data;
   };
+
+  const { data: queryUser, isLoading: loading, refetch: fetchProfile } = useQuery({
+      queryKey: ["profile", userId || "me"],
+      queryFn: fetchProfileFn,
+      staleTime: 5 * 60 * 1000, // 5 minutes caching
+  });
+
+  useEffect(() => {
+    if (queryUser) {
+      setUser(queryUser);
+      if (queryUser.bio) setEditBio(queryUser.bio);
+      if (queryUser.skills) setEditSkills(queryUser.skills.join(", "));
+    }
+  }, [queryUser]);
 
   const handleAIPolish = async () => {
       setAiLoading(true);
@@ -125,9 +130,7 @@ const ProfilePage = () => {
       }
   };
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  // useQuery auto-fetches on mount, no need for redundant useEffect
 
   const handleImageUpload = async (file: File, type: "profile" | "cover") => {
     const formData = new FormData();
@@ -187,7 +190,7 @@ const ProfilePage = () => {
               className="edit-cover-btn"
               onClick={() => coverInputRef.current?.click()}
             >
-              📷 Edit Cover
+              📷 Add Cover photo
             </button>
         )}
         {isOwnProfile && (

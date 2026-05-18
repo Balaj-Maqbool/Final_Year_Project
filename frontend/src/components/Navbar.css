@@ -2,7 +2,7 @@
    BASE NAVBAR (Sleek Dark)
 ========================= */
 .custom-navbar {
-  background-color: rgba(255, 255, 255, 0.8) !important;
+  background-color: rgba(223, 227, 226, 0.8) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   padding: 0.6rem 1.2rem !important;
