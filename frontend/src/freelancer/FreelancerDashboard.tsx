@@ -46,7 +46,7 @@ const FreelancerDashboard = () => {
   const { data, isLoading } = useQuery<DashboardData>({
     queryKey: ["freelancerDashboard"],
     queryFn: async () => apiRequest<DashboardData>("/dashboard/freelancer"),
-    staleTime: 5000,
+    staleTime: 5 * 60 * 1000, // 5 minutes caching
   });
 
   if (isLoading)

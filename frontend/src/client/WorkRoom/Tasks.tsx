@@ -28,7 +28,7 @@ const Tasks = () => {
     const { data: tasks, isLoading, isError, error } = useQuery({
         queryKey: ["tasks", jobId],
         queryFn: () => getTasks(jobId!),
-        
+        staleTime: 5 * 60 * 1000, // 5 minutes caching
         enabled: !!jobId,
     });
 
@@ -36,6 +36,7 @@ const Tasks = () => {
     const { data: job, refetch: refetchJob } = useQuery({
         queryKey: ["job", jobId],
         queryFn: () => jobHandler.getJob(jobId!),
+        staleTime: 5 * 60 * 1000, // 5 minutes caching
         enabled: !!jobId,
     });
 

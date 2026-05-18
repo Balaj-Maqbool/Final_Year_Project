@@ -15,7 +15,8 @@ const ChatWindow = () => {
 
     const { data: threads } = useQuery({
         queryKey: ["threads"],
-        queryFn: getMyThreads
+        queryFn: getMyThreads,
+        staleTime: 5 * 60 * 1000, // 5 minutes caching
     });
     const activeThread = threads?.docs.find((t: Chat) => t._id === activeThreadId);
 
@@ -24,6 +25,7 @@ const ChatWindow = () => {
         queryFn: () => getThreadMessages(activeThreadId!),
         enabled: !!activeThreadId,
         refetchInterval: 3000,
+        staleTime: 5000, // slight cache to avoid spinner on every poll return
     });
 
     const mutation = useMutation({

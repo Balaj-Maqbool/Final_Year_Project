@@ -50,7 +50,7 @@ const ClientDashboard = () => {
   const { data, isLoading } = useQuery<DashboardData>({
     queryKey: ["clientDashboard"],
     queryFn: async () => apiRequest<DashboardData>("/dashboard/client"),
-    staleTime: 5000,
+    staleTime: 5 * 60 * 1000, // 5 minutes caching
   });
 
   const handleDeleteJob = async (job: Job) => {

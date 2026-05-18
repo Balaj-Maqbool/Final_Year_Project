@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Container, Spinner, Modal, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { jobHandler, type Job } from "../services/jobHandler";
@@ -8,28 +9,20 @@ import "./css/AllJobs.css";
 const AllJobs = () => {
   const navigate = useNavigate();
 
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["allMyJobs"],
+    queryFn: () => jobHandler.getAllMyJobs(),
+    staleTime: 5 * 60 * 1000, // 5 minutes caching
+  });
+
+  const jobs = data?.docs || [];
+
   const [fundingJobId, setFundingJobId] = useState<string | null>(null);
 
   // Escrow modal state
   const [showEscrowModal, setShowEscrowModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [escrowAmount, setEscrowAmount] = useState<number>(0);
-
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const data = await jobHandler.getAllMyJobs();
-        setJobs(data.docs);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJobs();
-  }, []);
 
   const openEscrowModal = (job: Job) => {
     setSelectedJob(job);
