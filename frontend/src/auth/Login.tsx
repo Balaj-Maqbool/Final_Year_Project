@@ -1,4 +1,5 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, useEffect, type FormEvent } from "react";
+import { useSearchParams } from "react-router-dom";
 import "../css/forms.css";
 import { BACKEND_URL } from "../config";
 
@@ -15,9 +16,20 @@ interface Props {
 const Login = ({ onSubmit }: Props) => {
   const emailRef = useRef<HTMLInputElement>(null);
   const passRef  = useRef<HTMLInputElement>(null);
+  const [searchParams] = useSearchParams();
   const [role, setRole]       = useState("");
   const [showPass, setShowPass] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [googleError, setGoogleError] = useState("");
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      setGoogleError(decodeURIComponent(errorParam));
+      // Clean up the URL
+      window.history.replaceState({}, "", "/login");
+    }
+  }, [searchParams]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -27,7 +39,17 @@ const Login = ({ onSubmit }: Props) => {
     const password = passRef.current!.value;
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Please enter a valid email address.";
-    if (!password || password.length < 8) newErrors.password = "Password must be at least 8 characters long.";
+    if (!password || password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long.";
+    } else if (!/[A-Z]/.test(password)) {
+      newErrors.password = "Password must contain at least one uppercase letter (A-Z).";
+    } else if (!/[a-z]/.test(password)) {
+      newErrors.password = "Password must contain at least one lowercase letter (a-z).";
+    } else if (!/\d/.test(password)) {
+      newErrors.password = "Password must contain at least one number (0-9).";
+    } else if (!/[@$!%*?&#]/.test(password)) {
+      newErrors.password = "Password must contain at least one special character (@$!%*?&#).";
+    }
     if (!role) newErrors.role = "Please select a role.";
 
     if (Object.keys(newErrors).length > 0) {
@@ -57,6 +79,21 @@ const Login = ({ onSubmit }: Props) => {
         {/* Heading */}
         <h1 className="mf-heading">Sign in to<br />PakFreelance</h1>
         <p className="mf-subheading">Access your dashboard and manage your work.</p>
+
+        {googleError && (
+          <div style={{
+            background: "rgba(239, 68, 68, 0.15)",
+            border: "1px solid rgba(239, 68, 68, 0.3)",
+            color: "#fca5a5",
+            padding: "0.75rem 1rem",
+            borderRadius: "10px",
+            fontSize: "0.85rem",
+            marginBottom: "1rem",
+            textAlign: "center"
+          }}>
+            {googleError}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           {/* Email */}

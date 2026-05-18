@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { jobHandler } from "../services/jobHandler";
@@ -45,11 +45,29 @@ const item = {
 };
 
 const ClientDashboard = () => {
+  const queryClient = useQueryClient();
+
   const { data, isLoading } = useQuery<DashboardData>({
     queryKey: ["clientDashboard"],
     queryFn: async () => apiRequest<DashboardData>("/dashboard/client"),
-    staleTime: 5000,
+    staleTime: 5 * 60 * 1000, // 5 minutes caching
   });
+
+  const handleDeleteJob = async (job: Job) => {
+    if (job.status !== "Open") {
+      alert("Cannot delete a job that has been assigned or completed.");
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to delete "${job.title}"? This action cannot be undone.`)) return;
+
+    try {
+      await jobHandler.deleteJob(job._id);
+      queryClient.invalidateQueries({ queryKey: ["clientDashboard"] });
+    } catch (error: any) {
+      console.error("Error deleting job:", error);
+      alert(error.message || "Failed to delete job. Please try again.");
+    }
+  };
 
   if (isLoading)
     return (
@@ -136,7 +154,7 @@ const ClientDashboard = () => {
                       <span className="project-id">Deadline: {new Date(job.deadline).toLocaleDateString()}</span>
                     </div>
                     {job.budget && (
-                      <span className="project-amount">Rs {job.budget.toLocaleString()}</span>
+                      <span className="project-amount">Rs {Math.round(job.budget)}</span>
                     )}
                   </div>
 
@@ -152,17 +170,19 @@ const ClientDashboard = () => {
                       View Details
                     </Link>
                   </div>
-
+                  
                   {/* Bottom actions */}
                   <div className="project-card-actions">
-                    <Link to={`/client/tasks/${job._id}`} className="btn-pc tasks">Tasks</Link>
-                    <Link to={`/client/chat/${job._id}`}  className="btn-pc chat">Chat</Link>
-                    <button
-                      className="btn-pc delete"
-                      onClick={() => jobHandler.deleteJob(job._id)}
-                    >
-                      Delete
-                    </button>
+                    <Link to={`/client/chat/${job._id}`} className="btn-pc tasks">Tasks</Link>
+                    <Link to={`/client/tasks/${job._id}`}  className="btn-pc chat">Chat</Link>
+                    {job.status === "Open" && (
+                      <button
+                        className="btn-pc delete"
+                        onClick={() => handleDeleteJob(job)}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               ))}

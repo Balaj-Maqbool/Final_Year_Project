@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, Button, Badge, Alert, Spinner, Container } from "react-bootstrap";
 import { getTasks, createTask, updateTaskStatus, approveTask, deleteTask } from "../../services/taskHandler";
@@ -15,6 +15,7 @@ import "../../css/buttons.css";
 
 const Tasks = () => {
     const { jobId } = useParams<{ jobId: string }>();
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { theme } = useTheme();
     const [showForm, setShowForm] = useState(false);
@@ -27,6 +28,7 @@ const Tasks = () => {
     const { data: tasks, isLoading, isError, error } = useQuery({
         queryKey: ["tasks", jobId],
         queryFn: () => getTasks(jobId!),
+        staleTime: 5 * 60 * 1000, // 5 minutes caching
         enabled: !!jobId,
     });
 
@@ -34,6 +36,7 @@ const Tasks = () => {
     const { data: job, refetch: refetchJob } = useQuery({
         queryKey: ["job", jobId],
         queryFn: () => jobHandler.getJob(jobId!),
+        staleTime: 5 * 60 * 1000, // 5 minutes caching
         enabled: !!jobId,
     });
 
@@ -174,8 +177,81 @@ const Tasks = () => {
 
     return (
         <Container className="my-4">
+            {/* Project Header */}
+            <div className="mb-4 p-3 rounded" style={{
+                background: theme === "dark" ? "rgba(30, 41, 59, 0.8)" : "rgba(241, 245, 249, 0.8)",
+                border: theme === "dark" ? "1px solid #334155" : "1px solid #e2e8f0",
+                borderRadius: "12px"
+            }}>
+                <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div>
+                        <h2 className="mb-1" style={{ fontWeight: 800 }}>
+                            {job?.title || "Project Tasks"}
+                        </h2>
+                        <div className="d-flex align-items-center gap-2 mt-2">
+                            {job?.status && (
+                                <Badge bg={
+                                    job.status === "Open" ? "info" :
+                                    job.status === "Assigned" ? "warning" :
+                                    job.status === "Completed" ? "success" : "secondary"
+                                }>
+                                    {job.status}
+                                </Badge>
+                            )}
+                            {job?.contract_status && (
+                                <Badge bg={job.contract_status === "Active" ? "success" : "warning"}>
+                                    Escrow: {job.contract_status}
+                                </Badge>
+                            )}
+                        </div>
+                    </div>
+                    <div className="d-flex align-items-center gap-3">
+                        {job?.freelancer && (
+                            <div
+                                className="d-flex align-items-center gap-2 p-2 rounded"
+                                style={{
+                                    background: theme === "dark" ? "#0f172a" : "#fff",
+                                    border: theme === "dark" ? "1px solid #334155" : "1px solid #e2e8f0",
+                                    borderRadius: "10px",
+                                    cursor: "pointer"
+                                }}
+                                onClick={() => navigate(`/profile/${job.freelancer!._id}`)}
+                            >
+                                <div
+                                    className="rounded-circle d-flex align-items-center justify-content-center text-white"
+                                    style={{
+                                        width: "36px", height: "36px", fontSize: "0.9rem",
+                                        background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                                        overflow: "hidden"
+                                    }}
+                                >
+                                    {job.freelancer.profileImage ? (
+                                        <img src={job.freelancer.profileImage} alt="" className="w-100 h-100" style={{ objectFit: "cover" }} />
+                                    ) : (
+                                        job.freelancer.fullName.charAt(0).toUpperCase()
+                                    )}
+                                </div>
+                                <div>
+                                    <small className="text-muted" style={{ fontSize: "0.7rem" }}>ASSIGNED TO</small>
+                                    <div style={{ fontWeight: 600, fontSize: "0.9rem", lineHeight: 1.2 }}>
+                                        {job.freelancer.fullName}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Project Tasks</h2>
+                <div>
+                    {totalTasks > 0 && job?.status !== "Completed" && (
+                        <small className="text-muted">
+                            {tasks.docs.filter((t: Task) => t.is_approved).length}/{totalTasks} tasks approved
+                            {!allTasksApproved && " — approve all tasks to release escrow"}
+                        </small>
+                    )}
+                </div>
                 <div className="d-flex gap-2">
                     {job?.status === "Completed" ? (
                         <Button
@@ -185,15 +261,17 @@ const Tasks = () => {
                         >
                             ⭐ Rate Freelancer
                         </Button>
-                    ) : allTasksApproved ? (
+                    ) : (
                         <Button
                             size="sm"
-                            className="btn-modern success sm"
+                            className={allTasksApproved ? "btn-modern success sm" : "btn-modern neutral sm"}
                             onClick={handleCompleteJob}
+                            disabled={!allTasksApproved}
+                            title={!allTasksApproved ? "All tasks must be approved before you can release escrow" : "Mark project as complete and release escrow to freelancer"}
                         >
                             💰 Complete & Release Escrow
                         </Button>
-                    ) : null}
+                    )}
                     <Button
                         size="sm"
                         className="btn-modern purple sm"

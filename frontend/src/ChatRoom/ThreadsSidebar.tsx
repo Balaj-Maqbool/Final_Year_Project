@@ -17,6 +17,7 @@ const ThreadsSidebar = () => {
     const { data, isLoading, isError } = useQuery({
         queryKey: ["threads"],
         queryFn: getMyThreads,
+        staleTime: 5 * 60 * 1000, // 5 minutes caching
     });
 
     if (isLoading) return <div className="chat-sidebar p-3 d-flex align-items-center justify-content-center">Loading...</div>;

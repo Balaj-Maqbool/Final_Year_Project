@@ -40,8 +40,8 @@ export interface WalletResponse {
 }
 
 export const paymentHandler = {
-    createCheckoutSession: async (jobId: string): Promise<CheckoutSessionResponse> => {
-        return await apiRequest<CheckoutSessionResponse>(`${API}/checkout/session/${jobId}`, "POST");
+    createCheckoutSession: async (jobId: string, amount?: number): Promise<CheckoutSessionResponse> => {
+        return await apiRequest<CheckoutSessionResponse>(`${API}/checkout/session/${jobId}`, "POST", amount ? { amount } : {});
     },
 
     getWalletBalance: async (): Promise<WalletResponse> => {

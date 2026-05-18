@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import GetBids from "./GetBids";
 
 
+
 const ViewBids = () => {
     const { jobId } = useParams<{ jobId: string }>();
     const [job, setJob] = useState<Job | null>(null);
@@ -49,7 +50,7 @@ const ViewBids = () => {
                     <p>{job?.description}</p>
                 </div>
 
-                {/* Bids section will go here */}
+                {/* Bid Component here */}
                 <div className="mt-5">
                     <h3>Bids</h3>
                     <GetBids jobId={jobId} />

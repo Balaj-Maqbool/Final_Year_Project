@@ -1,3 +1,4 @@
+// verify token generted by routor dom.. for protected routing
 import { type JSX, useEffect, useState } from "react"
 import { Navigate } from "react-router-dom"
 import { useAuthStore } from "../store/useAuthStore"

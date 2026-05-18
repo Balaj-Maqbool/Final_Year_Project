@@ -1,3 +1,4 @@
+// react router dom for protected routing
 import type { JSX } from "react"
 import { Navigate } from "react-router-dom"
 

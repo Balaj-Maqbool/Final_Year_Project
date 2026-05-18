@@ -195,9 +195,6 @@ const updateBidStatus = asyncHandler(async (req, res) => {
             );
         }
 
-        job.status = "Assigned";
-        job.assigned_to = bid.user_id;
-        await job.save();
         console.log(`Job ${job._id} assigned to ${bid.user_id}`);
 
         const otherBids = await Bid.find({
