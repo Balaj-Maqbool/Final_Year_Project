@@ -10,22 +10,27 @@ interface MessageListProps {
 }
 
 const MessageList = ({ messages, currentUserId, activeThreadId, onDeleteMessage }: MessageListProps) => {
-    const bottomRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLDivElement>(null);
     const prevThreadId = useRef(activeThreadId);
 
     useEffect(() => {
-        if (prevThreadId.current !== activeThreadId) {
-            // Jump instantly when switching threads
-            bottomRef.current?.scrollIntoView({ behavior: "auto" });
-            prevThreadId.current = activeThreadId;
-        } else {
-            // Smooth scroll when new messages arrive
-            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (listRef.current) {
+            if (prevThreadId.current !== activeThreadId) {
+                // Jump instantly when switching threads
+                listRef.current.scrollTop = listRef.current.scrollHeight;
+                prevThreadId.current = activeThreadId;
+            } else {
+                // Smooth scroll when new messages arrive
+                listRef.current.scrollTo({
+                    top: listRef.current.scrollHeight,
+                    behavior: "smooth"
+                });
+            }
         }
     }, [messages.length, activeThreadId]);
 
     return (
-        <div className="message-list custom-scrollbar">
+        <div className="message-list custom-scrollbar" ref={listRef}>
             {[...messages].reverse().map((msgRef) => (
                 <MessageBubble
                     key={msgRef._id}
@@ -34,7 +39,6 @@ const MessageList = ({ messages, currentUserId, activeThreadId, onDeleteMessage 
                     onDelete={() => onDeleteMessage && onDeleteMessage(msgRef._id)}
                 />
             ))}
-            <div ref={bottomRef} />
         </div>
     );
 };
