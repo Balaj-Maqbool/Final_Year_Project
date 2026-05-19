@@ -3,6 +3,7 @@ import { bidHandler } from "../services/bidHandler"
 import { InitializeChat } from "../services/useChats";
 import { Card, Alert, Spinner, Button, Badge } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
 
 interface Bid {
     _id: string;
@@ -57,11 +58,11 @@ const GetBids = ({ jobId }: GetBidsProps) => {
 
         try {
             await bidHandler.updateBidStatus(jobId, bidId, "Accepted");
-            alert("Bid accepted! The job has been assigned. Go to your Projects page to fund the escrow.");
+            toast.success("Bid accepted! The job has been assigned. Go to your Projects page to fund the escrow.");
             fetchBids();
         } catch (err: any) {
             console.error(err);
-            alert(err.message || "Failed to accept bid");
+            toast.error(err.message || "Failed to accept bid");
         }
     };
 
@@ -73,7 +74,7 @@ const GetBids = ({ jobId }: GetBidsProps) => {
             }
         } catch (error) {
             console.error("Error starting chat:", error);
-            alert("Failed to start chat. Please try again.");
+            toast.error("Failed to start chat. Please try again.");
         }
     };
 

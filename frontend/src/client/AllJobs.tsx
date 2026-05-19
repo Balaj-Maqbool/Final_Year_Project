@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { jobHandler, type Job } from "../services/jobHandler";
 import { paymentHandler } from "../services/paymentHandler";
 import "./css/AllJobs.css";
+import toast from 'react-hot-toast';
 
 const AllJobs = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const AllJobs = () => {
   const handleFundJob = async () => {
     if (!selectedJob) return;
     if (escrowAmount <= 0) {
-      alert("Please enter a valid amount.");
+      toast.error("Please enter a valid amount.");
       return;
     }
 
@@ -47,7 +48,7 @@ const AllJobs = () => {
       }
     } catch (error) {
       console.error("Error creating checkout session:", error);
-      alert("Failed to initiate payment. Please try again.");
+      toast.error("Failed to initiate payment. Please try again.");
     } finally {
       setFundingJobId(null);
     }

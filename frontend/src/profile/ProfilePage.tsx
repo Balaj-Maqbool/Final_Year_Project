@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ratingHandler } from "../services/ratingHandler";
 import "./profile.css";
 import { BACKEND_URL } from "../config";
+import toast from 'react-hot-toast';
 
 
 interface UserProfile {
@@ -106,7 +107,7 @@ const ProfilePage = () => {
           setEditSkills(res.suggested_skills.join(", "));
       } catch (err) {
           console.error("Failed to polish profile", err);
-          alert("Failed to polish profile with AI.");
+          toast.error("Failed to polish profile with AI.");
       } finally {
           setAiLoading(false);
       }
@@ -124,7 +125,7 @@ const ProfilePage = () => {
           fetchProfile();
       } catch (err) {
           console.error("Failed to update profile", err);
-          alert("Failed to update profile.");
+          toast.error("Failed to update profile.");
       } finally {
           setSaveLoading(false);
       }
@@ -168,7 +169,7 @@ const ProfilePage = () => {
 
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Failed to upload image.");
+      toast.error("Failed to upload image.");
     }
   };
 

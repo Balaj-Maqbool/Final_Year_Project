@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { mediaHandler } from "../services/mediaHandler";
 import { useChatStore } from "../store/chatStore";
+import toast from 'react-hot-toast';
 
 interface MessageInputProps {
     onSendMessage: (content: string, attachments?: any[]) => void;
@@ -45,7 +46,7 @@ const MessageInput = ({ onSendMessage, isLoading }: MessageInputProps) => {
             if (fileInputRef.current) fileInputRef.current.value = "";
         } catch (error) {
             console.error("Error sending message with attachment:", error);
-            alert("Failed to send attachment.");
+            toast.error("Failed to send attachment.");
         } finally {
             setUploading(false);
         }

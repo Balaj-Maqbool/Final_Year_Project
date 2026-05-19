@@ -5,6 +5,7 @@ import "./css/JobDetails.css"; // New custom CSS
 import BidForm from "./Bids";
 import { bidHandler } from "../services/bidHandler";
 import { BACKEND_URL } from "../config";
+import toast from 'react-hot-toast';
 
 interface Job {
   _id: string;
@@ -123,7 +124,7 @@ const JobDetails = () => {
               }
             } catch (error) {
               console.error("Submission failed:", error);
-              alert("Failed to save bid. Please try again.");
+              toast.error("Failed to save bid. Please try again.");
             }
           }}
         />

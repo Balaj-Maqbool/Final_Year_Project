@@ -5,6 +5,7 @@ import type { registerData } from "./Register";
 import type { NavigateFunction } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { BACKEND_URL } from "../config";
+import toast from 'react-hot-toast';
 
 export const handleRegister = async (
   data: registerData,
@@ -21,14 +22,14 @@ export const handleRegister = async (
     const result = await response.json();
 
     if (response.ok) {
-      alert("Account created successfully!");
+      toast.success("Account created successfully!");
       navigate("/login");
     } else {
-      alert(`Registration failed: ${result.message}`);
+      toast.error(`Registration failed: ${result.message}`);
     }
   } catch (error) {
     console.error(error);
-    alert("Unable to connect to the server.");
+    toast.error("Unable to connect to the server.");
   }
 };
 /////handler function for login
@@ -47,7 +48,7 @@ export const handleLogin = async (
     const result = await response.json();
 
     if (!response.ok) {
-      alert(`Login failed: ${result.message || response.statusText}`);
+      toast.error(`Login failed: ${result.message || response.statusText}`);
       return;
     }
 

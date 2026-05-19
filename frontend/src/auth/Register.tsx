@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/forms.css";
 import { BACKEND_URL } from "../config";
+import toast from 'react-hot-toast';
 
 export interface registerData {
   fullName: string;
@@ -82,7 +83,7 @@ const Register = ({ onSubmit }: Props) => {
   };
 
   const handleGoogle = () => {
-    if (!role) { alert("Please select a role before signing up with Google."); return; }
+    if (!role) { toast.error("Please select a role before signing up with Google."); return; }
     window.location.href = `${BACKEND_URL}/api/v1/users/google?role=${role}`;
   };
 

@@ -4,6 +4,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { aiHandler } from "../services/aiHandler";
 import { BACKEND_URL } from "../config";
 import "../css/forms.css";
+import toast from 'react-hot-toast';
 
 export interface BidData {
   job_id: string;
@@ -38,7 +39,7 @@ const BidForm = ({ jobId, jobDescription, onSubmit, existingBid }: Props) => {
 
   const handleAIGenerate = async () => {
     if (!jobDescription) {
-      alert("Job description is not available to generate a proposal.");
+      toast.error("Job description is not available to generate a proposal.");
       return;
     }
     setAiLoading(true);
@@ -52,7 +53,7 @@ const BidForm = ({ jobId, jobDescription, onSubmit, existingBid }: Props) => {
       const aiResponse = await aiHandler.generateProposal(jobDescription, profile);
       if (proposalRef.current) proposalRef.current.value = aiResponse.proposal_text;
     } catch (err) {
-      alert("Failed to generate proposal with AI.");
+      toast.error("Failed to generate proposal with AI.");
     } finally {
       setAiLoading(false);
     }
@@ -62,9 +63,9 @@ const BidForm = ({ jobId, jobDescription, onSubmit, existingBid }: Props) => {
     e.preventDefault();
     if (!isEditable) return;
     const amount = Number(amountRef.current!.value);
-    if (!amount || amount <= 0) { alert("Please enter a valid bid amount"); return; }
+    if (!amount || amount <= 0) { toast.error("Please enter a valid bid amount"); return; }
     const message = proposalRef.current!.value;
-    if (!message.trim()) { alert("Please enter a proposal message"); return; }
+    if (!message.trim()) { toast.error("Please enter a proposal message"); return; }
     const startDate = new Date().toISOString();
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + 1);

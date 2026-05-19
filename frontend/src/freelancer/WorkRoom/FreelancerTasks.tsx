@@ -6,6 +6,7 @@ import { getTasks, updateTaskStatus, } from "../../services/taskHandler";
 import { jobHandler } from "../../services/jobHandler";
 import type { Task } from "../../services/taskHandler";
 import { useTheme } from "../../context/ThemeContext";
+import toast from 'react-hot-toast';
 
 
 const FreelancerTasks = () => {
@@ -38,7 +39,7 @@ const FreelancerTasks = () => {
             queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
         },
         onError: (err: any) => {
-            alert(`Failed to update task: ${err.message}`);
+            toast.error(`Failed to update task: ${err.message}`);
         }
     });
 
@@ -51,10 +52,10 @@ const FreelancerTasks = () => {
     const requestPaymentMutation = useMutation({
         mutationFn: () => jobHandler.requestPaymentRelease(jobId!),
         onSuccess: () => {
-            alert("Payment release request successfully sent to the Client!");
+            toast.success("Payment release request successfully sent to the Client!");
         },
         onError: (err: any) => {
-            alert(`Failed to request payment: ${err.response?.data?.message || err.message}`);
+            toast.error(`Failed to request payment: ${err.response?.data?.message || err.message}`);
         }
     });
 

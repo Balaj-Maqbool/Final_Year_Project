@@ -8,6 +8,7 @@ import { getJobVisual, getStatusPillClass, getStatusLabel } from "../utils/jobVi
 import "../dashboard.css";
 import "../css/buttons.css";
 import { FaClipboardList, FaBriefcase, FaCheckCircle, FaMoneyBillWave, FaRocket, FaInbox, FaFolderOpen } from "react-icons/fa";
+import toast from 'react-hot-toast';
 
 interface Job {
   _id: string;
@@ -55,7 +56,7 @@ const ClientDashboard = () => {
 
   const handleDeleteJob = async (job: Job) => {
     if (job.status !== "Open") {
-      alert("Cannot delete a job that has been assigned or completed.");
+      toast.error("Cannot delete a job that has been assigned or completed.");
       return;
     }
     if (!window.confirm(`Are you sure you want to delete "${job.title}"? This action cannot be undone.`)) return;
@@ -65,7 +66,7 @@ const ClientDashboard = () => {
       queryClient.invalidateQueries({ queryKey: ["clientDashboard"] });
     } catch (error: any) {
       console.error("Error deleting job:", error);
-      alert(error.message || "Failed to delete job. Please try again.");
+      toast.error(error.message || "Failed to delete job. Please try again.");
     }
   };
 

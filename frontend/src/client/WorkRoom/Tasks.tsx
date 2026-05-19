@@ -12,6 +12,7 @@ import type { Task } from "../../services/taskHandler";
 import TaskForm from "./TaskForm";
 import { useTheme } from "../../context/ThemeContext";
 import "../../css/buttons.css";
+import toast from 'react-hot-toast';
 
 const Tasks = () => {
     const { jobId } = useParams<{ jobId: string }>();
@@ -47,10 +48,10 @@ const Tasks = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
             setShowForm(false);
-            alert("Task created successfully!");
+            toast.success("Task created successfully!");
         },
         onError: (err: any) => {
-            alert(`Failed to create task: ${err.message}`);
+            toast.error(`Failed to create task: ${err.message}`);
         }
     });
 
@@ -60,7 +61,7 @@ const Tasks = () => {
             queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
         },
         onError: (err: any) => {
-            alert(`Failed to approve task: ${err.message}`);
+            toast.error(`Failed to approve task: ${err.message}`);
         }
     });
 
@@ -71,7 +72,7 @@ const Tasks = () => {
             queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
         },
         onError: (err: any) => {
-            alert(`Failed to delete task: ${err.message}`);
+            toast.error(`Failed to delete task: ${err.message}`);
         }
     });
 
@@ -82,18 +83,18 @@ const Tasks = () => {
             queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
         },
         onError: (err: any) => {
-            alert(`Failed to update task: ${err.message}`);
+            toast.error(`Failed to update task: ${err.message}`);
         }
     });
 
     const submitRatingMutation = useMutation({
         mutationFn: () => ratingHandler.addRating(jobId!, { rating, comment }),
         onSuccess: () => {
-            alert("Rating submitted successfully!");
+            toast.success("Rating submitted successfully!");
             setShowRatingModal(false);
         },
         onError: (err: any) => {
-            alert(`Failed to submit rating: ${err.response?.data?.message || err.message}`);
+            toast.error(`Failed to submit rating: ${err.response?.data?.message || err.message}`);
         }
     });
 
@@ -132,7 +133,7 @@ const Tasks = () => {
         try {
             const job = await jobHandler.getJob(jobId);
             if (!job || !job.description) {
-                alert("Could not fetch job description.");
+                toast.error("Could not fetch job description.");
                 return;
             }
             const aiResponse = await aiHandler.generateTaskBreakdown(job.description);
@@ -143,10 +144,10 @@ const Tasks = () => {
                 await createTask(jobId, { title: t.title, description: t.description });
             }
             queryClient.invalidateQueries({ queryKey: ["tasks", jobId] });
-            alert(`Successfully generated ${generatedTasks.length} tasks!`);
+            toast.success(`Successfully generated ${generatedTasks.length} tasks!`);
         } catch (err: any) {
             console.error("AI Generation Error", err);
-            alert("Failed to generate task breakdown with AI.");
+            toast.error("Failed to generate task breakdown with AI.");
         } finally {
             setAiLoading(false);
         }
@@ -157,11 +158,11 @@ const Tasks = () => {
         if (window.confirm("Are you sure you want to mark this project as completed? This will permanently release the escrow funds to the freelancer!")) {
             try {
                 await jobHandler.updateJob(jobId, { status: "Completed" } as any);
-                alert("Job marked as completed. Funds have been securely released from Escrow to the Freelancer!");
+                toast.success("Job marked as completed. Funds have been securely released from Escrow to the Freelancer!");
                 refetchJob();
                 setShowRatingModal(true); // Prompt them to rate immediately after completing
             } catch (err: any) {
-                alert(`Failed to complete job: ${err.response?.data?.message || err.message}`);
+                toast.error(`Failed to complete job: ${err.response?.data?.message || err.message}`);
             }
         }
     };

@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import "../css/forms.css";
 import { BACKEND_URL } from "../config";
+import toast from 'react-hot-toast';
 
 export interface loginData {
   email: string;
@@ -66,7 +67,7 @@ const Login = ({ onSubmit }: Props) => {
   };
 
   const handleGoogle = () => {
-    if (!role) { alert("Please select a role before signing in with Google."); return; }
+    if (!role) { toast.error("Please select a role before signing in with Google."); return; }
     window.location.href = `${BACKEND_URL}/api/v1/users/google?role=${role}`;
   };
 
