@@ -63,7 +63,7 @@ const ProfilePage = () => {
   const fetchProfileFn = async () => {
     let targetId = userId;
     if (!targetId) {
-      // 1. Get current user ID (lightweight)
+      // 1. Get current user ID 
       const meRes = await fetch(`${BACKEND_URL}/api/v1/users/me`, {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -87,7 +87,7 @@ const ProfilePage = () => {
   const { data: queryUser, isLoading: loading, refetch: fetchProfile } = useQuery({
       queryKey: ["profile", userId || "me"],
       queryFn: fetchProfileFn,
-      staleTime: 5 * 60 * 1000, // 5 minutes caching
+      staleTime: 5 * 60 * 1000, 
   });
 
   useEffect(() => {

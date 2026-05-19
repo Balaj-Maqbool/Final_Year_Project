@@ -493,3 +493,41 @@
     opacity: 1 !important;
     color: #ef4444 !important;
 }
+
+/* ============================================
+   MOBILE RESPONSIVENESS — CHAT
+============================================ */
+.chat-sidebar-wrapper {
+    height: 100%;
+    z-index: 1000;
+}
+
+.sidebar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+@media (max-width: 767.98px) {
+    .chat-sidebar-wrapper {
+        position: absolute;
+        top: 0;
+        left: -320px; /* Hide by default */
+        transition: left 0.3s ease-in-out;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        width: 320px;
+        max-width: 85vw;
+    }
+
+    .chat-sidebar-wrapper.open {
+        left: 0;
+    }
+    
+    .chat-sidebar {
+        width: 100%;
+    }
+}

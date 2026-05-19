@@ -6,7 +6,11 @@ import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-const ThreadsSidebar = () => {
+interface ThreadsSidebarProps {
+    onThreadSelect?: () => void;
+}
+
+const ThreadsSidebar = ({ onThreadSelect }: ThreadsSidebarProps) => {
     const activeThreadId = useChatStore((state) => state.activeThreadId);
     const setActiveThread = useChatStore((state) => state.setActiveThread);
     const [searchTerm, setSearchTerm] = useState("");
@@ -64,7 +68,10 @@ const ThreadsSidebar = () => {
                             return (
                                 <div
                                     key={thread._id}
-                                    onClick={() => setActiveThread(thread._id)}
+                                    onClick={() => {
+                                        setActiveThread(thread._id);
+                                        if (onThreadSelect) onThreadSelect();
+                                    }}
                                     className={`thread-item d-flex gap-3 align-items-center ${isActive ? 'active' : ''}`}
                                 >
                                     <div 

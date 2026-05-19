@@ -7,7 +7,11 @@ import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 
-const ChatWindow = () => {
+interface ChatWindowProps {
+    onMenuClick?: () => void;
+}
+
+const ChatWindow = ({ onMenuClick }: ChatWindowProps) => {
     const activeThreadId = useChatStore((state) => state.activeThreadId);
     const queryClient = useQueryClient();
     const user = useAuthStore((state) => state.user);
@@ -57,7 +61,18 @@ const ChatWindow = () => {
 
     if (!activeThreadId) {
         return (
-            <div className="chat-window d-flex align-items-center justify-content-center text-muted">
+            <div className="chat-window position-relative d-flex align-items-center justify-content-center text-muted w-100">
+                {/* Hamburger menu for mobile when no chat is selected */}
+                <button 
+                    className="btn btn-light d-md-none position-absolute top-0 start-0 m-3 shadow-sm"
+                    onClick={onMenuClick}
+                    style={{ zIndex: 100 }}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
                 {jobId ? (
                     <div className="text-center p-5 bg-white rounded-3 shadow-sm border" style={{ maxWidth: '400px' }}>
                         <div className="mb-3">
@@ -87,11 +102,12 @@ const ChatWindow = () => {
     const messages = data?.docs || [];
 
     return (
-        <div className="chat-window">
+        <div className="chat-window w-100 position-relative">
             {activeThread && user && (
                 <ChatHeader
                     participants={activeThread.participants}
                     currentUserId={user?._id}
+                    onMenuClick={onMenuClick}
                 />
             )}
 
